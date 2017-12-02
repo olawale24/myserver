@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="hostkeycheck">
+<label/>
+<label>Host key for the host "%%%SERVERHOST-SERVERPORT%%%" not found from database.</label>
+<label>
+The fingerprint of the host public key is:
+Babble: "%%%HOSTKEYFINGERPRINT%%%"
+RFC4716: "%%%HOSTKEYFINGERPRINT_RFC4716%%%"
+</label>
+<select1 ref="hostkeycheck">
+<label>Please select how you want to proceed.</label>
+<item>
+  <label>Cancel the connection.</label>
+  <value>cancel</value>
+</item>
+<item>
+  <label>Proceed with the connection but do not save the key.</label>
+  <value>once</value>
+</item>
+<item>
+  <label>Proceed with the connection and save the key for future use.</label>
+  <value>save</value>
+</item>
+<value>cancel</value>
+</select1>
+<submit ref="ok">
+<label>OK</label>
+</submit>
+</form>

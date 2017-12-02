@@ -1,0 +1,107 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides: ssh-server-g3
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start:  3 5
+# Default-Stop:   0 1 2 6
+# chkconfig: 345 85 15
+# description: Start or stop the SSH Tectia Server daemon
+### END INIT INFO
+daemon_user=
+start_controller="/opt/tectia/sbin/ssh-server-ctl"
+stop_controller="/opt/tectia/sbin/ssh-server-ctl"
+reload_controller="/opt/tectia/sbin/ssh-server-ctl"
+daemon="/opt/tectia/sbin/ssh-server-g3"
+# Make sure the current dir is accessible after su.
+mdir=`dirname "/opt/tectia/sbin"`
+cd "$mdir"    
+# Test executability
+for ctrl in \
+  "$start_controller" "$stop_controller" "$reload_controller" "$daemon"
+  do
+    if [ -n "$ctrl" ]; then
+      if [ ! -x "$ctrl" ]; then
+        echo "Starting ssh-server-g3 failed."
+        echo "File $ctrl is not executable." 1>&2
+        exit 1
+      fi
+    fi
+  done
+if [ X"$daemon_user" != X -a X"$daemon_user" != Xroot ]; then
+  # SELinux may deny su(1) but allow runuser(1) in init.d scripts
+  # and in any case runuser(1) fails more gracefully on some systems.
+  if [ -x /sbin/runuser ]; then
+    run_as_user="/sbin/runuser -s /bin/sh $daemon_user -c "
+  else
+    run_as_user="su -s /bin/sh $daemon_user -c "
+  fi
+else
+  run_as_user="eval "
+fi
+# Obtain process ID if applicable.
+# /opt/tectia/sbin/ssh-server-ctl does not need pid
+SSHPID=""
+
+# See how we were called.
+case "$1" in
+  start)
+    echo -n "Starting ssh-server-g3 "
+      if [ -n "$start_controller" ]; then
+        $run_as_user "$start_controller start"
+      else
+        $run_as_user "$daemon "
+     fi
+     retval=$?
+     if [ $retval -eq 0 ]; then
+       echo "done."
+     else
+       echo "failed."
+     fi
+     ;;
+   stop)
+     echo -n "Shutting down ssh-server-g3 "
+     if [ -n "$stop_controller" ]; then
+       $run_as_user "$stop_controller stop"
+       retval=$?
+     else
+       if test -n "$SSHPID"; then
+         $run_as_user "kill $SSHPID"
+         retval=$?
+       else
+         echo "Cannot stop ssh-server-g3 (no pid)"
+         retval=2
+       fi
+     fi
+     if [ $retval -eq 0 ]; then
+       echo "done."
+     else
+       echo "failed."
+     fi
+     ;;
+   restart)
+     $0 stop
+     $0 start
+     retval=$?
+     ;;
+   reload)
+     if [ -n "$reload_controller" ]; then
+       echo -n "Reloading ssh-server-g3 "
+       $run_as_user "$reload_controller reload"
+        retval=$?
+     else
+       echo -n "Reloading ssh-server-g3 (not supported) "
+       retval=2
+     fi
+     if [ $retval -eq 0 ]; then
+       echo "done."
+     else
+       echo "failed."
+     fi
+     ;;
+   *)
+     echo "Usage: ssh-server-g3 {start|stop|restart|reload}"
+     exit 1
+esac
+exit $retval

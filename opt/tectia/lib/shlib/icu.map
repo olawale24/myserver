@@ -1,0 +1,17 @@
+# This file contains character set name aliases. The character set for
+# the text must be ISO8859-1 (IBM-1047 on z/OS).
+#
+# File format:
+#
+# * '#' starts a comment. Everything after '#' sign is ignored in that line.
+# * Empty lines and white spaces in the beginning of the line are ignored.
+# * The first word is the alias name. It cannot include white spaces.
+# * White spaces after alias name are ignored.
+# * Next words are the real character set name. It can include white
+#   spaces (except new line characters).
+#
+
+IBM-1047 IBM-1047,swaplfnl
+EBCDIC   IBM-1047,swaplfnl
+UTF-16   UTF-16BE
+UCS-2    UTF-16BE

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE secsh-broker SYSTEM "ssh-broker-ng-config-1.dtd" >
+
+<!-- Tectia Connection Broker - ssh-broker-config-example.xml
+
+     NOTE: This file contains an example configuration for ssh-broker-g3.
+     Consider this file only as an example and create a real configuration 
+     to suit your environment.
+     
+     To use this file as a basis of your Connection Broker configuration,
+     copy it under name "ssh-broker-config.xml" to your user-specific directory
+     on Unix: $HOME/.ssh2/ssh-broker-config.xml
+     on Windows: %APPDATA%\SSH\ssh-broker-config.xml
+
+     Edit the file using a text editor or an XML editor. For more 
+     information on the configuration syntax, see the ssh-broker-config
+     manual page or documentation:
+     Tectia Client User Manual or 
+     Tectia ConnectSecure Administrator Manual.
+
+     The Connection Broker locates the DTD automatically. 
+-->
+
+<secsh-broker version="6.4">
+  <general>
+    <!-- By default, the crypto libraries are used in the "standard" mode.
+         They can also be used in the "fips" mode. -->
+    <crypto-lib mode="standard" />
+
+
+    <!-- Example of certificate validation settings -->
+<!--
+    <cert-validation end-point-identity-check="yes"
+                     default-domain="example.com"
+                     http-proxy-url="http://proxy.example.com:8080"
+		     max-path-length="12"
+		     cache-size="35"
+		     max-crl-size="11"
+		     external-search-timeout="60"
+		     max-ldap-response-length="11"
+		     ldap-idle-timeout="30">
+      <ldap-server address="ldap://ldap.example.com:389" />
+      <ocsp-responder url="http://ocsp.example.com:8090" validity-period="0" /> 
+      <crl-prefetch interval="3600" url="file:///full.path.to.crlfile" />
+      <dod-pki enable="no" />
+      <ca-certificate name="SSH Test CA1"
+                      file="ssh_test_ca1.crt"
+                      disable-crls="no"
+                      use-expired-crls="0" />
+    </cert-validation>         
+-->
+  </general>
+
+  <!-- Default connection settings -->
+  <default-settings>
+    <ciphers>
+      <cipher name="crypticore128@ssh.com" /> <!-- on Windows and Linux x86--> 
+      <cipher name="aes128-cbc" />
+      <cipher name="aes192-cbc" />
+      <cipher name="aes256-cbc" />
+      <cipher name="aes128-ctr" />
+      <cipher name="aes192-ctr" />
+      <cipher name="aes256-ctr" />
+      <cipher name="3des-cbc" />
+    </ciphers>
+
+    <macs>
+      <mac name="crypticore-mac@ssh.com" /> <!-- on Windows and Linux x86--> 
+      <mac name="hmac-sha1" />
+      <mac name="hmac-sha1-96" />
+      <mac name="hmac-sha2-256" />
+      <mac name="hmac-sha256-2@ssh.com" />
+      <mac name="hmac-sha224@ssh.com" />
+      <mac name="hmac-sha256@ssh.com" />
+      <mac name="hmac-sha384@ssh.com" />
+      <mac name="hmac-sha2-512" />
+      <mac name="hmac-sha512@ssh.com" />
+    </macs>
+    
+    <kexs>
+      <kex name="diffie-hellman-group14-sha1" />
+      <kex name="diffie-hellman-group14-sha256@ssh.com" />
+      <kex name="diffie-hellman-group-exchange-sha1" />
+      <kex name="diffie-hellman-group-exchange-sha256" />
+    </kexs>
+
+    <rekey bytes="1000000000" />
+
+    <authentication-methods>
+      <auth-publickey />
+      <auth-password />
+      <auth-keyboard-interactive />
+    </authentication-methods>
+
+    <compression name="none"
+                 level="0"/>
+
+    <!-- Default proxy rules -->
+<!--
+    <proxy ruleset="direct:///10.0.0.0/8,127.0.0.0/8,*.example.com;socks://fw.example.com:1080/" />
+-->
+
+    <idle-timeout type="connection" time="5" />
+
+    <server-banners visible="yes" />
+
+    <forwards>
+      <forward type="x11" state="off" />
+      <forward type="agent" state="on" />
+    </forwards>
+
+    <!-- By default, the address family is any.
+         It also can be inet (IPv4) or inet6 (IPv6). -->
+    <address-family type="any" />
+
+  </default-settings>
+
+  <!-- Connection profiles and profile-specific settings -->
+  <profiles>
+    <!-- Example profile 1 -->
+    <profile name="server1"
+             id="id1"
+             host="server1.example.com"
+             port="22"
+             connect-on-startup="NO"
+             user="%username%"
+             gateway-profile="">
+      <hostkey>
+      </hostkey>
+
+      <ciphers>
+        <cipher name="crypticore128@ssh.com" />
+        <cipher name="aes128-cbc" />
+        <cipher name="3des-cbc" />
+        <cipher name="twofish128-cbc" />
+      </ciphers>
+
+      <macs>
+        <mac name="crypticore-mac@ssh.com" />
+        <mac name="hmac-sha1" />
+        <mac name="hmac-md5" />
+      </macs>
+
+      <authentication-methods>
+        <auth-publickey/>
+        <auth-password />
+      </authentication-methods>
+
+      <compression name="none"
+                   level="0"/>
+
+      <!-- Profile-specific proxy rules --> 
+<!--
+      <proxy ruleset="" />
+-->
+
+      <idle-timeout type="connection" time="5" />
+
+      <server-banners visible="no" />
+
+      <forwards>
+        <forward type="agent" state="on" />
+        <forward type="x11" state="on" />
+      </forwards>
+
+      <tunnels>
+        <local-tunnel type="TCP" 
+                      listen-port="143"
+                      dst-host="imap.example.com"
+                      dst-port="143"
+                      allow-relay="NO" />
+        <remote-tunnel type="TCP"
+                       listen-port="11000"
+                       dst-host="localhost"
+                       dst-port="99" />
+      </tunnels>
+
+    </profile>
+
+    <!-- Example profile 2 -->
+    <profile name="server2"
+             id="id2"
+             host="server2.example.com"
+             port="22"
+             connect-on-startup="NO"
+             user="%username%"
+             gateway-profile="">
+      <hostkey>
+      </hostkey>
+
+      <compression name="none" />
+
+      <proxy ruleset="" />
+    </profile>
+  </profiles>
+
+  <!-- Automatic tunnels -->  
+  <static-tunnels>
+    <tunnel listen-port="25"
+            dst-host="smtp.example.com"
+            dst-port="25"
+            allow-relay="NO"
+            type="TCP"
+            profile="id1" />
+  </static-tunnels>
+  
+  <!-- Windows GUI settings -->
+  <gui hide-tray-icon="no"
+       show-exit-button="yes"
+       show-admin="yes"
+       enable-connector="yes"
+       show-security-notification="yes" />
+
+  <!-- Filter rules for ConnectSecure
+       * transparent TCP tunneling 
+       * transparent FTP tunneling 
+       * FTP-SFTP conversion 
+       
+       Example rule tunnels all port 23 (telnet) connections 
+       via the Secure Shell server defined in profile "id1".
+-->
+<!-- 
+  <filter-engine ip-generate-start = "198.18.0.1">
+
+    <rule application=".*"
+          host=".*"
+          ip-address=".*"
+          pseudo-ip="no"
+          ports="23"
+          action="TUNNEL"
+          profile-id="id1"
+          hostname-from-app="no"
+          username-from-app="no"
+          fallback-to-plain="no" />
+
+  </filter-engine>
+-->
+
+  <!-- Customized logging settings -->
+<!--
+  <logging>
+    <log-events facility="normal"
+                severity="informational">Broker_channel_control
+					 Broker_channel_close
+    </log-events>
+  </logging>
+-->
+
+</secsh-broker>

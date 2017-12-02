@@ -1,0 +1,47 @@
+#! /bin/sh
+#
+# This script creates symlinks in /usr/local/bin for compatibility
+# with the old Tectia 4.x packages which installed binaries in that
+# directory.
+#
+
+set -e
+
+env_file=/etc/ssh2/tectia-env.sh
+if test -f $env_file; then
+  . $env_file
+else
+  tectia_basedir=/opt/tectia
+fi
+
+if test -d /usr/local/bin; then
+  true
+else
+  echo "Error: The directory /usr/local/bin does not exist." >&2
+  exit 1
+fi
+
+for link in                 \
+  ssh:sshg3                 \
+  ssh2:sshg3                \
+  scp:scpg3                 \
+  scp2:scpg3                \
+  sftp:sftpg3               \
+  sftp2:sftpg3              \
+  ssh-keygen:ssh-keygen-g3  \
+  ssh-keygen2:ssh-keygen-g3 \
+  ; do
+
+  target=/usr/local/bin/`echo $link | cut -d : -f 1`
+  source="$tectia_basedir/bin/`echo $link | cut -d : -f 2`"
+
+  if test -e "$target"; then
+    echo "$target already exists." >&2
+  else
+    if ln -s "$source" "$target"; then
+      echo "Created $target -> $source"
+    else
+      echo "Failed to create $target" >&2
+    fi
+  fi
+done

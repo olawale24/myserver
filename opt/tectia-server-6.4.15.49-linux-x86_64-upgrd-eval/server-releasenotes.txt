@@ -1,0 +1,1146 @@
+Release Notes for Tectia Server 6.4.15
+---------------------------------------------
+
+21 June 2017
+
+
+(C) 2017 SSH Communications Security Corporation
+
+This software is protected by international copyright laws.
+All Rights Reserved.
+
+
+Table of Contents
+
+1.   About This Release
+2.   New Features
+3.   Bug Fixes
+4.   Known Issues
+5.   Further Information
+
+
+1.   About This Release
+-----------------------
+
+  The 6.4 release of Tectia Server is declared feature complete and
+  Long Term Supported (LTS). Therefore, it is supported for 3 years from
+  the release date of 6.4.12, until October 2018. It is possible to
+  further extend that support for 2 more years (until October
+  2020). There will be 6.4 maintenance releases which will fix critical
+  bugs, but no new features will be added to any future 6.4 release.
+
+  Items addressed in this release are listed under the "6.4.15" section.
+
+  We recommend uninstalling any SSH Secure Shell and SSH Tectia 4.x products
+  before installing Tectia 6.4 products.
+  For the installation instructions, refer to the Tectia Server Administrator
+  Manual.
+
+2.   New Features
+-----------------
+
+The following new features have been implemented in Tectia Server:
+
+New Features in 6.4.15
+----------------------
+
+(FB #54129)
+
+- OCSP Supports responder that are not directly related to the subject
+  certificate being verified (RFC5019, RFC6960). This is configured by
+  having the OCSP responder issuing CA certificate in the
+  ocsp-responder configuration data.
+
+(FB #54227)
+
+- Audit messages related to certificate validation indicate, whether
+  OCSP or CRL's were used during the validation process.
+
+New Features in 6.4.14
+----------------------
+
+(FB #47742)
+- Windows: Added support for Windows Server 2016 for Tectia Client and
+  Server.
+
+(FB #48552)
+- Windows: Added support for Windows 10 Anniversary Update for Tectia
+  Client and Server.
+
+
+New Features in 6.4.13
+----------------------
+
+(FB #40754)
+- Windows: Added support for Windows 10 for Tectia Client and Server.
+
+(FB #43071)
+- AIX: IBM AIX 5.3 is no longer supported.
+- Solaris: Oracle Solaris 9 is no longer supported.
+- Linux: SLED 10 and 11 and SLES 9 are no longer supported.
+
+(FB #42520)
+- All platforms: Installed host key is now 2048 bits by default.
+
+(FB #43942)
+- All platforms: Default key type in key generation is now RSA by default.
+
+
+New Features in 6.4.12
+----------------------
+
+(FB #39128)
+- All Platforms: The key-exchange method diffie-hellman-group1-sha1 was
+  removed from factory default Server configuration. The
+  diffie-hellman-group1-sha1 KEX method uses the 1024-bit Oakley group1,
+  which is small by current standards, as shown by the LogJam paper.
+
+  The ssh-keyfetch utility uses from now on diffie-hellman-group14-sha1
+  instead of group1.
+
+(FB #36435)
+- Windows: The Tectia Server package now includes also Tectia Client
+  components. If you previously have Tectia Client installed, the Server
+  installation will fold that installation in, resulting in a Server
+  installation. It is possible to install the package without the client
+  components. Installing Tectia ConnectSecure and Server is supported
+  only if the two packages are of the same version.
+
+(FB #37010)
+- Windows: It is now possible to install Tectia Server and try it out
+  without rebooting the machine. The caveat here is that public-key
+  authentication will not work, due to the necessity of restarting the
+  Server to register the SSH domain authentication package. Restarting
+  the Server will enable full functionality.
+
+(FB #36734)
+- Windows: User impersonation for file access no longer uses an extra
+  binary, which should make file access faster for, e.g., public-key
+  authentication.
+
+(FB #37320)
+- Linux: SLES 12 and SLED 12 are now officially supported platforms.
+
+(FB #38575, FB #2233)
+- Unix: Configuration element passwd-change-rules introduced in
+  6.4.10 caused regressions with configurations already containing the
+  rule for "passwd-change". The feature was modified to always add a
+  "passwd-change" rule unless the group is defined in the configuration.
+  This supersedes the change introduced in 6.4.10. If you wish to
+  disable the forced password change, you can do this by adding two
+  groups to the services block: A catch-all group and a passwd-change
+  group which will never match due to the catch-all.
+
+  <secsh-server>
+    ...
+    <services>
+      <group name="catchall">
+        <selector>
+          <user name="*" />
+        </selector>
+      </group>
+      <group name="passwd-change">
+        <selector>
+          <user-password-change-needed value="yes" />
+        </selector>
+      </group>
+
+    ... rules ...
+    </services>
+
+  </secsh-server>
+
+(FB #38516)
+- Windows: Primary access tokens are created consistently across
+  password authentication, S4U, and DAP.
+
+(FB #39932)
+- Windows: Upgraded Qt to 4.8.3 and ICU to 51.2. The software is now
+  built with Visual Studio 2013. The created MSI packages will require
+  a Microsoft update to install on Windows 2003 and XP.
+
+(FB #41355)
+- Windows: Upgraded the OpenSSL cryptographic library used in FIPS mode
+  to version 1.0.2a
+
+
+New Features in 6.4.11
+----------------------
+
+  Release 6.4.11 was z/OS specific, and there was no release for the
+  rest of the platforms.
+
+
+New Features in 6.4.10
+----------------------
+
+(FB #36108)
+- Linux, Solaris, HP-UX(IA-64): Upgraded the OpenSSL cryptographic
+  library used in FIPS mode to version 1.0.2a. HP-UX (PA-RISC) and IBM AIX
+  will continue to use the OpenSSL cryptographic library version 0.9.8.
+
+(FB #2233)
+- Unix: Added a configuration element in Tectia SSH Server that allows the
+  administrator to create rules about the changing of expired passwords.
+
+(FB #7588)
+- All Platforms: Added support for Elliptic Curve Diffie-Hellmann (ECDH) for
+  key exchange and Elliptic Curve Digital Signature Algorithm (ECDSA) for
+  keys, host keys and X.509 certificates. The curves used are NISTP256,
+  NISTP384 and NISTP521.
+
+(FB #35758)
+- All Platforms: Entrust certificates are no longer supported.
+
+
+New Features in 6.4.8
+---------------------
+
+(FB #32437)
+- Windows: Added support for Windows 8.1 for Tectia Client and Server.
+
+(FB #17240)
+- All Platforms: Added the possibility to define an external application in
+  the authentication/mapper element (in the authentication-methods block) to
+  extend the checks when authenticating users to Tectia Server.
+
+(FB #32330)
+- Linux: Added support for Red Hat Enterprise Linux 7 for Tectia Client,
+  Server and ConnectSecure.
+
+(FB #28924)
+- All Platforms: Added standard MACs hmac-sha2-256 and hmac-sha2-512 as
+  specified in RFC 6668. This enables third-party compatibility when using
+  SHA-2 MACs in Tectia products.
+
+(FB #34381)
+- Linux: Tectia SSH Server will prevent write access to
+  "/proc/self/{mem,maps}" when executing the sft-server-g3 subsystem.
+
+
+New Features in 6.4.7
+---------------------
+
+(FB #28339)
+- Windows: Added the possibility of exporting and importing the Tectia Server's
+  password cache.
+
+(FB #27820)
+- Windows, Linux, Solaris, HP-UX(IA-64): Upgraded the OpenSSL cryptographic
+  library used in FIPS mode to version 1.0.1e. The OpenSSL library version
+  1.0.1e was compiled with -DOPENSSL_NO_HEARTBEATS. Tectia Client, Server and
+  ConnectSecure use only the fipscannister object of the OpenSSL library, and
+  therefore do not contain the Heartbleed vulnerability.
+  HP-UX (PA-RISC) and IBM AIX will continue to use the OpenSSL cryptographic
+  library version 0.9.8. This does not affect Tectia Server for Linux on IBM
+  System z, as the OpenSSL library is not provided.
+
+
+New Features in 6.4.6
+---------------------
+
+(FB #27640)
+- Windows: Updated the certificate used for signing the Windows packages.
+  Note that the new certificate uses SHA-2 to verify its signature. Microsoft
+  XP with Service Pack 2 does not support SHA-2 and therefore cannot guarantee
+  the integrity of the certificate (KB968730). For Microsoft Windows Server
+  2003 with Service Pack 2, to validate the certificate, apply the hotfix
+  to KB968730.
+
+(FB #26246)
+- All platforms: Implemented "load control", a connection flood DoS attack
+  mitigation feature that uses a white list of IP addresses. The feature
+  attempts to keep Tectia Server up and running in the face of a Denial of
+  Service attack that tries to use so much of the server's resources that
+  normal service would be disrupted.
+
+(FB #27020)
+- Windows: Local tunneling constraints obtained via an external application
+  can now be configured using the Tectia Server Configuration GUI.
+
+(FB #27934)
+- Windows: Added support for Windows 2012 R2 for Tectia Client and Server.
+
+
+New Features in 6.4.5
+---------------------
+
+(FB #26767)
+- All Platforms: Added the Tectia Mapper Protocol to Tectia Server.
+  This provides the tools for communication between Tectia Server and an
+  external application to match local tunneling constraints with external data.
+
+(FB #23655)
+- All Platforms: In Tectia Server, added the possibility to define local
+  tunneling constraints obtained via an external application that uses the
+  Tectia Mapper protocol.
+
+(FB #21811)
+- Windows: Tectia Server can now authenticate domain users when there is a
+  one-way trust relationship between the domain of the host and the domain of
+  the user.
+
+(FB #26369)
+- Windows: Added a new option to ssh-server-ctl, "add-pwd-cache-user". This
+  command adds the specified user and entered password to the server password
+  cache database.
+
+(FB #24430)
+- Windows: Added support for Windows 8 for Tectia Client and Server.
+
+
+New Features in 6.4.2
+---------------------
+
+(FB #21294)
+- AIX: Tectia Server on AIX will always be started using the "startsrc -s
+  ssh-tectia-server" command. That will start two ssh-server-g3 processes.
+  One will be a service launcher, which will communicate with the AIX System
+  Resource Controller, and the other one will be the normal ssh-server-g3
+  process handling connections.
+  Now the case of stopping the Tectia Server when the server still has open
+  connections will be transparent to the AIX System Resource Controller, as it
+  will believe that the Tectia Server is stopped, but will still have the
+  existing connections active.
+
+(FB #21445)
+- Windows: Added support for Windows 2012 for SSH Tectia Client and Server.
+
+(FB #9607)
+- Solaris 11 SPARC: New installation packages available for Oracle Solaris 11
+  (SPARC).
+
+(FB #21784)
+- Solaris 11 x86-64: New installation packages available for Oracle Solaris 11
+  (x86-64).
+
+(FB #18890)
+- All Platforms: Implemented passphrase support in init string in the Tectia
+  Server communicating via PKCS#11.
+
+
+3.   Bug Fixes
+--------------
+
+The following fixes have been implemented in Tectia Server:
+
+
+Bug Fixes in 6.4.15
+-------------------
+
+(FB #45602)
+
+- All platforms: Fixed a memory leak on Private Key storage function
+  during server reconfiguration.
+
+(FB #51740, FB #53819)
+
+- All platforms: Fixed a race condition on X.509 certificate validation
+  code causing rare server side crashes when client authentication using
+  certificates was enabled.
+
+  Certificate validator configuration parameters were adjusted upwards
+  to allow use of large revocation lists up to 50MB of size.
+
+(FB #52579)
+
+- Linux: Use library call getgrouplist(3) to retrieve user group
+  membership information instead of calling getgrent(3) to avoid
+  delays when using network user directories, like AD or NIS.
+
+(FB #53871)
+
+- All platforms: TCP socket listener backlog parameter increased.
+
+(FB #53962)
+
+- All platforms: Fixed bug, where certificate/CRL cache could not be
+  loaded, if it contained large CRL's.
+
+(FB #53964)
+
+- All platforms: CRL autoupdate checks for expiration of the CRL soon
+  after these have been loaded from the local disk cache file.
+
+- All platforms: CRL prefetch is performed once soon after the server
+  has been started, instead of waiting for the given interval to
+  expire.
+
+
+(FB #54984)
+
+- All platforms: Fixed an error that could cause CRL prefetch to crash
+  the server.
+
+(FB #54176)
+
+- All platforms: Fixed an error, where valid CRL's were dropped from
+  the local cache without a good reason.
+
+(FB #53226)
+
+- All platforms: Fixed a bug that caused OCSP responses to be
+  rejected, in case when the OCSP responses do not contain a
+  responseNonce (e.g. are pre-produced), and the response thisUpdate,
+  and producedAt timestamps were not within expected interval.
+
+
+Bug Fixes in 6.4.14
+-------------------
+
+(FB #50909)
+- Windows: Network resource connections from virtual folders are no longer
+  leaked when opening an SFTP session on Tectia Server.
+
+
+Bug Fixes in 6.4.13
+-------------------
+
+(FB #45051)
+- Unix: Fixed input validation when starting X11 forwarding. Users without
+  shell access to the system could bypass the restrictions by using
+  techniques outlined in CVE-2016-3115. As a mitigating factor, even without
+  the fix, the output of the commands was not visible to the users, so the
+  vulnerability in this case is limited to creating files and outbound
+  connections with the privilege level of the authenticated user. This
+  vulnerability is limited to configurations with restricted user accounts
+  (forced or denied commands, denied shells).
+
+(FB #43094, #44961)
+- Linux: Removed unused files libgcc_s.so.1 and libstdc++.so.6 from the
+  packages.
+
+(FB #43853)
+- Windows: To avoid misunderstandings, the "Enable DoD PKI compliancy" label
+  on the Certificate Validation page of Tectia Server Configuration GUI was
+  renamed to "Enforce digital signature in key usage".
+
+(FB#44272)
+- Windows: Users with characters outside of US-ASCII in their user name can
+  now log in to Tectia Server using public key authentication.
+
+(FB#40750)
+- Windows: Authorization file definitions can now be removed using Tectia
+  Server Configuration GUI.
+
+(FB #43024)
+- All platforms: Policy name is now shown in audit messages for successful
+  connections.
+
+(FB #42057)
+- Windows: The text in the MSI installer notifying of an existing
+  installation is no longer truncated.
+
+
+Bug Fixes in 6.4.12
+-------------------
+
+(FB #33327)
+- All Platforms: Tectia Server will only read regular files as user's
+  public keys as authorization information.
+
+(FB #39090)
+- All Platforms: Authentication will no longer hang if an authorization
+  file is truncated during parsing.
+
+(FB #31609)
+- All Platforms: Fixed an issue that caused some file transfers using
+  streaming to fail silently, creating an empty file in the server.
+
+(FB #39804)
+- Windows: Improved error handling on authentication queries. This
+  allows the system to respond to error situations faster.
+
+(FB #39937)
+- Windows: Multiple logins to a Windows server can now happen in
+  parallel, speeding up login times on servers with moderate to high
+  traffic.
+
+(FB #38484)
+- Windows: S4U authentication is not attempted for local users, as it
+  cannot succeed.
+
+(FB #38485)
+- Windows: S4U authentication is not attempted on machines not attached
+  to a domain, as it cannot succeed.
+
+(FB #37655)
+- Unix: OpenSSH agent forwarding for ECDSA keys now works.
+
+(FB #39749)
+- All Platforms: In FIPS mode, cryptographic operations with too small
+  keys (<1024 bits) will now be refused.
+
+(FB #38089)
+- All Platforms: Old or invalid licenses no longer cause warnings at
+  program startup if a valid license is found.
+
+(FB #40799)
+- All Platforms: Sample files for Tectia Mapper Protocol are again
+  included in the distribution.
+
+
+Bug Fixes in 6.4.10
+-------------------
+
+(FB #33936)
+- Documentation: Generic improvements.
+
+(FB #34239)
+- Windows: Improved the performance when logging in to Tectia SSH Server in a
+  domain. The time spent in retrieving information from the domain controller
+  is now optimized.
+
+(FB #37690)
+- Documentation: Clarified the documentation regarding the umask value that is
+  used when a user logs in to Tectia SSH Server.
+
+(FB #36392)
+- Documentation: Documented the following deprecated elements and attributes
+  of the Tectia SSH Server and/or Client configuration files:
+  strict-host-key-checking
+  host-key-always-ask
+  accept-unknown-host-keys
+  transport-distribution
+  authentication-method
+  signature-algorithms (from the settings element)
+
+(FB #35116)
+- Linux, Solaris: Users without an entry in /etc/passwd and /etc/shadow no
+  longer fail to authorize to Tectia SSH Server when using an authentication
+  method that does not require the presence of an entry in said files.
+
+(FB #36430)
+- Linux: Fixed a problem in Tectia SSH Server that produced a hang of the
+  terminal connection after authentication in Linux distributions with a glibc
+  library newer than 2.18-16. NOTE: At the time of releasing this version, the
+  currently supported RHEL and SUSE versions include an older version of glibc,
+  meaning that they are not yet affected by this issue.
+
+(FB #29944)
+- All Platforms: Fixed an issue in Tectia SSH Server that was causing some
+  audit messages to not be logged during file transfer.
+
+(FB #34706)
+- All Platforms: Tectia SSH Server no longer returns an "unknown error" when
+  attempting to get a non-existing file from Tectia SSH Server with an
+  OpenSSH-based SCP client.
+
+(FB #34325)
+- All Platforms: Tectia SSH Server no longer sends its license ID in an
+  SSH_MSG_IGNORE message, as there are third-party SSH servers that do not
+  handle such a situation well.
+
+(FB #35326)
+- All Platforms: Fixed a problem with the authorization file option
+  "idle-timeout". When in use, it will no longer abort authentication when
+  using public-key authentication for that specific key.
+
+(FB #31290)
+- Windows, Linux, Solaris and HP-UX Itanium: On platforms where the OpenSSL
+  cryptographic library version 1.0.2a is used, ssh-keygen-g3 in FIPS mode
+  (--fips-mode) can now be used to generate RSA keys of length n*512,
+  where 2=<n=<24 (that is 1024, 1536, 2024, ... , 11776 and 12288 bits).
+
+
+Bug Fixes in 6.4.9
+------------------
+
+(FB #35115)
+- Linux, Solaris: Users without an entry in /etc/passwd and /etc/shadow no
+  longer fail to authorize to Tectia Server when using an authentication
+  method which does not require the presence of an entry in said files.
+
+
+Bug Fixes in 6.4.8
+------------------
+
+(FB #31617)
+- Windows: Fixed a Tectia Server crash that occurred during authentication
+  with users belonging to a large number of groups.
+
+(FB #22593)
+- Unix: When an account's password is expired with "passwd -e" or "chage -d 0"
+  and the inactivity period for the account is set, Tectia Server will no
+  longer deny the account login. Instead, it will require that the account's
+  password be changed.
+
+(FB #3316)
+- Windows: Tectia Server will no longer start if the ssh-server-config.xml
+  file has wrong permissions. The owner of the file must be a member of the
+  Administrators group, only Administrators and System may have full control
+  of the file, users are not allowed to modify the file, and other accounts
+  are not allowed not have access to the file.
+  When upgrading to this version of Tectia Server on Windows Server 2003 or
+  Windows XP, Power Users and "Terminal Server User" must be removed from the
+  ACL manually or via the installer during the upgrade.
+
+(FB #31618)
+- Windows: During a quiet upgrade of Tectia Server, if the ACL for an existing
+  configuration file is incorrect, the server will by default be uninstalled.
+  The default behavior can be overridden by specifying one of the following
+  values to the SSHMSI_SSH_FILE_PERMISSIONS property of the MSI package:
+  * Reset or 1 - reset permissions to default state.
+  * Ignore or 2 - continue installation without modifying file permissions. In
+    this case the server and configuration utility may not be able to start.
+
+(FB #31972)
+- Unix: Improved the management of accounts when the /etc/shadow file is in
+  use.
+
+(FB #22923)
+- Windows: Fixed an issue that prevented login to Tectia Server on Windows
+  using password authentication with a password containing certain special
+  characters.
+
+(FB #28887)
+- Windows: Fixed an issue with remote command execution when connecting
+  from/to older versions of Tectia Client or Tectia Server on Windows with
+  Japanese locale.
+
+(FB #32440)
+- Documentation: Generic documentation improvements.
+
+(FB #9858)
+- Windows: Enabled logging of messages with severity 'error' and 'warning'
+  to system log before applying settings from the configuration file.
+
+(FB #32037)
+- Windows: Tectia Server Configuration GUI no longer crashes when using a
+  configuration file with the content copied straight from
+  ssh-server-config-tutorial.xml.
+
+(FB #31668)
+- Windows: Fixed a memory corruption that occurred when retrieving user
+  groups failed, and could have caused a crash in Tectia Server.
+
+(FB #32670)
+- All Platforms: Tectia Server will now specify the "user-agent" when
+  performing HTTP get requests during certificate validation, as it seems to
+  be a requirement for some of the setups when downloading CA's via HTTP.
+
+
+Bug Fixes in 6.4.7
+------------------
+
+(FB #30784)
+- Documentation: Minor modifications to the documents.
+
+(FB #21025)
+- All Platforms: Fixed a crash in the Tectia Server when using keyboard
+  interactive with radius authentication when under stress.
+
+(FB #28273)
+- All Platforms: Fixed a race condition that was causing public key
+  authentication to occasionally fail under stress.
+
+(FB #27769)
+- All Platforms: Fixed a crash that occurred when Tectia Server was under
+  stress.
+
+(FB #27676)
+- All Platforms: Tectia Server under heavy stress will no longer hang when
+  performing public key authentication.
+
+(FB #29213)
+- Windows: In Tectia Server Configuration GUI, added an input check to all
+  fields that accept numbers. The accepted range is 1-65535 for port numbers,
+  and 0-2147483647 (0x7fffffff) for other fields that do not have specific
+  restrictions.
+
+(FB #29684)
+- All Platforms: With ssh-keygen-g3 in FIPS mode, it is now possible to
+  generate DSA keys larger than 1024 bits.
+
+(FB #30282)
+- All Platforms: fixed a memory leak that occurred in Tectia Server when
+  performing public key authentication under certain circumstances.
+
+(FB #29565)
+- All Platforms: When Sft_server_fxp_request log messages are enabled, the
+  server will no longer audit unrequested log events.
+
+
+Bug Fixes in 6.4.6
+------------------
+
+(FB #26749)
+- Windows: Improved error handling related to domain user authentication
+  when there is a one-way trust relationship between the domain of the host
+  and the domain of the user.
+
+(FB #15146)
+- Windows: Fixed the display of certain incorrect error messages.
+
+(FB #27101)
+- All Platforms: Fixed a deadlock that occurred in Tectia Server under stress
+  when using the Tectia Mapper Protocol.
+
+(FB #27974)
+- Documentation: Corrected the Tectia Server Registry Keys location on Windows.
+
+(FB #27996)
+- Windows: RSA SecurID authentication no longer fails when aceclnt.dll is
+  specified in the Tectia Server configuration file, but not in the system's
+  path.
+
+(FB #27997)
+- Windows: GSSAPI authentication no longer fails in certain conditions when
+  the security authentication package is too large.
+
+(FB #27995)
+- Windows: Users are now able to authenticate via GSSAPI when using the host
+  name, the fully qualified domain name or an IP address to define the
+  destination server.
+
+(FB #26771)
+- Windows: Fixed a memory leak that occurred in Tectia Server under certain
+  conditions when authenticating domain users.
+
+(FB #21192)
+- All platforms: Fixed a bug in Tectia Server that was causing the
+  ssh-servant-g3 process to crash under stress.
+
+(FB #28707)
+- Windows: Fixed a bug in Tectia Server that was causing the ssh-servant-g3
+  process to crash when authenticating domain users.
+
+(FB #23888)
+- Unix: When configuring GSSAPI authentication, the dll-path parameter is no
+  longer ignored.
+
+(FB #20730)
+- All Platforms: Improved Tectia Server's stability under stress.
+
+
+Bug Fixes in 6.4.5
+------------------
+
+(FB #24390)
+- All Platforms: If a version exchange failure occurs, Tectia Server now logs
+  a disconnect message and sends a binary message to the client. This is a
+  change of behavior to any previous releases.
+
+Bug Fixes in 6.4.4
+------------------
+
+(FB #24545)
+- Windows: Tectia Server Configuration GUI now allows more than 1000 rules on
+  the pages Connections and Encryption, Authentication, and Services.
+
+(FB #23521)
+- AIX, HPUX: If a connection is disconnected because the authentication
+  failed, Tectia Server will now report one failure. This concerns only PAM,
+  LAM and/or public-key authentication. The behavior has not changed when
+  using password or keyboard interactive with password sub-method: Tectia
+  Server reports one failure per failed password.
+
+
+Bug Fixes in 6.4.3
+------------------
+
+(FB #22292)
+- Windows: In Tectia SSH Server, fixed a crash that occurred when GSSAPI was
+  used.
+
+
+Bug Fixes in 6.4.2
+------------------
+
+(FB #9610)
+- All Platforms: Fixed a memory leak in ssh-broker-g3 and in ssh-servant-g3.
+  The memory leak occurred in certain cases when GSSAPI authentication was
+  used.
+
+(FB #22758)
+- Windows: Viewing Troubleshooting Log has been reactivated and improved
+  performance and reliability.
+
+(FB #11294)
+- AIX: When upgrading a Tectia Server that has active connections, the server
+  will not restart if the fix for APAR IV07310 is installed on the AIX host.
+
+(FB #14478)
+- All Platforms: Improved documentation and removed inconsistencies in parsing
+  the Regular expressions used in the Allow/Deny-from options of the
+  authorization's file.
+
+(FB #21794)
+- Windows: Fixed the Troubleshooting Log from the server, as it was slowing
+  down too much plus was missing some trace messages when the Tectia Server
+  was under stress.
+
+(FB #20475)
+- All Platforms: The End-user license agreement (EULA) has been updated to
+  reflect the new company name.
+
+(FB #20710)
+- All Platforms: Tectia Client, Server and ConnectSecure executables no longer
+  fail to start when using relative path ./<executable_name>.
+
+(FB #19916)
+- Unix: Fixed the behavior when an ssh terminal connection has processes in the
+  background and requests to exit. Previously, when it was executed via remote
+  command without terminal or with an interactive session, the ssh terminal
+  connection hanged. Now, in the case of a remote command, it will kill the
+  background process and will exit, and in the case of an interactive session,
+  the ssh terminal connection will exit and will leave the background processes
+  running.
+
+(FB #21348)
+- All Platforms: There is no longer different behavior in terminal action when
+  Tectia Server is started with ssh-server-config-default.xml configuration
+  file or without any configuration file.
+
+(FB #20579)
+- All Platforms: Reloading the configuration on Tectia Server no longer hangs
+  if a forced command specified in an authorization file has been executed.
+
+(FB #21390)
+- Windows: There is no longer different behavior in terminal action when Tectia
+  Server is started without any configuration file or when it is started with
+  the configuration file generated by the Tectia Server Configuration GUI.
+
+
+Bug Fixes in 6.4.1
+------------------
+
+(FB #21081)
+- All Platforms: In file transfer clients, ASCII and character set conversion
+  related site commands to Tectia SSH Server for IBM z/OS now work against all
+  versions of Tectia SSH Server for IBM z/OS.
+
+
+Bug Fixes in 6.4.0
+------------------
+
+(FB #17811)
+- Windows: Password cache is again configurable by using GUI on displays with
+  vertical resolution of 768 pixels.
+
+(FB #19310)
+- Windows: When executing remote commands and external programs, the standard
+  error of the command is no longer redirected to standard output.
+
+(FB #17201)
+- Unix: Changed the way the server identifies the ptyless sessions when needed
+  to be logged. Previously we used ssh-<pid>, but that proved to increase badly
+  the size of utmp file in AIX, for instance.
+  Now the server emulates the behavior of the pty sessions, and always
+  identifies them with ssh-<lowest_available_number>.
+  This causes those identifiers to be reused, limiting the unwanted growth of
+  the utmp file.
+
+(FB #20475)
+- All Platforms: The End-user license agreement (EULA) has been updated to
+  reflect the new company name.
+
+(FB #20710)
+- All Platforms: Tectia Client, Server and ConnectSecure executables no longer
+  fail to be started by relative path ./<executable_name>.
+
+
+4.   Known Issues
+-----------------
+
+The following issues are currently known to exist in Tectia SSH Server:
+
+(FB #41772)
+- Linux, RHEL6: ssh-servant-g3 processes can show large virtual memory
+  allocation, in excess of one GB per process. This is due to thread
+  arena allocation in libc 2.10 and later, included in RHEL 6.0, not
+  because of memory leaks.
+
+(FB #39681)
+- Solaris: With exec-directly="no", csh on Solaris closes auditing file
+  descriptors for sft-server-g3, effectively disabling logging with
+  sftp. The recommended solution here is to use exec-directly="yes".
+
+(FB #41617)
+- Windows: Upgrade only recognizes versions 6.1 onwards.
+
+(FB #36835)
+- All platforms: Remote translation tables only work when the site command
+  X=BIN is used. Local translation tables work as intended.
+
+(FB #41381)
+- Windows: On XP and Windows Server 2003, restarting the machine is
+  required to be able to start Tectia Server.
+
+(FB #22991)
+- AIX: Upgrading from version 6.2.x or 6.3.x will not restart the server
+  automatically after installing the upgrade packages. Upgrading from
+  versions 6.1.x (or earlier), and versions 6.4.2 (or later) will work
+  normally and restart the server after upgrade.
+
+(FB #19541)
+- Unix/Linux: When logged to the SSH Tectia Server, an executable will fail
+  to start if any parent of the current working directory is not readable
+  and relative paths are used to refer to the executable.
+
+(FB #13818)
+- All Platforms: The usage of IPv6 addresses in certificates is not yet
+  supported.
+
+(FB #14973)
+- Linux: SSH Tectia Server must be stopped before upgrading from 6.2.0 as the
+  newer ssh-server-ctl will not be able to stop the 6.2.0 server. Upgrades from
+  any other version than 6.2.0 do not experience this issue.
+
+(FB #9145)
+- Windows: When installing Tectia Server on a platform that has more than 30
+  CPUs running Windows 2003 SP2, make sure that you have the proper Microsoft
+  patches installed to not hit a Microsoft bug which will make your host
+  unusable.
+  For more information, see: http://support.microsoft.com/kb/2539164
+
+(FB #10425)
+- Unix: if OpenSSL 0.9.8 is installed on the host where Tectia Server is
+  installed, it may fail when using PAM with software that uses that OpenSSL
+  library.
+  Workaround if FIPS is not used: Rename the libcrypto.so.0.9.8 existent under
+  /opt/tectia/sshlib to another name (note that this will make FIPS mode
+  unusable).
+
+(FB #9367)
+- Windows: If the installation fails with error message "An error occurred
+  during the installation of assembly component {B708EB72-AA82-3EB7-8BB0-
+  D845BAB35C93D}. HRESULT: 0x80070BC9" use Windows Update to install
+  required operating system updates.
+
+(FB #9106)
+- AIX: Executables are now compiled in 64 bit. For PAM to work, the operating
+  system should point to the 64-bit versions of PAM libraries instead of the
+  32-bit versions.
+
+(FB #9530)
+- All platforms: Extra checks are done when starting the Tectia Server and
+  Connection Broker in the FIPS mode due to the OpenSSL FIPS cryptographic
+  library health check. This will lead to a noticeable delay in the start of
+  the process on slow machines.
+
+(FB #8826)
+- Windows: Users authenticated with a public key cannot access Network
+  DFS shares that are in a different box than where the Tectia server is
+  running.
+  Workaround: Use password cache.
+
+(FB #4699)
+- AIX: Due to IBM's bug IZ02631, a servant may deadlock under heavy stress.
+  IBM has a fix for AIX 5.3 and AIX 6.1.
+
+(FB #4705)
+- Linux SE: If the common package is installed with SElinux disabled, the
+  following warning message will be given during the installation:
+    /usr/bin/chcon: can't apply partial context to unlabeled file
+    /opt/tectia/lib/shlib/libicudata.so.40
+    /usr/bin/chcon: can't apply partial context to unlabeled file
+    /opt/tectia/lib/shlib/libicuuc.so.40
+  This can be safely ignored. However, if the SElinux enforcing is enabled
+  after the installation, the following command needs to be executed:
+    /usr/bin/chcon -t textrel_shlib_t /opt/tectia/lib/shlib/*.so
+
+(RQ #19164)
+- Linux RedHat 3: The pam_krb5 module supplied with Red Hat Linux 3 will
+  not work with Tectia Server when configured with
+  pam-calls-with-commands=yes as pam_krb5 requires pam_authenticate() to be
+  called before pam_setcred().
+
+(RQ #19080)
+- AIX: Authentication may fail for LDAP accounts when verifying login
+  permissions.
+  This is caused by an error in AIX system libraries when trying to retrieve
+  password expiration information for an LDAP user and is addressed by IBM APAR
+  IZ46727 (registration required):
+   http://www-01.ibm.com/support/docview.wss?uid=isg1IZ46727
+
+(RQ #18818)
+- Windows XP: Connections may fail when receiving more than 10 concurrent
+  connections. This is a known limitation in Windows XP. More information
+  available in the following Microsoft knowledge base article:
+  http://support.microsoft.com/kb/314882.  Windows XP is a client operating
+  system not intended for server purposes. For best performance and
+  availability we recommend running Tectia Server on Windows Server editions.
+
+(RQ #18437)
+- Windows: Tectia Server doesn't support other than ISO Latin 1
+  character sets in folder names for storing troubleshooting logs.
+
+(RQ #18307)
+- All platforms: The file transfer with WinSCP 3.6 might fail when the file
+  transfer is resumed.
+
+(RQ #18211)
+- All platforms: If the server configuration has one or more selectors in
+  the <connections> block listing specific ciphers, and the client does not
+  match the selector, it is still allowed the default ciphers. This is
+  because there is no implicit deny-rule in the <connections> block (the
+  behavior is different from the <authentication-methods> block).
+
+(RQ #18084)
+- Unix: All installed Tectia products must be upgraded to 6.0.2 at the
+  same time.  If some packages are left to 6.0.1 or older version, they will
+  stop working when the 6.0.2 common package is installed.
+
+(RQ #17626)
+- Windows: On Windows, Tectia Server does not support GW mode for
+  connecting to other Secure Shell servers.
+
+(RQ #17604)
+- All platforms: Files larger then 4GB cannot be transferred to or from
+  Tectia Server when using the OpenSSH 'scp' command.
+  Workaround: The files can be transferred using scpg3 or sftpg3.
+
+(RQ #17271)
+- Solaris x86-64: RSA SecurID cannot be used with Tectia Server on
+  Solaris x86-64, because RSA SecurID offers only a 32-bit PAM library.
+  Tectia Server expects a 64-bit pam_securid.so.
+
+(RQ #17170)
+- Solaris 10: Tectia Server and the FTP/SFTP conversion component of
+  Tectia Client with EFT Expansion Pack need to be uninstalled separately
+  from each local zone, if they have been installed to all zones by
+  installing into the global zone.
+
+(RQ #17055)
+- Solaris: Installation packages do not detect the underlying Solaris
+  architecture to prevent installation of the x86-64 packages on x86
+  architecture. The packages can be installed but they will not work.
+
+(RQ #16986)
+- Windows: SFTP 'chmod' command is not supported against Tectia Server
+  running on Windows.
+
+(RQ #16410)
+- Solaris 10: Tectia Server and the FTP-SFTP conversion component of
+  Tectia ConnectSecure need to be uninstalled separately from each local
+  zone, if they got installed to all zones by installing into the global
+  zone.
+
+(RQ #16342)
+- All platforms: OpenSSH keys are not accepted as host keys, when running
+  the server in FIPS mode.
+
+(RQ #16285)
+- AIX: When trying to log in to an AIX server using an account which has an
+  expired password, the client returns the following error message:
+  "Request exec channel error: Disconnected by application." The reason
+  for the disconnection is, however, logged correctly in the server's log.
+
+(RQ #16080)
+- Windows: The Server reports a "Wrong password" message to the event log
+  even though the correct password is given, but the account has expired.
+
+(RQ #15976)
+- Windows: Users without administrator rights cannot use file transfer with
+  the default Windows 2003 ACL settings.
+
+(RQ #15973)
+- All platforms: The certificate validation path construction from LDAP
+  fails, if the LDAP server requires suffix ';binary' for the PKI binary blob
+  attribute names.
+
+(RQ #15874)
+- Linux: If a user account has expired, the Server incorrectly asks the
+  user to change the password and then denies login.
+
+(RQ #15819)
+- Solaris: Quality checks for password changes (e.g. password length,
+  characters etc.) enforced by PAM will only be enforced when using PAM
+  authentication. When changing passwords via forced commands (i.e. when
+  using authentication methods other than keyboard-interactive PAM), the
+  Tectia Server will not enforce PAM-related password quality checks.
+
+(RQ #15807)
+- Windows: If a non-admin user tries to start the server, the server
+  reports error message "Failed to access service manager".
+
+(RQ #15711)
+- Windows: All well-known security identifiers ('Everyone' and
+  'Authenticated Users', for instance) are not shown in the Tectia Server
+  Configuration GUI's directory object picker when browsing groups for a
+  selector.
+
+(RQ #15627)
+- Unix: Currently it is not possible to allow X11 forwarding when terminal
+  connections are denied.
+
+(RQ #15393)
+- Windows: Installing PGP Desktop 9.5.2 and Tectia Server on the same
+  Windows machine will cause the one installed earlier not to work.
+
+(RQ #15228)
+- All platforms: File transfers of files larger than 4kb using Net:SFTP and
+  Net::SSH::Perl fail against Tectia Server.
+  Workaround is documented at http://www.cpanforum.com/threads/2092.
+  The workaround involves lowering the value of COPY_SIZE in the SFTP.pm perl
+  module from 8192 to 4063 or lower.
+
+(RQ #15016)
+- HP-UX: Shadow passwords are not supported on HP-UX when using the
+  password authentication method. Shadow passwords can be used on HP-UX only
+  with keyboard-interactive PAM authentication, with the appropriate PAM
+  configuration.
+
+(RQ #14973)
+- Windows: The Server reports "Wrong password" message to the event log
+  even though the correct password is given, if the account is locked.
+
+(RQ #14762)
+- Windows: Currently it is not possible to see and select Active Directory
+  universal groups in the User Group Selector dialog of the configuration
+  tool GUI. However, universal groups can be used as selectors if those are
+  entered manually to the user group selector name field.
+
+(RQ #14672)
+- All platforms: It is possible to generate all lengths of RSA/DSA keys in
+  FIPS mode, although the Tectia Client/Server software will only accept
+  keys compliant with FIPS.
+
+(RQ #14259)
+- AIX: The Server hangs after a few authentication tries when the following
+  value is set in the /etc/security/user file:
+  SYSTEM='KRB5Files or compat'
+  The Server does not hang when the value is set to: SYSTEM='compat'
+
+(RQ #14197)
+- Windows: OpenSSH host keys are not accepted for use by the Server if it
+  is in FIPS mode.
+  Workaround: Convert the OpenSSH key to Tectia format using command:
+     ssh-keygen-g3 --import-private-key
+
+(RQ #14039)
+- Windows: Using rsync with Cygwin OpenSSH against Tectia Server fails
+  when using public-key authentication.
+
+(RQ #12576)
+- HP-UX 11.11: Attempting GSSAPI authentication can cause the
+  auths-gssapi-userproc-krb process to consume CPU and not exit after the
+  client disconnects. The GSSAPI authentication will be enabled if no
+  configuration file is found or if specifically enabled in the server
+  configuration. The HP-UX patch PHSS_35381 fixes this issue. GSSAPI needs to
+  be disabled in the server configuration, if installing the patch is not an
+  option.
+
+(RQ #12517)
+- Unix: Canceling user authentication when Tectia Server has been
+  configured with keyboard-interactive authentication method, causes
+  authentication to fail with "Server responded 'Unexpected response
+  packet'".
+
+(RQ #11836)
+- All platforms: After changing the password on a Secure Shell server, but
+  before logging in with the new password, either the Connection Broker must be
+  restarted to close the previous connection, or the user must wait for the
+  connection to time out (by default 5 seconds). If this is not done, login
+  with the new password will not succeed.
+
+
+5.   Further Information
+------------------------
+
+  More information can be found on the man pages and in the Tectia manuals
+  that are also available at: http://www.ssh.com/services/online-resources/.
+
+  Additional licenses can be purchased from our online store at:
+  http://www.ssh.com/.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="endpointcheck">
+<label/>
+<label>End point identity for host "%%%SERVERHOST%%%" does not match.</label>
+<label> </label>
+<label>Certificate:</label>
+%%%CERTDESCRIPTION%%%
+<label> </label>
+<select1 ref="endpointcheck">
+<label>Please select how you want to proceed.</label>
+<item>
+  <label>Cancel the connection.</label>
+  <value>cancel</value>
+</item>
+<item>
+  <label>Accept host identity.</label>
+  <value>accept</value>
+</item>
+<value>cancel</value>
+</select1>
+</form>

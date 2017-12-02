@@ -1,0 +1,215 @@
+.TH ssh-scepclient-g3 1 "16 June 2017"  
+.SH NAME
+ssh-scepclient-g3 \- SCEP enrollment client
+.SH SYNOPSIS
+ssh-scepclient-g3 command [options] access [name]
+.PP
+.nf
+Where command is one of the following:
+     GET\-CA
+     GET\-CHAIN
+     ENROLL psk keypair template
+
+Most commands can accept the following options:
+     \-o prefix       Save result into files with prefix.
+     \-S url          Use this socks server to access CA.
+     \-H url          Use this HTTP proxy to access CA.
+
+The following identifiers are used to specify options:
+     psk      \-p key (used as revocationPassword or challengePassword)
+     keypair  \-P url (private\-key URL)
+     ca       \-C file (CA certificate file)
+              \-E file (RA encryption certificate file)
+              \-V file (RA validation certificate file)
+     template \-T file (certificate template)
+              \-s subject\-ldap[;type=value]
+              \-u key\-usage\-name[;key\-usage\-name]
+              \-U extended\-key\-usage\-name[;extended\-key\-usage\-name]
+     access   URL where the CA listens for requests.
+
+GET\-CA and GET\-CHAIN take name argument, that is something
+interpreted by the CA to specify a CA entity managed by the responder.
+
+Key URLs are either valid external key paths or in the format:
+     "generate://savetype:password@keytype:size/save\-file\-prefix"
+     "file://savetype:password@/file\-prefix"
+     "file://passphrase/file\-prefix"
+     "file:/file\-prefix"
+     "key\-filename"
+
+The "keytype" for the SCEP protocol has to be "rsa".
+
+The key generation "savetype" can be:
+ \- ssh2 (Secure Shell 2 key type)
+ \- ssh1 (Legacy Secure Shell 1 key type)
+ \- ssh  (Tectia proprietary crypto library format, passphrase\-protected)
+ \- pkcs1 (PKCS#1 format)
+ \- pkcs8s (passphrase\-protected PKCS#8, "shrouded PKCS#8")
+ \- pkcs8 (plain\-text PKCS#8)
+ \- x509 (Tectia proprietary X.509 library key type)
+.fi
+.SH DESCRIPTION
+The ssh\-scepclient\-g3 command-line tool is a 
+certificate enrollment client that uses the SCEP protocol. It can generate 
+an RSA public-key pair and get certificates for its public components. The 
+SCEP protocol was developed by Cisco and Verisign to be used on Cisco 
+routers. Nowadays most CA platforms support this protocol for client 
+certificate enrollment.
+.SH COMMANDS
+The ssh\-scepclient\-g3 command-line command keywords are listed below. 
+Shorthands longer than three letters can be used to identify the 
+command. The commands are case-insensitive. The user must specify the CA 
+address URL for each command. Here the term "user" refers to a user, 
+program, or hardware device.
+.TP 
+\fBGET\-CA\fR
+Requests CA or RA certificate download from the CA, and display the 
+certificate fingerprint for CA validation. Fingerprints should be 
+received from the CA using some out-of-band mechanism.
+.TP 
+\fBGET\-CHAIN\fR
+Requests certificate chain from the CA/RA to the top-level CA.
+.TP 
+\fBENROLL\fR
+Requests a new certificate from the CA. The CA will authorize the 
+request using some out-of-band mechanism, or it can contain a 
+password received from the CA.
+.SH OPTIONS
+.TP 
+\fB\-o \fR\fIprefix\fR
+Saves output certificates into files with the given prefix. The prefix 
+is first appended by a number, followed by the file extension 
+\&.ca for CA certificates or .crt for user certificates.
+.TP 
+\fB\-S \fR\fIurl\fR
+Specifies the SOCKS URL if the CA is located behind a SOCKS-enabled 
+firewall. The format of the URL is: 
+socks://[username@]server[:port][/network/bits[,network/bits]]
+.TP 
+\fB\-H \fR\fIurl\fR
+Uses the given HTTP proxy server to access the CA. The format of the 
+URL is: http://server[:port]/.
+.PP
+The usage line uses the following meta commands:
+.TP 
+\fBpsk\fR
+The pre-shared key given by the CA or RA, or a revocation password 
+invented by the client and provided to the CA when the user wishes to 
+revoke the certificate issued. The type and need for this depends on the 
+PKI platform used by the CA.
+.RS 
+.TP 
+\fB\-p \fR\fIkey\fR
+An authentication password or a revocation password transferred 
+(in encrypted format) to the CA for certification request or revocation 
+request authorization purposes.
+.RE
+.TP 
+\fBkeypair\fR
+The subject key pair to be certified.
+.RS 
+.TP 
+\fB\-P \fR\fIurl\fR
+URL specifying the private key location. This is an external 
+key URL whose format is specified in \fBssh-cmpclient-g3\fR(1).
+.RE
+.TP 
+\fBca\fR
+The CA/RA certificates.
+.RS 
+.TP 
+\fB\-C\fR \fIfile\fR
+When performing enrollment, reads the CA certificate from the 
+given file path.
+.TP 
+\fB\-E\fR \fIfile\fR
+Optionally specifies the RA encryption certificate.
+.TP 
+\fB\-V\fR \fIfile\fR
+Optionally specifies the RA signing certificate.
+.RE
+.TP 
+\fBtemplate\fR
+The subject name and flags to be certified.
+.RS 
+.TP 
+\fB\-T\fR \fIfile\fR
+The file containing the certificate used as the template for the 
+operation. Values used to identify the subject are read from this, but 
+the user may overwrite the key, key-usage flags, or subject names.
+.TP 
+\fB\-s\fR \fIsubject-ldap[;type=value]*\fR
+A subject name in reverse LDAP format, that is, the most general 
+component first, and alternative subject names. The name 
+subject-ldap will be copied into the request verbatim.
+
+A typical choice would be a DN in the format 
+"C=US,O=SSH,CN=Some Body", but in principle this can be 
+anything that is usable for the resulting certificate.
+
+The possible type values are ip, 
+email, dn, dns, uri, 
+and rid.
+.TP 
+\fB\-u \fR\fIkey-usage-name[;key-usage-name]*\fR
+Requested key usage purpose code. The following codes are recognized: 
+digitalSignature, nonRepudiation, 
+keyEncipherment, dataEncipherment, 
+keyAgreement, keyCertSign, cRLSign, 
+encipherOnly, decipherOnly, and help. 
+The special keyword help lists the supported key usages which are defined 
+in \fIRFC 3280\fR.
+.TP 
+\fB\-U \fR\fIextended-key-usage-name[;extended-key-usage-name]*\fR
+Requested extended key usage code. The following codes, in addition 
+to user-specified dotted OID values are recognized: serverAuth, 
+clientAuth, codeSigning, 
+emailProtection, timeStamping, 
+ikeIntermediate, and smartCardLogon.
+.RE
+.TP 
+\fBaccess\fR
+Specifies the address of the CA in URL format. If the host address is an IPv6 
+address, it must be enclosed in brackets (http://[IPv6-address]:port/).
+.TP 
+\fBname\fR
+Specifies the destination CA name.
+.SH EXAMPLES
+In the following example we first receive the CA certificate. The CA 
+address is pki.ssh.com, the port is 8080, and the 
+CA name is test-ca1.ssh.com.
+.PP
+.nf
+$ ssh\-scepclient\-g3 GET\-CA \\ 
+   \-o ca http://pki.ssh.com:8080/scep/ \\
+   test\-ca1.ssh.com
+
+Received CA/RA certificate ca\-0.ca:
+
+fingerprint 9b:96:51:bb:29:0d:c9:e0:75:c8:03:0d:0d:92:60:6c
+.fi
+.PP
+Next, we enroll an RSA certificate. The user is authenticated to the CA 
+with the key ssh. The subject name and alternative IP address 
+are given, as well as key-usage flags.
+.PP
+.nf
+$ ssh\-scepclient\-g3 ENROLL \\
+    \-C ca\-0.ca \-p ssh \\
+    \-o subject \-P generate://pkcs8:ssh@rsa:2048/subject \\
+    \-s 'C=FI,O=SSH,CN=SCEP Example;IP=1.2.3.4' \\
+    \-u digitalsignature \\
+    http://pki.ssh.com:8080/scep/
+
+Received user certificate subject\-0.crt: 
+fingerprint 4b:7e:d7:67:27:5e:e0:54:2f:5b:56:69:b5:01:d2:15
+$ ls subject*
+subject\-0.crt   subject.prv
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-cmpclient-g3\fR(1),
+\fBssh-certview-g3\fR(1)

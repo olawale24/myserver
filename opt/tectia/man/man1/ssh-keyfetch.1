@@ -1,0 +1,227 @@
+.TH ssh-keyfetch 1 "16 June 2017"  
+.SH NAME
+ssh-keyfetch \- Host key tool for the Secure Shell client
+.SH SYNOPSIS
+.ad l
+\fBssh\-keyfetch\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR]\&...
+.br
+[\fBhost\fR]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-keyfetch 
+is a tool that downloads server host keys and optionally sets them as 
+known host keys for the Secure Shell client. It is typically used by the 
+system administrator during the initial setup phase. 
+.PP
+By default the host key is fetched from the server and saved in file 
+\fBkey_\fR\fIhost_port\fR\fB.suffix\fR 
+in the current directory.
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-a, \-\-set\-trusted \fR
+Instead of writing the public key to a file, add the public key as a 
+known host key to the user-specific directory: 
+$HOME/.ssh2/hostkeys. 
+This option cannot be combined with \fB\-C\fR or \fB\-K\fR. 
+.RS 
+\fBCaution\fR
+
+When ssh\-keyfetch is run with the 
+\fB\-a\fR option, it accepts the received host keys 
+automatically without prompting the user. You should verify the validity 
+of keys by verifying the key fingerprints after receiving them or you risk 
+being subject to a man-in-the-middle attack. 
+
+To validate the host key, obtain the host key fingerprint from a 
+trusted source (for example by calling the server administrator) and 
+verify it against the output from command:
+
+.nf
+ssh\-keygen\-g3 \-\-fingerprint <hostname>
+.fi
+.RE
+.TP 
+\fB\-A, \-\-fetch\-any \fR
+Probe for and fetch either server public key or certificate.
+.TP 
+\fB\-C, \-\-fetch\-certificate \fR
+Probe for and fetch the server certificate only.
+.TP 
+\fB\-d, \-\-debug \fR\fIdebug-level\fR 
+Enable debugging.
+.TP 
+\fB\-D, \-\-debug\-default \fR
+Enable debugging with default level.
+.TP 
+\fB\-f, \-\-filename\-format \fR\fInameformat\fR
+Filename format for known host keys. Accepted values are
+\fIplain\fR and
+\fIhashed\fR. The default is \fIplain\fR.
+.TP 
+\fB\-F, \-\-fingerprint\-type \fR[ \fB=babble\fR | \fBbabble\-upper\fR | \fBpgp\-2\fR | \fBpgp\-5\fR | \fBhex\fR | \fBhex\-upper\fR ]
+Public key fingerprint type for fingerprints displayed in messages and
+log. Most popular types are \fIbabble\fR (the SSH
+babble format) and \fIhex\fR. The default is
+\fIbabble\fR. See also the option \fB\-\-rfc4716\fR.
+.TP 
+\fB\-H, \-\-hash\fR \fB=md5\fR\fBsha1\fR 
+Specifies the digest algorithm for fingerprint generation.
+Valid options are \fBmd5\fR and \fBsha1\fR.
+.TP 
+\fB\-K, \-\-kex\-key\-formats \fR\fItypelist\fR
+Explicitly specify the host-key types accepted in protocol key
+exchange. For experts only. See RFC 4253 for details.
+.TP 
+\fB\-l, \-\-log \fR
+Report successfully received keys in log format. The log format
+consists of one line per key, six fields per line. The fields are:
+.RS 
+.TP 0.2i
+\(bu
+accept|save
+.TP 0.2i
+\(bu
+replace|append
+.TP 0.2i
+\(bu
+hostname
+.TP 0.2i
+\(bu
+ip-port
+.TP 0.2i
+\(bu
+user-id
+.TP 0.2i
+\(bu
+key-file-path
+.TP 0.2i
+\(bu
+fingerprint
+.RE
+
+.TP 
+\fB\-o, \-\-output\-file \fR\fIoutput-file\fR
+Write result to \fIoutput-file\fR. A minus
+sign ("\fB\-\fR") denotes standard output.
+.TP 
+\fB\-O, \-\-output\-directory \fR\fIoutput-dir\fR
+Write result to \fIoutput-dir\fR. The default is 
+the current directory.
+.TP 
+\fB\-p, \-\-port \fR\fIport\fR
+Server port (default: \fI22\fR).
+.TP 
+\fB\-P, \-\-fetch\-public\-key \fR
+Probe for and fetch the server public key only. This is the default behaviour.
+.TP 
+\fB\-q, \-\-quiet \fR
+Quiet mode, report only errors.
+.TP 
+\fB\-R, \-\-rfc4716\fR
+Displays the public key fingerprints in the format specified in RFC 4716.
+The digest algorithm (hash) is md5, and the output format is the 16-bytes
+output in lowercase HEX separated with colons (:).
+.TP 
+\fB\-S, \-\-proxy\-url \fR\fIsocks-url\fR
+Specifies the SOCKS server to use.
+.TP 
+\fB\-t, \-\-timeout \fR\fItimeout\fR
+Connection timeout in seconds (default: \fI10\fR seconds).
+.TP 
+\fB\-\-append\fR \fB=yes\fR\fBno\fR 
+Instead of appending a new host key, overwrite the existing known
+host keys for this host. Optional values are \fByes\fR and 
+\fBno\fR. The default is to append. 
+.TP 
+\fB\-V, \-\-version\fR
+Displays version string and exits.
+.SH "ENVIRONMENT VARIABLES"
+.TP 
+SSH_SOCKS_SERVER
+The address of the SOCKS server used by ssh\-keyfetch.
+.SH EXAMPLES
+Connect to the server through a SOCKS proxy:
+.PP
+.nf
+$ ssh\-keyfetch \-S socks://fw.example.com:1080/10.0.0.0/8 server.outside.example
+Public key from server.outside.example:22 saved.
+ File: server.outside.example.pub
+ Fingerprint: xucar\-bened\-liryt\-lumup\-minad\-tozuc\-pesyp\-vafah\-mugyd\-susic\-guxix
+.fi
+.PP
+Accept the server key as a known key for Tectia Client and
+report in the more rigid log format:
+.PP
+.nf
+$ ssh\-keyfetch \-a \-l  newhost
+Accepted newhost 22 testuser /home/testuser/.ssh2/hostkeys/key_22_newhost.pub 
+xigad\-hozuf\-kykek\-vogid\-dumid\-bydop\-mulym\-zegar\-nybuv\-muled\-syxyx
+.fi
+.PP
+Accept the server key as a known key for Tectia Client/Server and
+store the key to global configuration \fBhostkeys\fR directory:
+.PP
+.nf
+$ ssh\-keyfetch \-a \-\-output\-directory /etc/ssh2/hostkeys 
+Accepted newhost 22 testuser /etc/ssh2/hostkeys/key_22_anotherhost.pub 
+bydop\-mulym\-zegar\-nybuv\-muled\-syxyx\-xigad\-hozuf\-kykek\-vogid\-dumid
+.fi
+.PP
+Accept the server key as a known key for Tectia Client and
+use an uninformative hash as the filename for the stored known key:
+.PP
+.nf
+$ ssh\-keyfetch \-f hashed \-a  newhost
+Public key from newhost:22 accepted as trusted hostkey.
+ File:
+ /home/testuser/.ssh2/hostkeys/keys_420b23ca959ab165e52e117a90baa89d92ffc535
+ Fingerprint:
+ xigad\-hozuf\-kykek\-vogid\-dumid\-bydop\-mulym\-zegar\-nybuv\-muled\-syxyx
+.fi
+.PP
+Fetch the X.509 certificate of the server running in port 222
+and display the content with ssh\-certview:
+.PP
+.nf
+$ ssh\-keyfetch \-C \-p 222 \-o \- newhost | ssh\-certview \-
+Certificate = 
+  SubjectName = <C=FI, O=SSH, OU=DEV, CN=newhost.ssh.com>
+  IssuerName = <C=FI, O=SSH, CN=Sickle CA>
+  SerialNumber= 24593438
+  Validity = 
+    NotBefore = 2007 Sep 13th, 15:10:00 GMT
+    NotAfter  = 2008 Sep 12th, 15:10:00 GMT
+  PublicKeyInfo = 
+    PublicKey =
+      Algorithm = RSA
+      Modulus n  (1024 bits) :
+\&...
+  Fingerprints = 
+    MD5 = 3c:71:17:9b:c2:12:26:cf:96:27:fb:d7:a8:19:37:89
+    SHA\-1 =
+    14:72:f3:0f:20:5e:75:ed:d2:c3:86:4b:69:45:00:47:ae:fe:31:64
+.fi
+.PP
+This explicit key exchange type list is equivalent to specifying
+option \fB\-A\fR:
+
+.nf
+$ ssh\-keyfetch \-K ssh\-rsa,ssh\-dss,x509v3\-sign\-rsa,x509v3\-sign\-dss newhost 
+Public key from newhost:22 saved.
+ File: key_newhost_22.pub
+ Fingerprint:
+ xigad\-hozuf\-kykek\-vogid\-dumid\-bydop\-mulym\-zegar\-nybuv\-muled\-syxyx
+.fi
+
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBsshg3\fR(1), 
+\fBssh-keygen-g3\fR(1)

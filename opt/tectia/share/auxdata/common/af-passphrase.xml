@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="passphrase">
+<label></label>
+<!-- BEGIN BLOCK: KEY PATH -->
+<label>Key path: %%%VALUE%%%</label>
+<!-- END BLOCK: KEY PATH -->
+<!-- BEGIN BLOCK: KEY LABEL -->
+<label>Key label: %%%VALUE%%%</label>
+<!-- END BLOCK: KEY LABEL -->
+<!-- BEGIN BLOCK: KEY FILE -->
+<label>File name: %%%VALUE%%%</label>
+<!-- END BLOCK: KEY FILE -->
+<!-- BEGIN BLOCK: TOKEN LABEL -->
+<label>Token label: %%%VALUE%%%</label>
+<!-- END BLOCK: TOKEN LABEL -->
+<!-- BEGIN BLOCK: TOKEN MANUFACTURER -->
+<label>Manufacturer: %%%VALUE%%%</label>
+<!-- END BLOCK: TOKEN MANUFACTURER -->
+<secret ref="passphrase">
+<label>Passphrase for the private key</label>
+<send submission="ok" />
+</secret>
+<submit ref="ok" >
+<label>OK</label>
+</submit>
+<submit ref="cancel" >
+<label>Cancel</label>
+</submit>
+</form>

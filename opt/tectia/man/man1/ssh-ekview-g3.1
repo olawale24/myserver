@@ -1,0 +1,52 @@
+.TH ssh-ekview-g3 1 "16 June 2017"  
+.SH NAME
+ssh-ekview-g3 \- external key viewer
+.SH SYNOPSIS
+.ad l
+\fBssh\-ekview\-g3\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR]\&... \fBprovider\fR 
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+The ssh\-ekview\-g3 program allows 
+you to export certificates from external key providers. You 
+can further study these certificates with ssh\-certview\-g3.
+.PP
+This is useful when you want to generate, for example, entries for 
+allowing certificate authentication in the ssh-server-config.xml 
+file. You might need to know the subject names on the certificate.
+.PP
+With ssh\-ekview\-g3, you can export the certificate and 
+get the information you need from the certificates with ssh\-certview\-g3.
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-h\fR
+Displays a short help.
+.TP 
+\fB\-i \fR\fIinfo\fR
+Uses \fIinfo\fR as the 
+initialization string for the provider.
+.TP 
+\fB\-k\fR
+Prints the key paths only.
+.TP 
+\fB\-e \fR\fIkeypath\fR
+Exports certificates at 
+\fIkeypath\fR to files.
+.TP 
+\fB\-a\fR
+Exports all found certificates to files.
+.TP 
+\fB\-b \fR\fIbase\fR
+Uses \fIbase\fR when printing 
+integers. For example, the decimal 10 is 'a' in base-16.
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-certview-g3\fR(1), 
+\fBssh-server-config\fR(5) 

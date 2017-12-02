@@ -1,0 +1,527 @@
+.TH ssh-server-g3 8 "16 June 2017"  
+.SH NAME
+ssh-server-g3 \- Secure Shell server - Generation 3
+.SH SYNOPSIS
+.ad l
+\fBssh\-server\-g3\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fB\-4\fR] [\fB\-6\fR] [\fB\-D, \-\-debug=\fR \fBLEVEL\fR] [\fB\-f, \-\-config\-file=\fR \fBFILE\fR] [\fB\-H, \-\-hostkey=\fR \fBFILE\fR]
+.br
+[\fB\-l, \-\-listen=\fR[\fBADDRESS:\fR] \fBPORT\fR ] [\fB\-n, \-\-num\-processes=\fR \fBNUM\fR]
+.br
+[\fB\-\-auxdata\-path=\fR \fBPATH\fR] [\fB\-\-fips\-mode\fR
+[
+\fB=yes\fR | \fBno\fR 
+]
+]
+.br
+[\fB\-\-libexec\-path=\fR \fBPATH\fR] [\fB\-\-max\-num\-processes=\fR \fBNUM\fR] [\fB\-\-plugin\-path=\fR \fBPATH\fR]
+.br
+[\fB\-V, \-\-version\fR] [\fB\-h, \-\-help\fR]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-server\-g3 is the Secure Shell server program for Tectia Server.
+.PP
+The ssh\-server\-g3 command should not be used 
+directly, except for debugging purposes. Use instead the startup script 
+with the same name, ssh\-server\-g3. 
+.PP
+The path to the ssh\-server\-g3 startup script varies 
+between operating systems:
+.TP 0.2i
+\(bu
+On Linux and Solaris: 
+
+.nf
+# /etc/init.d/ssh\-server\-g3 [command]
+.fi
+.TP 0.2i
+\(bu
+On HP-UX:
+
+.nf
+# /sbin/init.d/ssh\-server\-g3 [command]
+.fi
+.PP
+In the command-line startup scripts, the \fBcommand\fR can 
+be either start, stop, 
+restart, or reload:
+.TP 
+start
+Start the server.
+.TP 
+stop
+Stop the server. Existing connections stay open until closed 
+from the client side.
+.TP 
+restart
+Start a new server process. Existing connections stay open 
+using the old server process. The old process is closed after the 
+last old connection is closed from the client side.
+.TP 
+reload
+Reload the configuration file. Existing connections stay 
+open.
+.PP
+On AIX platforms, use the System Resource Controller (SRC) of the 
+operating system to stop and start the server process manually.
+.PP
+To start Tectia Server on AIX, enter command:
+.PP
+.nf
+startsrc \-s ssh\-tectia\-server
+.fi
+.PP
+To stop Tectia Server on AIX, enter command:
+.PP
+.nf
+stopsrc \-s ssh\-tectia\-server
+.fi
+.PP
+On AIX, using startsrc starts two ssh-server-g3
+processes. One process is so-called service launcher that interfaces
+with the SRC and the actual SSH server process. By using a separate
+service launcher, the SRC is able to start a new server process in the
+case that old server process has been stopped but it is still
+serving open connections.
+.SH OPTIONS
+When the ssh\-server\-g3 command is used directly, it 
+accepts the following options:
+.TP 
+\fB\-4\fR
+Accepts only IPv4 connections and works in IPv4 mode.
+.TP 
+\fB\-6\fR
+Accepts only IPv6 connections and works in IPv6 mode.
+.TP 
+\fB\-D, \-\-debug=\fR\fILEVEL\fR
+Sets the debug level string to \fILEVEL\fR.
+.TP 
+\fB\-f, \-\-config\-file=\fR\fIFILE\fR
+Reads the Tectia Server configuration file from 
+\fIFILE\fR instead of the default location.
+.TP 
+\fB\-H, \-\-hostkey=\fR\fIFILE\fR
+Specifies the host key file to be used.
+.TP 
+\fB\-l, \-\-listen=\fR [\fBADDRESS:\fR] \fBPORT\fR
+Specifies the listen address and port. If 
+\fIADDRESS\fR is unspecified, listen on any IP 
+address. If IPv6 address is used, the address must be inside brackets, for 
+example, \fB[::1]\fR. 
+.TP 
+\fB\-n, \-\-num\-processes=\fR\fINUM\fR
+Sets the number of Servant processes to \fINUM\fR.
+This value defines also the maximum number of Servants that the master server is allowed to 
+have running at a time.
+.TP 
+\fB\-\-auxdata\-path=\fR\fIPATH\fR
+Sets the path to the auxiliary data directory.
+.TP 
+\fB\-\-fips\-mode\fR [ \fB=yes\fR | \fBno\fR ]
+When set to \fByes\fR, uses the FIPS mode for the 
+cryptographic library. When set to \fBno\fR, uses the standard 
+mode for the cryptographic library. If the option is given without the 
+\fByes|no\fR argument, \fByes\fR is assumed. If the 
+option is not given at all on the command line, the mode specified in the 
+\fBssh\-server\-config.xml\fR file is used (by default, the standard 
+mode).
+.TP 
+\fB\-\-libexec\-path=\fR\fIPATH\fR
+Sets the path to the \fBlibexec\fR directory.
+.TP 
+\fB\-\-max\-num\-processes=\fR\fINUM\fR
+Sets the maximum number of Servant processes to \fINUM\fR.
+.TP 
+\fB\-\-plugin\-path=\fR\fIPATH\fR
+Sets the path to the plugin directory.
+.TP 
+\fB\-V, \-\-version\fR
+Displays program version and exits.
+.TP 
+\fB\-h, \-\-help\fR
+Displays a short summary of command-line options and exits.
+.SH "LOGIN PROCESS"
+When a user logs in successfully, ssh\-server\-g3 does the 
+following:
+.TP 0.4i
+1.
+Changes process to run with normal user privileges.
+.TP 0.4i
+2.
+Sets up the basic environment.
+.TP 0.4i
+3.
+\fI(On Solaris)\fR Reads \fB/etc/default/login\fR, if it exists.
+.TP 0.4i
+4.
+Reads \fB/etc/environment\fR, if it exists.
+.TP 0.4i
+5.
+Reads \fB$HOME/.ssh2/environment\fR, if it exists.
+
+Note that setting the environment variables included in this file on the client side 
+must be allowed in the Tectia Server configuration using the
+\fBservices/rule/environment\fR element
+(see the \fBssh\-server\-config(5)\fR man page).
+.TP 0.4i
+6.
+Changes to the user's home directory.
+.TP 0.4i
+7.
+Checks for RC files and runs it from the user's home 
+directory (by default \fB$HOME/.ssh2/rc\fR) or, if that does 
+not exist, runs \fB/etc/ssh2/sshrc\fR. Any RC file stored in 
+the user's home directory will be run with the user's shell, and any global 
+RC file will be run with \fB/bin/sh\fR.
+.TP 0.4i
+8.
+Runs the user's shell, or the specified command or subsystem.
+.SH "ENVIRONMENT VARIABLES"
+Upon connection, Tectia Server will automatically set a number of environment 
+variables that can be used by Secure Shell clients. The clients can also 
+set or change the value of the environment variables if allowed by the 
+server configuration (\fBssh\-server\-config.xml\fR). The following 
+variables are set by ssh\-server\-g3:
+.TP 
+\fBDISPLAY\fR
+The \fBDISPLAY\fR variable indicates the location of the 
+X11 server. It is automatically set by the server to point to a value of 
+the form \fBhostname:n\fR where \fBhostname\fR 
+indicates the host on which the server and the shell are running, and 
+\fBn\fR is an integer greater or equal than 1. Secure Shell 
+clients use this special value to forward X11 connections over the secure 
+channel. 
+.TP 
+\fBHOME\fR
+The user's home directory.
+.TP 
+\fBLOGNAME\fR
+Synonym for \fBUSER\fR; set for compatibility with 
+systems using this variable.
+.TP 
+\fBMAIL\fR
+The user's mailbox.
+.TP 
+\fBPATH\fR
+Set to the default PATH, depending on the operating system or, on some 
+systems, \fB/etc/environment\fR or \fB/etc/default/login\fR.
+.TP 
+\fBSSH_SOCKS_SERVER\fR
+The address of the SOCKS server used by the client.
+.TP 
+\fBSSH2_AUTH_SOCK\fR
+If this exists, it is used to indicate the path of a Unix-domain 
+socket used to communicate with the authentication agent (or its local 
+representative).
+.TP 
+\fBSSH2_CLIENT\fR
+Identifies the client end of the connection. The variable contains 
+three space-separated values: client IP address, client port number, and 
+server port number.
+.TP 
+\fBSSH2_ORIGINAL_COMMAND, SSH_ORIGINAL_COMMAND\fR
+This will be the original command given to the Secure Shell client 
+if a forced command is run. It can be used, for example, to fetch 
+arguments from the other end. This does not have to be a real command, it 
+can be the name of a file, device, parameters or anything else.
+.TP 
+\fBSSH2_TTY\fR
+This is set to the name of the tty (path to the device) associated 
+with the current shell or command. If the current session has no tty, 
+this variable is not set.
+.TP 
+\fBTERM\fR
+The terminal type of the Secure Shell client.
+.TP 
+\fBTZ\fR
+The time-zone variable is set to indicate the present time zone if 
+it was set when the server was started (the server passes the value to new 
+connections).
+.TP 
+\fBUSER\fR
+The name of the user.
+.SH FILES
+ssh\-server\-g3 uses the following files:
+.TP 
+\fB/etc/ssh2/ssh\-server\-config.xml\fR
+This is the ssh\-server\-g3 configuration file.
+The format of this file is described 
+on the 
+\fBssh-server-config\fR(5) 
+man page.
+.TP 
+\fB/etc/ssh2/hostkey[.pub]\fR
+These files are the default host key pair used by Tectia Server for 
+authenticating itself to the clients. A 2048-bit RSA key pair is 
+automatically generated during the installation. It consists of the private 
+key (\fBhostkey\fR) and the public key (\fBhostkey.pub\fR). 
+.TP 
+\fB/etc/ssh2/random_seed\fR
+This file is used for seeding the random number generator. This file 
+is created the first time the program is run and it is updated 
+automatically. You should never need to read or modify this file.
+.TP 
+\fB/etc/ssh2/trusted_hosts\fR
+This directory is for storing the client host public keys that are 
+trusted for host-based authentication.
+
+The public-key files should be named according to the following 
+pattern:
+
+.nf
+<hostname>.<keytype>.pub
+.fi
+
+In the key name, \fI<hostname>\fR is the hostname the
+client is sending to the server and \fI<keytype>\fR is the
+type of the public key (ssh-dss, ssh-rsa,
+ecdsa-sha2-nistp256, ecdsa-sha2-nistp384, or
+ecdsa-sha2-nistp521). For example, a key called
+\fIclient.example.com.ssh-dss.pub\fR is a DSS key that is trusted
+for login from the host \fIclient.example.com\fR. 
+.TP 
+\fB$HOME/.ssh2/authorized_keys\fR (user-specific)
+This directory is the default location used for the user public keys 
+that are authorized for login.
+.TP 
+\fB$HOME/.ssh2/authorization\fR (user-specific)
+This is the default file that lists the user public keys that are 
+authorized for login.
+
+Using the authorization file is optional. If the file does not exist, 
+Tectia Server looks for authorized keys in the 
+\fB$HOME/.ssh2/authorized_keys\fR directory, by default, or in 
+another authorized-keys directory defined in the Tectia Server configuration. 
+
+The authorization file contains a list of public key filenames each 
+preceded by the keyword \fBKey\fR, and each one on its own line. 
+All public keys listed in the authorization file are authorized for login. 
+An example file is shown below:
+
+.nf
+Key         mykey.pub
+.fi
+
+This directs Tectia Server to use \fB$HOME/.ssh2/mykey.pub\fR as a 
+valid public key when authorizing login.
+
+The files are by default assumed to be in the \fB$HOME/.ssh2\fR 
+directory, but also a path to the key file can be given. The path can be 
+absolute or relative to the \fB$HOME/.ssh2\fR directory. The directory 
+path can also contain a pattern string that is expanded by Tectia Server.
+
+The following pattern strings can be used:
+.RS 
+.TP 0.2i
+\(bu
+\fB%D\fR is the user's home directory
+.TP 0.2i
+\(bu
+\fB%U\fR is the user's login name
+.TP 0.2i
+\(bu
+\fB%IU\fR is the user's user ID (uid)
+.TP 0.2i
+\(bu
+\fB%IG\fR is the user's group ID (gid)
+.RE
+
+Examples of allowed key paths are shown below:
+
+.nf
+Key authorized_keys/key1.pub
+Key /tmp/key2.pub
+Key /usr/%U/key3.pub
+.fi
+
+Optionally, additional parameters can be specified for the keys by 
+using the \fBOptions\fR keyword. 
+See the section called "Authorization File Options" for more information.
+.TP 
+\fB$HOME/.ssh/authorized_keys\fR (user-specific)
+This is the default file used by OpenSSH server that contains the 
+user public keys that are authorized for login. It is supported also by 
+Tectia Server from version 5.1 onwards. The location of the file must be defined in 
+the \fBssh\-server\-config.xml\fR file by using the 
+\fBopenssh\-authorized\-keys\-file\fR attribute.
+See the
+\fBssh-server-config\fR(5)
+man page.
+
+The file contains public keys, one on each row, and options. The 
+format of each row is as follows:
+
+.nf
+options  keytype  base64\-encoded\-key  comment
+.fi
+
+Tectia Server supports all OpenSSH-style \fBauthorized_keys\fR file 
+options, except \fBpermitopen="host:port"\fR and 
+\fBtunnel="n"\fR. 
+
+For more information on the format of this file, see the OpenSSH
+\fBsshd\fR(8) 
+man page.
+.SH "AUTHORIZATION FILE OPTIONS"
+On the first line of the authorization file, you can optionally 
+specify the regular expression syntax that is used when parsing hostname 
+patterns in the \fBallow\-from\fR and \fBdeny\-from\fR 
+options (see below). The format of the first line is as follows:
+.PP
+.nf
+## REGEX\-SYNTAX egrep
+.fi
+.PP
+The value for the syntax can be \fBegrep\fR (default), 
+\fBssh\fR, \fBzsh_fileglob\fR, or 
+\fBtraditional\fR. The values are not case-sensitive.
+\fBzsh_fileglob\fR and \fBtraditional\fR are 
+synonymous.
+.RS 
+\fBNote\fR
+.PP
+The Tectia Server implementation of matching and parsing the patterns
+does not fully behave as egrep, because in the case of egrep
+and ssh REGEX syntax, Tectia Server encloses the pattern with ^(<existing_pattern>)$, and therefore the parsed string must have
+the same length as the text to match.
+.RE
+.PP
+For each key in the \fBauthorization\fR file, options 
+can be specified using the \fBOptions\fR keyword. This keyword, 
+if used, must follow the \fBKey\fR keyword above. Multiple 
+options must be specified as a comma-separated list on one line. Tectia Server 
+supports the following options: 
+.TP 
+\fBallow\-from\fR and \fBdeny\-from\fR
+In addition to public-key authentication, the canonical name of the 
+remote host must match the given pattern(s). 
+You can use a host name or an IP address to specify the remote host.
+Enter the host name or IP address with or without quotation marks.
+.RS 
+\fBNote\fR
+
+Because of Tectia Server's implementation for handling egrep
+REGEX syntax, when providing host names and IP addresses as pattern(s),
+use the escape character for periods, for instance host.example.com should
+be given as pattern host\\.example\\.com.
+.RE
+
+Specify one pattern per keyword; multiple keywords can be used. See 
+the example below.
+
+If you specify host names in the \fBallow\-from\fR or 
+\fBdeny\-from\fR options, ensure that you set the following attribute values in 
+the server configuration file \fBssh\-server\-config.xml\fR:
+.RS 
+.TP 0.2i
+\(bu
+\fBrequire\-dns\-match="yes"\fR under the \fBauth\-publickey\fR element
+.TP 0.2i
+\(bu
+\fBresolve\-client\-hostname="yes"\fR under the \fBsettings\fR element
+.RE
+
+These settings will prevent authentications from failing in case of 
+problems with DNS lookups and reverse mapping.
+.RS 
+\fBNote\fR
+
+The authorization file is read first to find the keys allowed 
+for authentication. The \fBdeny\-from\fR option will not work if 
+the key is stored in the \fBauthorized_files\fR directory or 
+other location later in the reading order defined by the 
+\fBauth\-publickey\fR element (see 
+\fBssh-server-config\fR(5)) 
+in \fBssh\-server\-config.xml\fR.
+.RE
+.TP 
+\fBcommand="command"\fR
+This is used to specify a "forced command" that will be executed on
+the server side instead of anything else when the user is
+authenticated. The command supplied by the user (if any) is put in
+the environment variable \fBSSH2_ORIGINAL_COMMAND\fR. The command
+is run on a pty if the connection requests a pty; otherwise it is run
+without a tty. Quotes may be used in the command if escaped
+with backslashes.
+
+This option is useful for restricting certain public keys to
+perform just a specific operation. An example might be a key that
+permits remote backups but nothing else. Notice that the client may
+specify TCP/IP and/or X11 forwarding, unless they are explicitly
+denied (see \fBno\-port\-forwarding\fR and \fBno\-x11\-forwarding\fR below).
+
+If terminal is explicitly allowed in the \fBssh\-server\-config.xml\fR 
+file, the forced command is run only when the user tries to run remote 
+commands. If the user requests a shell, he can get it normally and the 
+forced command is not run.
+
+If a forced command is defined in the \fBssh\-server\-config.xml\fR 
+file, it overrides any commands in the authorization files. The 
+configuration file might also allow only specific commands, or deny all 
+remote commands. These restrictions apply also to commands in the 
+authorization file.
+
+For more information on command restrictions in the configuration 
+file, see 
+the \fBssh-server-config\fR(5) 
+man page.
+.TP 
+\fBenvironment="NAME=value"\fR
+This option specifies that the string is to be added to the environment when 
+logging in using this key. Environment variables set this way override 
+other default environment values. Multiple options of this type are 
+permitted.
+.TP 
+\fBidle\-timeout="time"\fR
+This option sets idle timeout limit to time either in seconds 
+(\fBs\fR or nothing after the number), in minutes 
+(\fBm\fR), in hours (\fBh\fR), in days 
+(\fBd\fR), or in weeks (\fBw\fR). If the connection 
+has been idle (all channels) this long, the connection is closed.
+.TP 
+\fBno\-port\-forwarding\fR
+This option forbids TCP/IP forwarding when this key is used for 
+authentication. Any port forward (tunneling) requests by the client will 
+return an error. This is useful in combination with the 
+\fBcommand\fR option.
+.TP 
+\fBno\-x11\-forwarding\fR
+This option forbids X11 forwarding when this key is used for 
+authentication. Any X11 forward requests by the client will return an 
+error.
+.TP 
+\fBno\-agent\-forwarding\fR
+This option forbids authentication agent forwarding when this key is 
+used for authentication.
+.TP 
+\fBno\-pty\fR
+This option prevents tty allocation (a request to allocate a pty will 
+fail).
+.PP
+An example of an authorization file is shown below:
+.PP
+.nf
+## REGEX\-SYNTAX egrep
+
+# First key: login allowed only from the specified IP address
+Key     key1.pub
+Options allow\-from="10\\.1\\.100\\.1", command="echo FOOBAR", no\-x11\-forwarding
+
+# Second key: login allowed and denied only from the specified IP addresses 
+Key     key2.pub
+Options allow\-from="10\\.1\\.100\\.2", deny\-from="10\\.1\\.100\\.1"
+
+# Third key: forced command for doing a backup of the disk drive
+Key     key3.pub
+Options command="dd if=/dev/hda", no\-port\-forwarding, no\-x11\-forwarding
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-server-config\fR(5), 
+\fBssh-server-ctl\fR(8) 

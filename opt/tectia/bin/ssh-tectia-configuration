@@ -1,0 +1,46 @@
+#! /bin/sh
+#
+# Copyright (c) 2016 SSH Communications Security Corporation. 
+# This software is protected by international copyright laws. 
+# All rights reserved.
+#
+
+TECTIA_ENV_FILE=${TECTIA_ENV_FILE:-/etc/ssh2/tectia-env.sh}
+if test -f $TECTIA_ENV_FILE; then
+  . $TECTIA_ENV_FILE
+else
+  tectia_basedir=${tectia_basedir:-/opt/tectia}
+fi
+
+shlibdir="$tectia_basedir/lib/shlib"
+qtdir="$tectia_basedir/lib/qt"
+bindir="$tectia_basedir/libexec"
+
+SSH_TECTIA_CMD_NAME="ssh-tectia-configuration"
+export SSH_TECTIA_CMD_NAME
+
+command="${bindir}/ssh-tectia-configuration"
+
+if [ ! -d "$shlibdir" ]; then
+  echo "Required shared libraries (\"$shlibdir\") not found" >&2
+  exit 2
+fi
+
+if [ ! -d "$qtdir" ]; then
+  echo "Qt4 libraries (\"$qtdir\") not found" >&2
+  exit 2
+fi
+
+if [ ! -x "$command" ]; then
+  echo "The executable for ssh-tectia-configuration (\"$command\") not found" >&2
+  exit 2
+fi
+
+if [ -z "$LD_LIBRARY_PATH" ]; then
+  LD_LIBRARY_PATH="$shlibdir:$qtdir"
+else
+  LD_LIBRARY_PATH="$shlibdir:$qtdir:$LD_LIBRARY_PATH"
+fi
+export LD_LIBRARY_PATH
+
+exec "$command" "$@"

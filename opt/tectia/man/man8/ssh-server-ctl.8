@@ -1,0 +1,219 @@
+.TH ssh-server-ctl 8 "16 June 2017"  
+.SH NAME
+ssh-server-ctl \- Tectia Server control utility.
+.SH SYNOPSIS
+.ad l
+\fBssh\-server\-ctl\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR] [\fBcommand\fR
+[\fBcommand\-options\fR]]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-server\-ctl
+is a control
+utility that can be used to start, stop, or reload the configuration of Tectia Server
+(ssh\-server\-g3). It can also be used to add new servants or to stop
+servants, to check the status of the server and to pause the server. 
+.RS 
+\fBNote\fR
+.PP
+ssh\-server\-ctl
+must be run as
+a privileged user (root).
+.RE
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-C, \-\-current\fR 
+Connects to the current server.
+.TP 
+\fB\-D, \-\-debug=\fR\fILEVEL\fR 
+Defines the debug level.
+.TP 
+\fB\-h, \-\-help\fR 
+Displays the help text for the command.
+.TP 
+\fB\-l, \-\-listen=\fR\fIPORT\fR 
+Same as the \fBport\fR option.
+.TP 
+\fB\-O, \-\-old\fR 
+Connects to the backup listener.
+.TP 
+\fB\-P, \-\-pid \fR\fIPID\fR 
+Targets the command to the ssh\-server\-g3 process identified with
+the given \fIPID\fR. Available on Unix only.
+.TP 
+\fB\-p, \-\-port \fR\fIPORT\fR 
+Targets the command to the ssh\-server\-g3 process running on the
+given \fIPORT\fR. The default port 22 is assumed if this option is
+not used.
+.TP 
+\fB\-\-server\-address\fR 
+The path to the server control socket.
+.TP 
+\fB\-q, \-\-quiet\fR 
+Displays little or no output depending on the command.
+.TP 
+\fB\-s, \-\-short\fR 
+Displays a shorter more machine readable output.
+.TP 
+\fB\-v, \-\-verbose\fR 
+Displays more information if it is available.
+.TP 
+\fB\-V, \-\-version\fR 
+Displays the version string.
+.SH COMMANDS
+ssh\-server\-ctl 
+accepts the following commands:
+.TP 
+\fBadd\-servant\fR 
+Start a new servant or new servants.
+
+Options:
+.RS 
+.TP 
+\fBnum\fR 
+Defines the number of servants to be started.
+.RE
+.TP 
+\fBcontinue\fR 
+Continue a previously paused service.
+.TP 
+\fBpause\fR 
+Pause the service. Existing connections continue to function, but new connections
+will not be accepted until the continue command has been
+given.
+.TP 
+\fBpid\fR 
+Prints the server process ID.
+.TP 
+\fBreload\fR 
+Causes the server process to reload its configuration. The configuration is read
+from the \fBssh\-server\-config.xml\fR file. Existing connections stay open
+using the old configuration and the new connections will use the new
+configuration.
+.TP 
+\fBstart\fR 
+Attempts to start the server process by executing
+ssh\-server\-g3.
+
+The \fBstart\fR command will check if there is a server process currently
+running; if yes, the tool will report the case and will not make any starting
+attempts.
+
+Options:
+.RS 
+.TP 
+\fB\-p, \-\-port \fR\fIPORT\fR 
+Start the server on an alternate port (the default port is 22).
+.TP 
+\fB\-f, \-\-config\-file \fR\fIFILE\fR 
+Uses the given file as a configuration.
+.RE
+.TP 
+\fBstatus\fR 
+When the server is running, this command outputs the following information:
+.RS 
+.TP 0.2i
+\(bu
+Server status and process ID
+.TP 0.2i
+\(bu
+Date and time of starting the server
+.TP 0.2i
+\(bu
+Cryptographic mode
+.TP 0.2i
+\(bu
+Address family type
+.TP 0.2i
+\(bu
+Path to the server control socket
+.TP 0.2i
+\(bu
+Number of successful reconfigurations
+.TP 0.2i
+\(bu
+Date and time of the last reconfiguration (if applicable)
+.TP 0.2i
+\(bu
+Number of connections received
+.TP 0.2i
+\(bu
+Number of servants
+.TP 0.2i
+\(bu
+Preferred number of servants
+.TP 0.2i
+\(bu
+Maximum number of servants
+.TP 0.2i
+\(bu
+Maximum number of connections per servant
+.TP 0.2i
+\(bu
+Total number of connections after which servants are retired
+.TP 0.2i
+\(bu
+Status of load control (enabled/disabled)
+.TP 0.2i
+\(bu
+Maximum size for the server's white list
+.TP 0.2i
+\(bu
+Discard limit for the server's white list 
+.TP 0.2i
+\(bu
+Additionally, for each servant:
+.RS 
+.TP 0.2i
+\(bu
+Process ID
+.TP 0.2i
+\(bu
+Status
+.TP 0.2i
+\(bu
+Number of connections, unauthenticated connections, and channels
+.TP 0.2i
+\(bu
+All-time total number of connections
+.RE
+.RE
+.TP 
+\fBstop\fR 
+Causes the server process to start shutting down. The \fBstop\fR command
+checks if there is a server process currently running; if not, the tool will report the
+case and will not make any stopping attempts.
+
+On AIX, if an error occurs when the server is stopped by using
+ssh\-server\-ctl stop, it falls back to stop the server process
+directly. 
+
+Options:
+.RS 
+.TP 
+\fB\-F, \-\-force\fR 
+Forcefully disconnects connections to shut down the server quicker. The
+\fBforce\fR option should be given with the initial
+stop command.
+.RE
+.TP 
+\fBstop\-servant\fR \fBid ...\fR 
+Causes the server to stop servants specified by their ID numbers. You can use a
+space-separated list to enter several IDs.
+.TP 
+\fBview\-white\-list\fR 
+Prints the IP addresses on the server's white list in reverse chronological order.
+The white list is a list of IP addresses of connections that have recently had a
+successful authentication. (For more information, see 
+\fBload\-control\fR in \fBssh-server-config\fR(5).) 
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-server-g3\fR(8),
+\fBssh-server-config\fR(5)

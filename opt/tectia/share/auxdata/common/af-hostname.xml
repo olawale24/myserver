@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="host">
+<label></label>
+<input ref="host">
+<label>Host</label>
+<send submission="ok" />
+</input>
+<submit ref="ok" >
+<label>OK</label>
+</submit>
+<submit ref="cancel" >
+<label>Cancel</label>
+</submit>
+</form>

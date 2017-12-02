@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE secsh-server SYSTEM
+   "/opt/tectia/share/auxdata/ssh-server-ng/ssh-server-ng-config-1.dtd" [
+  <!ENTITY configdir PUBLIC "secsh:directory(config-server)" "">
+]>
+
+<!-- Tectia Server 6.x - ssh-server-config-default.xml
+
+     Copyright (c) SSH Communications Security Corporation.
+     This software is protected by international copyright laws.
+     All rights reserved.
+
+     NOTE: This file demonstrates the hardcoded default settings used by 
+     ssh-server-g3 when it loads its configuration. Changing this file will 
+     not affect the actual default settings!
+
+     To use this file as a basis of your server configuration, copy it to 
+     the same directory with the name "ssh-server-config.xml". Edit the file 
+     using a text editor or an XML editor. For more information on the 
+     configuration syntax, see the ssh-server-config(5) manual page or SSH 
+     Tectia Server Administrator Manual.
+
+     ssh-server-g3 locates the DTD automatically. The DOCTYPE declaration
+     shows the path on Unix platforms. 
+     On 32-bit Windows platforms, the default path to the DTD is:
+     "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+     On 64-bit windows platforms, the default path to the DTD is:
+     "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+
+     The &configdir; entity is expanded by ssh-server-g3 as the default 
+     configuration directory on each platform.
+      On Unix: "/etc/ssh2"
+      On 32-bit Windows platforms: "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia Server" 
+      On 64-bit Windows platforms: "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia Server" 
+
+     If you edit the configuration file using an XML editor and want to 
+     validate the XML, change the contents of the DOCTYPE declaration 
+     according to your platform. Note that both the DOCTYPE declaration and
+     the DTD are mandatory; should they be missing, the server will not be
+     able to parse the configuration properly.
+-->
+
+<secsh-server>
+
+  <params>
+    <!-- By default, the crypto libraries are used in the "standard" mode.
+         They can also be used in the "fips" mode. -->
+    <crypto-lib mode="standard" />
+
+    <!-- By default, the address family used by the server is only inet (so only IPv4 addresses are used) 
+         It can be set to use inet, inet6 or any. -->
+    <address-family type="inet" />
+
+    <!-- Replace the value of xauth-path with the path to the xauth binary on your host. -->
+    <!-- <settings xauth-path="/usr/bin/xauth" /> -->
+    <settings windows-logon-type="interactive" />
+
+    <hostkey>
+      <private file="&configdir;/hostkey" />
+    </hostkey>
+
+    <!-- Ports to listen on -->
+    <listener id="default" port="22" />
+
+    <logging>
+      <log-events facility="auth" severity="informational">
+        Auth_method_success Auth_method_failure Auth_methods_completed
+        Auth_methods_available Hostbased_auth_warning
+        Publickey_auth_warning Publickey_auth_success GSSAPI_auth_warning
+        Keyboard_interactive_pam_auth_warning
+        Keyboard_interactive_radius_auth_warning
+        Keyboard_interactive_password_auth_warning
+        Keyboard_interactive_securid_auth_warning
+        GSSAPI_auth_success
+        Keyboard_interactive_pam_auth_success
+        Keyboard_interactive_radius_auth_success
+        Keyboard_interactive_password_auth_success
+        Keyboard_interactive_securid_auth_success
+      </log-events>
+      <log-events facility="auth" severity="warning">
+        Hostbased_auth_error Publickey_auth_error GSSAPI_auth_error
+        Keyboard_interactive_pam_auth_error
+        Keyboard_interactive_radius_auth_error
+        Keyboard_interactive_password_auth_error
+        Keyboard_interactive_securid_auth_error
+      </log-events>
+      <log-events facility="daemon" severity="error">
+        Server_start_failed
+      </log-events>
+      <log-events facility="daemon" severity="notice">
+        Server_listener_failed Server_listener_started
+        Server_listener_stopped Server_reconfig_finished
+        Server_reconfig_started Server_stopping Server_running
+        Server_starting
+      </log-events>
+      <log-events facility="daemon" severity="warning">
+        Servant_exited Servant_error
+      </log-events>
+      <log-events facility="normal" severity="informational">
+        Algorithm_negotiation_success Certificate_validation_success
+        Certificate_validation_failure Key_store_create
+        Key_store_destroy Key_store_add_provider Key_store_decrypt
+        Key_store_sign Key_store_sign_digest Logout Disconnect
+        Channel_open_failure Session_channel_open
+        Session_channel_close Forwarding_channel_open
+        Forwarding_channel_close Forwarding_listener_open
+        Forwarding_listener_close Auth_listener_open
+        Auth_listener_close Auth_channel_open Auth_channel_close
+      </log-events>
+      <log-events facility="normal" severity="security-failure">
+        Connection_denied Login_failure
+      </log-events>
+      <log-events facility="normal" severity="security-success">
+        Connect Login_success
+      </log-events>
+      <log-events facility="normal" severity="warning">
+        Algorithm_negotiation_failure KEX_failure
+        Key_store_create_failed Key_store_add_provider_failed
+        Key_store_decrypt_failed Key_store_sign_failed
+        Key_store_sign_digest_failed
+      </log-events>
+    </logging>
+
+    <limits max-connections="256" max-processes="40" />
+
+    <!-- Change pam-calls-with-commands to "yes" to enable PAM account
+         management, session and credential setting calls for
+         connections regardless of authentication method. -->
+
+    <pluggable-authentication-modules service-name="ssh-server-g3"
+                                      pam-calls-with-commands="no" />
+  </params>
+
+  <!-- Some of the ciphers, macs, or authentication methods might be
+       missing depending on your architecture. -->
+
+  <connections>
+
+    <connection name="connection" action="allow" tcp-keepalive="no">
+      <!-- Rekey happens every hour or after 1GB of data, which ever is
+           sooner. -->
+      <rekey seconds="3600" bytes="1000000000" />
+
+      <cipher name="aes128-cbc" />
+      <cipher name="aes192-cbc" />
+      <cipher name="aes256-cbc" />
+      <cipher name="aes128-ctr" />
+      <cipher name="aes192-ctr" />
+      <cipher name="aes256-ctr" />
+      <cipher name="3des-cbc" />
+      <!-- The following cipher is only available on Windows and Linux 
+           x86 platforms, and only when in non-FIPS mode -->
+      <cipher name="crypticore128@ssh.com" allow-missing="yes" />
+
+      <mac name="hmac-sha1" />
+      <mac name="hmac-sha1-96" />
+      <mac name="hmac-sha2-256" />
+      <mac name="hmac-sha256-2@ssh.com" />
+      <mac name="hmac-sha224@ssh.com" />
+      <mac name="hmac-sha256@ssh.com" />
+      <mac name="hmac-sha384@ssh.com" />
+      <mac name="hmac-sha2-512" />
+      <mac name="hmac-sha512@ssh.com" />
+      <!-- The following mac is only available on Windows and Linux 
+           x86 platforms, and only when in non-FIPS mode -->
+      <mac name="crypticore-mac@ssh.com" allow-missing="yes" />
+
+      <!-- The following KEX methods are available by default,
+           and all are supported under FIPS mode -->
+      <kex name="diffie-hellman-group14-sha1" />
+      <kex name="diffie-hellman-group14-sha256@ssh.com" />
+      <kex name="diffie-hellman-group-exchange-sha1" />
+      <kex name="diffie-hellman-group-exchange-sha256" />
+    </connection>
+
+  </connections>
+
+  <authentication-methods login-grace-time="600">
+    <!-- By default, the banner message is empty. -->
+    <banner-message />
+
+    <!-- This is the default strict file modes setting. Note that this
+         is Unix-specific, and has no effect on Windows. -->
+    <auth-file-modes strict="yes" mask-bits="022" />
+
+    <authentication name="authentication">
+
+      <!-- Not all authentication methods are available everywhere.
+           GSS-API, for example, is only available on select platforms.
+           
+           The 'allow-missing' attribute allows configuration to
+           succeed even if the plugin is missing. Otherwise listing
+           missing authentication plugins in the authentication block of
+           a config file will make the configuration fail if the plugin
+           is not found.  -->
+
+      <!-- For the above reason, gssapi has the allow-missing
+           attribute set to 'yes' out in this example config file. -->
+      <auth-gssapi allow-missing="yes" />
+      <auth-publickey />
+      <auth-password />
+      <auth-keyboard-interactive />
+    </authentication>
+  </authentication-methods>
+
+  <services>
+
+    <!-- The following passwd-change group and rule are implicitly added as a
+	 head of the groups and rules list of the server's configuration if no
+	 group "passwd-change" is already defined in the server's configuration
+	 file.-->
+    <group name="passwd-change">
+      <selector>
+        <user-password-change-needed />
+      </selector>
+    </group>
+
+    <!-- This rule is used to force password change. -->
+    <rule group="passwd-change">
+      <terminal action="deny" />
+      <subsystem type="sftp" application="sft-server-g3" action="deny" />
+      <command application="/usr/bin/passwd" action="forced" />
+      <tunnel-local action="deny" />
+      <tunnel-remote action="deny" />
+    </rule>
+    <!-- Enforced password change rule ends. -->
+
+    <!-- By default, idle timeouts are disabled. -->
+    <rule idle-timeout="0">
+
+      <environment allowed-case-sensitive="TERM,PATH,TZ,LANG,LC_*" />
+      <!-- By default, the terminal action is not defined.
+           Therefore, the server will allow terminal access if the client
+           requests it when no forced command is to be executed and will
+           always deny terminal access if a forced command is to be executed.
+           Please, note that this is different than defining 
+           '<terminal action="allow"/>' or '<terminal action="deny"/>'. -->
+
+      <subsystem type="sftp" application="sft-server-g3" action="allow">
+        <!-- Home folder and virtual folders, Windows specific. -->
+        <attribute name="home" value="%USERPROFILE%" />
+        <!-- These implicit default virtual folders are only set if no
+             virtual folders are set in the configuration. If you set
+             ANY virtual folders, none of the following will be set. -->
+        <attribute name="virtual-folder" value="C:=C:\" />
+        <attribute name="virtual-folder" value="D:=D:\" />
+        <attribute name="virtual-folder" value="E:=E:\" />
+        <!-- ... all available drives. -->
+      </subsystem>
+
+      <command action="allow" />
+
+      <!-- All tunnel types are distinct and independent of each
+           other. -->
+      <tunnel-agent action="allow" />
+      <tunnel-x11 action="allow" />
+      <tunnel-local action="allow" />
+      <tunnel-remote action="allow" />
+
+    </rule>
+
+  </services>
+
+</secsh-server>

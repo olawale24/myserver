@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="store-passphrase">
+<label></label>
+<!-- BEGIN BLOCK: OPEN STORE -->
+<label>Please provide passphrase to open %%%STORENAME%%%.</label>
+<!-- END BLOCK: OPEN STORE -->
+<!-- BEGIN BLOCK: NEW STORE PASSPHRASE -->
+<label>Please input new passphrase for %%%STORENAME%%%.</label>
+<!-- END BLOCK: NEW STORE PASSPHRASE -->
+<secret ref="passphrase">
+<label>Passphrase</label>
+%%%SENDSUBMISSION%%%
+</secret>
+<!-- BEGIN BLOCK: NEW PASSPHRASE -->
+<secret ref="passphrase-again">
+<label>Passphrase again</label>
+<send submission="ok" />
+</secret>
+<!-- END BLOCK: NEW PASSPHRASE -->
+<submit ref="ok" >
+<label>OK</label>
+</submit>
+<submit ref="cancel" >
+<label>Cancel</label>
+</submit>
+</form>

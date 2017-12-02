@@ -1,0 +1,1340 @@
+#!/bin/sh
+#
+# ssh-troubleshoot
+#
+# Gather system information to aid in troubleshooting.
+#
+# Author: Tomi Kause <tomi.kause@ssh.com>
+#
+# Copyright (c) 2016 SSH Communications Security Corporation. 
+# This software is protected by international copyright laws. 
+# All rights reserved.
+#
+
+TECTIA_PRODUCTS_AIX="SSHTectia.Server SSHTectia.Client  SSHTectia.ClientF SSHTectia.Common SSHTectia.SDK SSHTectia.Capture SSHTectia.FTPConversion"
+TECTIA_PRODUCTS_AIX="$TECTIA_PRODUCTS_AIX SSHTectia.GUIC"
+TECTIA_PRODUCTS_AIX="$TECTIA_PRODUCTS_AIX SSHTectia.MFT.Events" # Not yet as of this writing
+TECTIA_PRODUCTS_AIX="$TECTIA_PRODUCTS_AIX SSH.Secure.Shell"     # 4.x
+
+TECTIA_PRODUCTS_HP="SSHG3server SSHG3client SSHG3clntf SSHG3common SSHG3sdk SSHG3capture SSHG3ftpconv"
+TECTIA_PRODUCTS_HP="$TECTIA_PRODUCTS_HP SSHG3guic"
+TECTIA_PRODUCTS_HP="$TECTIA_PRODUCTS_HP SSHG3mft"
+TECTIA_PRODUCTS_HP="$TECTIA_PRODUCTS_HP ssh2"
+
+TECTIA_PRODUCTS_SOLARIS="SSHG3srvr SSHG3clnt SSHG3clnf SSHG3cmmn SSHG3sdk SSHG3capt SSHG3ftp" # Version 5 and up
+TECTIA_PRODUCTS_SOLARIS="$TECTIA_PRODUCTS_SOLARIS SSHG3guic"
+TECTIA_PRODUCTS_SOLARIS="$TECTIA_PRODUCTS_SOLARIS SSHG3mft" # Not yet as of this writing
+TECTIA_PRODUCTS_SOLARIS="$TECTIA_PRODUCTS_SOLARIS SSHssh2"  # 4.x
+
+TECTIA_PRODUCTS_LINUX="ssh-tectia-server ssh-tectia-client ssh-tectia-client-ft-only ssh-tectia-common ssh-tectia-sdk ssh-tectia-capture" # Version 5 and up
+TECTIA_PRODUCTS_LINUX="$TECTIA_PRODUCTS_LINUX ssh-tectia-guisupport"
+TECTIA_PRODUCTS_LINUX="$TECTIA_PRODUCTS_LINUX ssh-tectia-mft-events" # 6.1.0 and up
+TECTIA_PRODUCTS_LINUX="$TECTIA_PRODUCTS_LINUX ssh" # 4.x
+
+
+# OPENSSH_PRODUCTS_SOLARIS="SUNWsshcu SUNWsshdr SUNWsshdu SUNWsshr SUNWsshu"
+
+TECTIA_ETCDIRS="/etc/ssh2 /opt/tectia/etc/ssh2 $TECTIA_ETCDIR"
+TECTIA_INSTDIRS="/opt/tectia /usr/local $TECTIA_INSTDIR"
+
+TECTIA_GLOBAL_CONFIG_FILES="ssh-server-config.xml ssh-broker-config.xml ssh-socks-proxy-config.xml ssh2_config sshd2_config ssh_certd_config ssh_ftadv_config mapfile upgrade_history"
+TECTIA_USER_CONFIG_FILES="ssh-broker-config.xml ssh2_config ssh-events-config.xml authorization identification"
+
+TECTIA_GLOBAL_PRIVATE_KEY_FILES="hostkey"
+TECTIA_GLOBAL_PUBLIC_KEY_DIRS="hostkeys knownhosts trusted_hosts"
+TECTIA_USER_PUBLIC_KEY_DIRS="hostkeys knownhosts authorized_keys"
+
+# Tectia products recognize and honor selected OpenSSH files.
+OPENSSH_GLOBAL_PUBLIC_KEY_FILES="/etc/ssh/ssh_known_hosts"
+OPENSSH_USER_PUBLIC_KEY_FILES="known_hosts authorized_keys"
+
+TECTIA_CLIENT_BINARIES="/opt/tectia/bin/sshg3 /usr/local/bin/ssh2 /usr/lpp/tectia/bin/ssh2 /usr/bin/ssh"
+TECTIA_SERVER_BINARIES="/opt/tectia/sbin/ssh-server-g3 /usr/local/sbin/sshd2 /usr/lpp/tectia/sbin/sshd2 /opt/tectia/bin/ssh-events"
+
+host_and_timestamp="`hostname`-`date -u +'%Y%m%d-%H%M'`UTC"
+SSH_TROUBLESHOOT_OUTFILE=${SSH_TROUBLESHOOT_OUTFILE:-"ssh-troubleshoot-data-${host_and_timestamp}.tar"}
+
+my_exit() {
+  if [ -d "$my_tmpdir" ]; then
+    find "$my_tmpdir" -type d -exec chmod u+w \{\} \;
+    rm -rf "$my_tmpdir"
+  fi
+  exit $1
+}
+
+my_trap() {
+  trap "echo Deleting temporary work directory $my_tmpdir ... ; find "$my_tmpdir" -type d -exec chmod u+w \{\} \;  ; rm -rf $my_tmpdir; echo done. Exiting ; exit $1" HUP INT QUIT
+}
+
+tty >/dev/null 2>&1
+if [ $? = 0 ]; then
+  i_have_tty=true
+else
+  i_have_tty=false
+fi
+
+#
+# Detect also the SSH internal debug packages. For every
+# SSHG3something or ssh-tectia-something product add also the
+# DBGG3something or dbg-tectia-something to the list.
+#
+for os in AIX HP SOLARIS LINUX; do
+  dbg_pkgs=""
+  eval prods=$`echo TECTIA_PRODUCTS_${os}`
+  for prod in $prods; do
+    echo $prod | grep '^SSHG3' >/dev/null 2>&1
+    if [ $? = 0 ]; then
+      p_dbg=`echo $prod | sed -e 's/^SSHG3/DBGG3/'`
+      dbg_pkgs="$dbg_pkgs $p_dbg"
+    fi
+    echo $prod | grep '^ssh.tectia' >/dev/null 2>&1
+    if [ $? = 0 ]; then
+      p_dbg=`echo $prod | sed -e 's/^ssh/dbg/'`
+      dbg_pkgs="$dbg_pkgs $p_dbg"
+    fi
+  done
+  eval TECTIA_PRODUCTS_${os}='"$prods $dbg_pkgs"'
+done
+
+separator() {
+  echo '============================================================================'
+}
+
+header() {
+  echo "--- $1 ---"
+}
+
+initialize_debug() {
+  exec 5>&1
+}
+
+debug() {
+  ${debugp:-false} && echo "$@" 1>&5
+}
+
+verbose() {
+  ${verbosep:-false} && echo "$@" 1>&5
+}
+
+echo_bold() {
+  if $i_have_tty ; then
+    if [ "X$UNAME" != "XOS/390" -a "X$UNAME" != "XHP-UX" ]; then
+      tput blink
+    fi
+    tput bold
+    echo "$1"
+    tput sgr0
+  else
+    echo '****************************************************************************'
+    echo "$1"
+    echo '****************************************************************************'
+  fi  
+}
+
+initialize() {
+  initialize_debug
+  debug "Initializing..."
+  path_orig="$PATH"
+  PATH="/sbin:/usr/sbin:$PATH"
+
+  ls_opts="-la"
+  ps_opts="-edaf"
+  tar_extra_opts=""
+
+  umask 077
+  case "$UNAME" in
+    OS/390)
+      bpxk_autocvt_orig="$_BPXK_AUTOCVT"
+      cee_runopts_orig="$_CEE_RUNOPTS"
+      libpath_orig="$LIBPATH"
+      umask 0077
+      _BPXK_AUTOCVT=ON
+      export _BPXK_AUTOCVT
+      _CEE_RUNOPTS='TRAP(ON)'
+      export _CEE_RUNOPTS
+      LIBPATH=/opt/tectia/lib:$LIBPATH
+      export LIBPATH
+      ls_opts="-laETb"
+      tar_extra_opts="UX"
+      ;;
+    AIX)
+      ;;
+    HP-UX)
+      ;;
+    SunOS)
+      # Relocation may happen on Solaris. Find the products are really
+      # installed and adjust the list of potential/known installation
+      # directories accordingly.
+      PATH="$PATH:/usr/ucb"
+      TECTIA_INSTDIRS=`(for p in $TECTIA_PRODUCTS_SOLARIS; do
+                          pkginfo -q $p && pkginfo -r $p
+                        done
+                        for d in $TECTIA_INSTDIRS; do
+                          echo $d
+                        done  ) | sort | uniq`
+      ;;
+    Linux)
+      rpm --help >/dev/null 2>&1
+      if [ $? = 0 ]; then
+        HAVE_RPM=true
+      else
+        HAVE_RPM=false
+      fi
+      # Debian is not supported, but anyhow.
+      dpkg-query --help >/dev/null 2>&1
+      if [ $? = 0 ]; then
+        HAVE_DPKG_QUERY=true
+      else
+        HAVE_DPKG_QUERY=false
+      fi
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+  esac
+  if [ "X$tectia_user" = X -o X"$tectia_user" = "X$whoami" ]; then
+    user_home="$HOME"
+    tectia_user="$whoami"
+  elif [ "X$UNAME" = "XOS/390" ]; then
+    user_home="`echo 'echo ~'$tectia_user | tcsh`"
+  else
+    # For SunOS/Solaris.
+    user_home="`echo 'echo ~'$tectia_user | csh`"
+  fi
+  export PATH
+}
+
+#
+# Copy a file to the tmp archive to get tarred at the end.
+# For grabbing conf files and such.
+#
+get_file() {
+  file="$1"
+  
+  verbose "Copying file $file"
+  # relative -> absolute
+  if [ X"`echo $file | sed -e 's/\(.\).*/\1/'`" != X/ ]; then
+    file="`pwd`/$file"
+  fi
+
+  if $create_archive; then
+    if [ "X$archive_tmpdir_files" = X ]; then
+      echo "get_file $file: tmpdir not initialized" 1>&2
+      my_exit 10
+    fi
+    dir="`dirname $file`"
+    mkdir -p "$archive_tmpdir_files/$dir" && \
+
+    if [ -f "${archive_tmpdir_files}${dir}/`basename $file`" ]; then
+      echo "${archive_tmpdir_files}${dir}/`basename $file`" exists. 1>&2
+      echo This does not happen. 1>&2
+      my_exit 12
+    fi
+    cp "$file" "${archive_tmpdir_files}${dir}/"
+    if [ $? != 0 ]; then
+       if [ -f "$file" ]; then
+         echo Copying $file failed. 1>&2
+         $keep_going || my_exit 13
+         debug "Keep going"
+       fi
+    fi
+  else
+    header "$file"
+    cat "$file"
+  fi    
+}
+
+get_matching_files() {
+  # Do nothing if there are no matches.
+  # An elaborate way to tackle lack of nullglob.
+  hits=`ls $1 2>/dev/null | wc -l | tr -d ' '`
+  if [ $hits = 0 ]; then
+    :
+  else
+    for f in $1; do
+      get_file "$f"
+    done
+  fi
+}
+
+#
+# Copy a file to the tmp archive to get tarred at the end.
+# For grabbing conf files and such.
+#
+get_dir() {
+  dir="$1"
+  
+  verbose "Copying directory $dir"
+  # relative -> absolute
+  if [ X"`echo $dir | sed -e 's/\(.\).*/\1/'`" != X/ ]; then
+    dir="`pwd`/$dir"
+  fi
+
+  if $create_archive; then
+    if [ "X$archive_tmpdir_files" = X ]; then
+      echo "get_dir $dir: tmpdir not initialized"
+      my_exit 10
+    fi
+    parent_dir="`dirname $dir`"
+
+    failed="$my_tmpdir/tarfail$$"
+    if [ $UNAME = Linux ]; then
+      # cp(1) tolerates changing files under /proc better than tar(1)
+      cp -a "$dir" "${archive_tmpdir_files}" || touch $failed
+    else
+      ( cd / && tar cf - ./"$dir" || touch $failed) | ( cd "${archive_tmpdir_files}/" && tar xf - || touch $failed)
+    fi  
+  if [ -f "$failed" ]; then
+      retval=1
+      rm -f "$failed"
+    fi
+    if [ $retval != 0 ]; then
+       if [ -d "$dir" ]; then
+         echo Copying $dir failed. 1>&2
+         $keep_going || my_exit 13
+         debug "Keep going"
+       fi
+    fi
+  else
+    for f in `find "$dir" -type f`; do
+      header "$f"
+      cat "$f"
+    done
+  fi    
+}
+
+#
+# Run a command, reporting the act in verbose mode
+# and redirecting output appropriately
+#
+run_cmd() {
+  tag="$1"
+  cmd="$2"
+  my_keep_going="${3:-false}"
+  if [ X"$tag" = "Xprintenv" ]; then
+    verbose "Running $tag"
+  else   
+    verbose "Running $cmd"
+  fi
+  redirect_output $tag
+  # eval => cmd can be "envvar=value cmd"
+  eval $cmd
+  retval=$?
+  restore_output
+  if [ $retval != 0 ]; then
+    if [ $my_keep_going != true ]; then
+      verbose "Command $cmd failed"
+    else
+      debug "Command $cmd failed"
+    fi  
+    if [ $keep_going = false -a $my_keep_going = false ]; then
+      my_exit 14
+    fi
+  fi
+}
+
+
+#
+# Redirect standard output and standard error to a file in tmp
+# archive. For capturing command output.
+# Caveat: Calls cannot be nested. See redirect_output2().
+#
+
+redirect_output() {
+  tag="$1"
+  my_stdout="$archive_tmpdir_output/${tag}.out"
+  exec 6<&1
+  exec 7<&2
+  exec >"$my_stdout" 2>&1 
+}
+
+#
+# Undo redirect_outout()
+#
+restore_output () {
+  exec 1<&6
+  exec 2<&7
+}
+
+#
+# Another pair of redirect/restore output. These things cannot be
+# nested either, but with these you can achieve two levels
+# of nesting.
+redirect_output2() {
+  tag="$1"
+  my_stdout="$archive_tmpdir_output/${tag}.out"
+  exec 8<&1
+  exec 9<&2
+  exec >"$my_stdout" 2>&1 
+}
+
+#
+# Undo redirect_outout2()
+#
+restore_output2 () {
+  exec 1<&8
+  exec 2<&9
+}
+
+#
+# Identify the OS we are running on.
+#
+print_os_version() {
+  verbose "Querying operation system version and hardware info"
+  redirect_output os_version
+  hostname
+  uname -a
+  case "$UNAME" in
+    OS/390)
+      # We could try to figure out a relevant dataset or two and grep things
+      # from them. In theory. In practice we need a REXX script or something
+      # to drive things from outside the z/OS Unix sandbox.
+      ;;
+    AIX)
+      separator
+      header "oslevel" ; oslevel
+      separator
+      header "oslevel -g" ; oslevel -g
+      separator
+      header "oslevel -s" ; oslevel -s
+      ;;
+    HP-UX)
+      separator
+      model
+      separator
+      for i in MACHINE_MODEL SECURITY_CLASS CPU_VERSION  HW_32_64_CAPABLE KERNEL_BITS \
+               LIBC_VERSION  OPEN_MAX POSIX_CHILD_MAX CHILD_MAX TMP_MAX WORD_BIT \
+               INT_MAX UINT_MAX UINT_MAX  ULONG_MAX ; do
+        echo $i `getconf $i`
+      done
+      if [ -x /opt/ignite/bin/print_manifest ]; then
+        /opt/ignite/bin/print_manifest
+      fi
+      ;;
+    SunOS)
+      separator
+      showrev
+      ;;
+    Linux)
+      separator
+      cat /etc/issue
+      hash lsb_release >/dev/null 2>&1
+      if [ $? -eq 0 ]; then
+         run_cmd "lsb_release-a" "lsb_release -a"
+      elif [ -f /etc/redhat-release ]; then
+         cat /etc/redhat-release
+      elif [ -f /etc/SuSE-release ]; then
+         cat /etc/SuSE-release
+      else
+         echo "Unable to detect Linux distribution"
+      fi
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+  esac
+  restore_output
+}
+
+list_os_patches() {
+  verbose "Listing operating system patches..."
+  redirect_output os_patches
+  separator
+  header 'Operating System Patches'
+  case "$UNAME" in
+    OS/390)
+      # Tricky to obtain from the USS sandbox
+      echo Unavailable
+      ;;
+    AIX)
+      instfix -i
+      ;;
+    HP-UX)
+      swlist -v -l patch
+      ;;     
+    SunOS)
+      arch
+      arch -k
+      showrev -w
+      showrev -p
+      ;;
+    Linux)
+      # Included in rpm -qa output
+      echo See installed_software.out
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+  esac
+  restore_output
+}
+
+#
+# OS version and patches if applicable/available.
+#
+get_os_info() {
+  print_os_version
+  list_os_patches    
+}
+
+#
+# Get misc OS configuration files and info:
+# PAM, syslog, resolver, ifconfg and such
+#
+get_os_configuration() {
+  for f in \
+    "/etc/passwd" \
+    "/etc/group" \
+    "/etc/hosts" \
+    "/etc/hosts.equiv" \
+    "/etc/networks" \
+    "/etc/defaultrouter" \
+    "/etc/resolv.conf"\
+    "/etc/nsswitch.conf" \
+    "/etc/ldap.conf" \
+    "/etc/pam.conf" \
+    "/etc/pam_user.conf" \
+    "/etc/pam_ldap.conf" \
+    "/etc/pam.ldap.trusted" \
+    "/etc/pam_smb.conf" \
+    "/etc/pam_krb.conf" \
+    "/usr/lib/security/methods.cfg" \
+    "/etc/netgroup" \
+    "/etc/inetsvcs.conf" \
+    "/etc/syslog.conf"\
+    "/etc/syslog-ng/syslog-ng.conf" \
+    "/etc/disktab" \
+    "/etc/fstab" \
+    "/etc/vfstab" \
+    "/etc/ntp.conf" \
+    "/etc/shells" \
+    "/etc/profile" \
+    "/etc/csh.cshrc" \
+    "/etc/csh.login" \
+    "/etc/bash.bashrc" \
+    "/etc/bashrc" \
+    "/etc/zshrc"   ; do
+    if [ -f "$f" ] ; then
+      get_file "$f"
+    fi
+  done
+  for d in \
+    "/etc/pam.d" ; do
+    if [ -d "$d" ]; then
+      get_dir "$d"
+    fi
+  done
+}
+
+#
+# Take last 32000 lines from all local syslog files, except the ones we guess to
+# contain only mail, news or printing related data.
+# If a syslog file is not readable we skip it and keep going.
+# Caveat: some fancy new syslog daemon configuration file syntaxes on
+# more recent Linuxen make this a bit tricky/unreliable. We do the best we can.
+#
+get_syslog_output() {
+  if [ -r /etc/syslog.conf ]; then
+    if [  -x /usr/ccs/bin/m4 ]; then
+      # On Solaris syslog.conf must be fed thru m4 before parsing.
+      syslogconf_printer="/usr/ccs/bin/m4 -DLOGHOST"
+    else
+      syslogconf_printer=cat
+    fi
+    # Skip comments, avoid syslog files for mail, lpr and news, avoid anything in /dev/
+    # and deal with the bacslash terminated continuation lines on recent Linuxen.
+    $syslogconf_printer /etc/syslog.conf | awk '/^[^#].*\\$/ { printf "%s", $0; next } /^[^#]/ {print}' | \
+       sed -e 's/\\[ \t]*//gp'  | \
+       awk '{print $2}' | \
+       sed -e 's_^-/_/_gp' | \
+       egrep -v '(\*|/dev/|/mail|/news|/lpr)' | sort | uniq >"$my_tmpdir/syslog_files"
+       for f in /var/log/messages `cat $my_tmpdir/syslog_files 2>/dev/null`; do
+         # Only absolute paths please, filter out usernames, @loghosts and asterisks.
+         echo $f | grep '^/' >/dev/null 2>&1
+         if [ $? != 0 ]; then
+           continue
+         fi
+         # Filter out unredable and non-existent files. 
+         if [ -r "$f" ]; then
+           logfile_archname="$archive_tmpdir_files/$f"
+           logfile_archdir="`dirname $logfile_archname`"
+           if [ ! -d "$logfile_archdir" ]; then
+              mkdir -p "$logfile_archdir"
+           fi
+           verbose "Tail of syslog file $f"
+           tail -32768 <$f >"$logfile_archname"
+         else
+           # Unreadable syslog files require --keep-going to
+           # keep going...
+           if [ -f "$f" ]; then
+             verbose "Syslog file $f is not readable."
+             $keep_going || my_exit 14
+           else
+             # ...but non-existent syslog files are
+             # silently skipped.
+             debug "Syslog file $f does not exist."
+           fi
+         fi
+       done
+       rm -r "$my_tmpdir/syslog_files"
+  fi
+}
+
+#
+# 
+# 
+get_os_state() {
+  verbose "Querying operating system state..."
+  # XXX TODO: on HP-UX adjust env for ps
+  run_cmd "date" "date"
+  run_cmd "uptime" "uptime"
+  run_cmd "id" "id"
+  run_cmd "ps" "ps $ps_opts"
+  run_cmd "who" "who -a"
+  run_cmd "df" "df"
+  case "$UNAME" in
+    OS/390)
+      # "Devices/interfaces/links (-d)"
+      run_cmd "onetstat-d" "onetstat -d"
+      # "Home IP / link/if (-h)"
+      run_cmd "onetstat-h" "onetstat -h"
+      # "IPv4 routing table (-g)"
+      run_cmd "onetstat-g" "onetstat -g"
+      # "Listening connections (-c SERVER)"
+      run_cmd "onetstat-cSERVER" "onetstat -c SERVER"
+      # "Connections / application data (-c APPLDATA)"
+      run_cmd "onetstat-cAPPLDATA" "onetstat -c APPLDATA"
+      # "All connections/sockets (-a)"
+      run_cmd "onetstat-a" "onetstat -a"
+      # "All connections/sockets (long) (-A)"
+      run_cmd "onetstat-A" "onetstat -A"
+      # "Jobnames (-e)"
+      run_cmd "onetstat-e" "onetstat -e"
+      # "Configuration/parameters (-f)"
+      run_cmd "onetstat-f" "onetstat -f"
+      # "Byte counts (-b)"
+      run_cmd "onetstat-b" "onetstat -b"
+      # "Job specific src/if (-J)"
+      run_cmd "onetstat-J" "onetstat -J"
+      # "QoS (-j)"
+      run_cmd "onetstat-j" "onetstat -j"
+      # "Reserved ports (-o)"
+      run_cmd "onetstat-o" "onetstat -o"
+      # "Clients (-s)"
+      run_cmd "onetstat-s" "onetstat -s"
+      # "TCP/IP uptime (-u)"
+      run_cmd "onetstat-u" "onetstat -u"
+      ;;
+    HP-UX)
+      run_cmd "netstat" "netstat -a"
+      run_cmd "netstat-vr" "netstat -vr"
+      run_cmd "netstat-win" "netstat -win"
+      run_cmd "netstat-wi" "netstat -wi"
+      run_cmd "lanscan" "lanscan -v"
+      for i in `netstat -wi | awk '/^[a-z]/ {print $1}'|sort -u| tr -d '*'`; do 
+        run_cmd "ifconfig$i" "ifconfig $i"
+      done
+      ;;
+    AIX)
+      run_cmd "netstat" "netstat -a"
+      run_cmd "netstat-r" "netstat -r"
+      run_cmd "ifconfig" "ifconfig -a"
+      run_cmd "vmstat" "vmstat"
+      run_cmd "no-a" "no -a"
+      run_cmd "lsattr-E-lsys0" "lsattr -E -l sys0"
+      run_cmd 'odmget-qname-inet0 CuAt' 'odmget -q name=inet0 CuAt'
+      # pstat is root only
+      # Process table (-a)
+      run_cmd "pstat-a" "pstat -a"
+      # Swap (-s)
+      run_cmd "pstat-s" "pstat -s"
+      # Processor status (-S)
+      run_cmd "pstat-S" "pstat -S"
+      # System variables (-T)
+      run_cmd "pstat-T" "pstat -T"
+      redirect_output "alog-o-tboot"
+        t="$my_tmpdir/alogboot$$"
+        alog -o -t boot >"$t" 2>&1
+        if [ $? = 0 ]; then
+          cat "$t"
+        else
+          :
+        fi
+        rm -f "$t"
+      restore_output
+      redirect_output "lsuser"
+        lsuser root
+	lsuser $tectia_user
+        if [ -r /usr/lib/security/methods.cfg ]; then
+        for m in `< /usr/lib/security/methods.cfg  awk  '/^[A-Z0-9][A-Z0-9]*: *$/ {print } ' | tr -d :`; do
+          printf "${m}:" ; lsuser -R $m $tectia_user
+        done 
+fi
+
+      restore_output
+      ;;
+    Linux)
+      run_cmd "chage-l" "chage -l $tectia_user"
+      run_cmd "netstat" "netstat -a"
+      run_cmd "netstat-r" "netstat -r"
+      run_cmd "ifconfig" "ifconfig -a"
+      ;;
+    *)
+      run_cmd "netstat" "netstat -a"
+      run_cmd "netstat-r" "netstat -r"
+      run_cmd "ifconfig" "ifconfig -a"
+      ;;
+  esac
+  case "$UNAME" in
+    OS/390)
+      run_cmd "SYSNAME" "sysvar SYSNAME"
+      ;;
+    AIX)
+      ;;
+    HP-UX)
+      ;;     
+    SunOS)
+      t="$my_tmpdir/svcs_a_$$"
+      ver=`uname -r`
+      case "$ver" in
+      5.10|5.11)
+        svcs -a > $t 2>&1
+        if [ $? = 0 ]; then
+          grep -i ssh  $t > $archive_tmpdir_output/svcs_ssh_services.out
+          mv $t $archive_tmpdir_output/svcs_all.out
+        fi 
+        rm -f "$t"
+        ;;
+      5.8|5.9)
+        echo "svcs not available on Solaris 8 and 9, skipping"
+        ;;
+      *)
+        echo "unknown version of Solaris, skipping svcs"
+        ;;
+      esac
+      # normally prtdiag should be under /usr/platform/$ARCH/...
+      prtdiag_path="/usr/platform/`arch -k`/sbin/prtdiag"
+      if [ ! -x $prtdiag_path ]; then
+        # ...but on Solaris 11 AMD and Solaris 11 non-global zones prtdiag is in /usr/sbin
+        prtdiag_path="/usr/sbin/prtdiag"
+      fi
+      if [ ! -x $prtdiag_path ]; then
+        # if prtdiag is not found at all, exit/fail
+        echo "Can't find prtdiag command, skipping"
+      else
+        # LC_MESSAGES set to get error message in English
+        prtout=`LC_MESSAGES="C" $prtdiag_path 2>&1`
+        PRT_NONGLOBAL="prtdiag can only be run in the global zone"
+        PRT_NOTIMPL="prtdiag: not implemented on"
+        if [ "$prtout" = "$PRT_NONGLOBAL" -o "`echo $prtout|cut -c0-27`" = "$PRT_NOTIMPL" ]; then
+          echo "$prtout, skipping"
+        else 
+          run_cmd "prtdiag" "$prtdiag_path"
+        fi
+      fi
+      ;;
+    Linux)
+      # SELinux enabled?
+      id --context >/dev/null 2>&1
+      if [ $? = 0 ]; then
+        run_cmd "id--context" "id --context"
+      fi
+      
+      chkconfig --list >/dev/null 2>&1
+      if [ $? = 0 ]; then
+         run_cmd "chkconfig" "chkconfig --list"
+      fi
+      run_cmd "route" "route"
+      run_cmd "runlevel" "runlevel"
+      for f in version cpuinfo  modules meminfo stat swaps loadavg; do
+        if [ -e /proc/$f ]; then
+          get_file "/proc/$f"
+        fi
+      done
+      if [ -d /proc/net/. ]; then
+          get_dir "/proc/net"
+      fi
+      iptables -L >/dev/null 2>&1 
+      if [ $? = 0 ]; then
+        run_cmd "iptables-L" "iptables -L"
+      fi
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+     esac
+}
+
+#
+# Query the OS package manager for a list of all installed software.
+#
+list_os_software_all() {
+  separator
+  header 'Listing all installed software'
+  case "$UNAME" in
+    OS/390)
+      # Cannot
+      ;;
+    AIX)
+      lslpp -L all
+      header
+      lslpp -ha
+      ;;
+    HP-UX)
+      swlist
+      ;;
+    SunOS)
+      pkginfo -l
+      ;;
+    Linux)
+      $HAVE_DPKG_QUERY && dpkg-query -l
+      $HAVE_RPM && rpm -qa --last
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+  esac
+}
+
+#
+# printenv + ulimit
+#
+get_environment_et_al() {
+  # This should be the very first thing to do,
+  # Should get grabbed first, before mutilating the environment at all.
+  # Handle the few mutilated variables as special cases for now.
+
+  case "$UNAME" in
+    OS/390)
+      run_cmd "printenv" 'PATH=$path_orig _BPXK_AUTOCVT="$bpxk_autocvt_orig" _CEE_RUNOPTS="$cee_runopts_orig" LIBPATH="$libpath_orig" printenv'
+      ;;
+    SunOS)
+      run_cmd "printenv" "PATH=/usr/ucb:$path_orig printenv"
+      ;;
+    *)
+      run_cmd "printenv" "PATH=$path_orig printenv"
+      ;;
+  esac
+  run_cmd "ulimits" "ulimit -a"
+}
+
+#
+# Query the OS package manager for installed Tectia products.
+#
+list_os_software_tectia() {
+  verbose 'Listing installed Tectia Software'
+  case "$UNAME" in
+    OS/390)
+      # TODO: 
+      ;;
+    AIX)
+      t=$my_tmpdir/lslpp${p}$$
+      for p in $TECTIA_PRODUCTS_AIX; do
+        debug "Probing for $p..."
+        lslpp -L ${p} >$t 2>&1
+         if [ $? = 0 ]; then
+           cat $t
+         fi
+         rm $t
+      done
+      ;;
+    HP-UX)
+      for p in $TECTIA_PRODUCTS_HP; do
+        debug "Probing for $p..."
+         t=$my_tmpdir/swlist${p}$$
+         swlist -v $p >$t 2>&1
+         if [ $? = 0 ]; then
+           cat $t
+         fi
+         rm $t
+      done
+      ;;
+    SunOS)
+      for p in $TECTIA_PRODUCTS_SOLARIS; do
+        pkginfo -q $p && pkginfo -l $p
+      done
+      ;;
+    Linux)
+      for p in $TECTIA_PRODUCTS_LINUX; do
+        debug "Probing for $p..."
+        
+        $HAVE_RPM && rpm -qis --provides $p 2>/dev/null | fgrep -v "is not installed"
+        if $HAVE_DPKG_QUERY; then
+          dpkg-query -s $p 2>/dev/null
+          dpkg-query -L $p 2>/dev/null
+        fi
+      done
+      ;;
+    *)
+      echo Unsupported platform ${UNAME} 1>&2
+      my_exit 2
+  esac
+}
+
+list_dir() {
+  dir="$1"
+  # relative -> absolute
+  if [ X"`echo $dir | sed -e 's/\(.\).*/\1/'`" != X/ ]; then
+    dir="`pwd`/$dir"
+  fi
+  tag="`echo $dir | tr / _`"
+
+  if [ -d "$dir" ]; then
+    redirect_output2 "listing_of$tag"
+      ls $ls_opts -Rta "$dir"
+    restore_output2
+  else
+    debug "Directory $d does not exist"
+  fi
+}
+
+#
+# Grab everything from /etc/ssh2 or equivalent.
+# 
+get_etc_ssh2() {
+  for dir in $TECTIA_ETCDIRS; do
+    if [ -d "$dir" ]; then
+      echo_bold "Copying everything (including PRIVATE KEYS) from ${dir}..."
+      sleep 2
+      list_dir "$dir"
+      get_dir "$dir"
+    fi
+  done
+}
+
+#
+# Grab Tectia configuration files from /etc or equivalent.
+# 
+get_configuration_tectia_global() {
+  for dir in $TECTIA_ETCDIRS; do
+    if [ -d "$dir" ]; then
+      verbose "Global Tectia configuration in ${dir}..."
+      list_dir "$dir"
+      for conf in $TECTIA_GLOBAL_CONFIG_FILES ; do
+        if [ ! -f ${dir}/${conf} ]; then
+          continue
+        fi
+        get_file "${dir}/${conf}"
+      done
+    fi
+  done
+}
+
+get_public_keys_openssh_global() {
+  for d in $OPENSSH_GLOBAL_PUBLIC_KEY_FILES; do
+    if [ -d "$d" ]; then
+      get_dir "$d"
+    fi
+  done
+}
+
+get_public_keys_tectia_global() {
+  for dir in $TECTIA_ETCDIRS; do
+    if [ -d "$dir" ]; then
+      verbose "Tectia public keys in ${dir}..."
+      for key in $TECTIA_GLOBAL_PRIVATE_KEY_FILES ; do
+        if [ -f ${dir}/${key}.pub ]; then
+          get_file "${dir}/${key}.pub"
+        fi
+        if [ -f ${dir}/${key}.crt ]; then
+          get_file "${dir}/${key}.crt"
+        fi
+        if [ -f ${dir}/${key}.cer ]; then
+          get_file "${dir}/${key}.cer"
+        fi
+      done
+      for subdir in "$TECTIA_GLOBAL_PUBLIC_KEY_DIRS"; do
+        if [ -d "${dir}/${subdir}" ]; then
+          get_dir "${dir}/${subdir}"
+        fi
+      done
+    fi
+  done
+}
+
+#
+# Grab everything from the user .ssh2 directory.
+# 
+get_user_ssh2() {
+  dir="$user_home/.ssh2"
+  if [ -d "$dir" ]; then
+    echo_bold "Copying everything (possibly including PRIVATE KEYS) from ${dir}..."
+    sleep 2
+    get_dir "$dir"
+  fi
+}
+
+#
+# Grab Tectia configuration files from the user
+# home directory.
+# 
+get_configuration_tectia_user() {
+  dir="$user_home/.ssh2"
+  if [ -d "$dir" ]; then
+    verbose "User configuration in ${dir}..."
+    list_dir "$dir"
+    for conf in $TECTIA_USER_CONFIG_FILES ; do
+      if [ -f ${dir}/${conf} ]; then
+        get_file "${dir}/${conf}"
+      fi
+    done
+  else
+    verbose "User Tectia directory $dir does not exist"
+  fi
+}
+
+#get_matching_key_files() {
+#  # Do nothing if there are no matches.
+#  # An elaborate way to tackle lack of nullglob.
+#  hits=`ls $1 | wc -l | tr -d ' '`
+#  if [ $hits = 0 ]; then
+#    :
+#  else
+#    for f in $1; do
+#      get_file "$f"
+#      for suffix in pub crt; do
+#        if [ X"`basename $f .$suffix`" != X"`basename $f`" ]; then
+#          prvkey="`dirname $f`/`basename $f .$suffix`"
+#          debug "Considering private key $prvkey"
+#          if [ -f "$prvkey" ]; then
+#            # TODO: We should check that the keypair matches.
+#            if $include_private_keys; then
+#              get_file "$prvkey"
+#            else
+#             verbose "Private key $prvkey for $f exists, skipping."
+#            fi
+#          else
+#            # This is not a problem for trust anchors,
+#            # ie. trusted (root) certificates or
+#            # lone public keys which are or were or could be
+#            # listed in .ssh2/authorization
+#            debug "Private key $prvkey for $f was not found."
+#          fi
+#        fi
+#      done
+#    done
+#  fi
+#}
+
+get_public_keys_openssh_user() {
+  for f in $OPENSSH_USER_PUBLIC_KEY_FILES; do
+    if [ -f "$user_home/.ssh/$f" ]; then
+      get_file "$user_home/.ssh/$f"
+    fi
+  done
+}
+
+get_public_keys_tectia_user() {
+  dir="$user_home/.ssh2"
+  if [ -d "$dir" ]; then
+    verbose "User public keys in ${dir}..."
+    get_matching_files "$dir/*.pub"
+    get_matching_files "$dir/*.crt"
+    get_matching_files "$dir/*.cer"
+    for subdir in "$TECTIA_USER_PUBLIC_KEY_DIRS"; do
+      if [ -d "${dir}/${subdir}" ]; then
+        get_dir "${dir}/${subdir}"
+      fi
+    done
+  else
+    debug "User Tectia directory $dir does not exist"
+  fi
+}
+
+#
+# Do not completely believe that OS package manager. Horrible manual
+# tweaks may have happened. Run the Tectia binaries to obtain the real
+# version of installed Tectia products.
+#
+# TODO: Find relocated installations on Solaris.
+#
+print_tectia_versions() {
+  redirect_output tectia_versions
+  separator
+  header 'Client version '
+  verbose "Searching for installed Tectia clients..."
+  for c in $TECTIA_CLIENT_BINARIES; do
+    if [ -x "$c" ]; then
+      echo ${c}:
+      verbose "  ${c}"
+      ls $ls_opts $c
+      $c -V -v
+    fi
+  done
+  header 'Server version '
+  verbose "Searching for installed Tectia servers..."
+  for s in $TECTIA_SERVER_BINARIES; do
+    if [ -x "$s" ]; then
+      echo ${s}:
+      verbose "  ${s}"
+      ls $ls_opts $s
+      $s -V -v
+    fi
+  done
+  restore_output
+}
+
+myname="`basename $0`"
+UNAME=${TROUBLESHOOT_FAKE_UNAME:-`uname`}
+whoami=`PATH="$PATH:/usr/ucb" whoami`
+
+# Figure out my location so I can include myself in the
+# output archive.
+myname_long="$0"
+if [ X"`echo $myname_long | sed -e 's/\(.\).*/\1/'`" != X/ ]; then
+  myname_long="`pwd`/$myname_long"
+  if [ ! -f "$myname_long" ]; then
+    # I was found on PATH
+    if [ $UNAME != OS/390 ]; then
+      myname_long="`which $0`"
+      if [ ! -f "$myname_long" ]; then
+        # I do not exist. I guess I was piped to the shell.
+        myname_long="ssh-troubleshoot"
+      fi
+    else
+      # No which(1) on z/OS
+      myname_long="ssh-troubleshoot"
+    fi
+  fi
+fi
+if [ X$myname_long = X/bin/sh ]; then
+  myname="ssh-troubleshoot"
+  myname_long="$myname"
+fi
+
+DESCRIPTION="
+Description:
+  $myname is a tool for collecting information on the operating system
+  (its version, patches, configuration settings, installed software
+  components and current environment and state) and on the SSH Tectia
+  installation (installed product versions, their global and
+  user-specific configurations. The collected information will be
+  stored in a tar file and can be used for troubleshooting purposes.
+"
+
+USAGE="Usage:
+  $myname [ options ] [ command [ command-options ] ]
+
+  Options:
+  -o, --output filename
+      Stores the result data to this file. If the the filename is '-',
+      $myname outputs data to the standard output.
+      Default is
+      ${SSH_TROUBLESHOOT_OUTFILE}.
+
+  -u, --user
+      Set the user. Default is the current user ($whoami). For the
+      info command this affects the home directory from which the
+      Tectia configuration files are grabbed.
+
+  -k, --keep-going
+      Continue as much as possible after an error.
+
+  -q, --quiet
+      Suppress detailed report about command progress, report
+      only errors.
+
+  Options must be given separately. They cannot be combined like '-Dv'.
+
+  Commands:
+  info
+      Gather information about system configuration.
+      The data will be a tar archive.
+      This is the default action.
+
+      Command options for info command:
+
+      --include-private-keys
+          Include everything from the Tectia configuration directories
+          in the result data, also private keys.
+          Private keys and unrecognized files are not included by default.
+
+  Examples:
+    $myname info
+"
+
+debugp=false
+verbosep=true
+keep_going=false
+while [ X != "X$*" ]; do
+  case "$1" in
+    -h|--help)
+      echo "$DESCRIPTION"
+      echo "$USAGE"
+      my_exit 0
+      ;;
+    -V|--version)
+      echo "Revision $Rev$Date: 2009-11-12 17:54:36 +0200 (Thu, 12 Nov 2009)"
+      my_exit 0
+      ;;
+    -q|--quiet)
+      verbosep=false
+      shift
+      ;;
+    -d|--debug)
+      verbosep=true
+      debugp=true
+      shift
+      ;;
+    -o|--output)
+      shift
+      SSH_TROUBLESHOOT_OUTFILE="$1"
+      if [ X = X"$SSH_TROUBLESHOOT_OUTFILE" ]; then
+        printf "$USAGE" 1>&2
+        my_exit 9
+      fi
+      shift
+      ;;
+    -u|--user)
+     shift
+     tectia_user="$1"
+     if [ X = "X$tectia_user" ]; then
+        printf "$USAGE" 1>&2
+        my_exit 9
+     fi
+     shift
+     ;;
+    -k|--keep-going)
+     keep_going=true
+     shift
+     ;;
+    -*)
+      printf "$USAGE" 1>&2
+      my_exit 9
+      ;;
+    *)
+      command="$1"
+      shift
+      break
+      ;;
+  esac
+done
+
+initialize
+if [ "X$command" = X ]; then
+  printf "$USAGE" 1>&2
+  my_exit 9
+fi
+
+setup_archive() {
+  my_tmpdir="${TMP:-/tmp}/ssh-troubleshoot-tmp.$$"
+  archive_tmpdir="$my_tmpdir/ssh-troubleshoot-data-$host_and_timestamp"
+  archive_tmpdir_files="$archive_tmpdir/files"
+  archive_tmpdir_output="$archive_tmpdir/output"
+  mkdir "$my_tmpdir" && \
+    mkdir "$archive_tmpdir" && \
+    mkdir "$archive_tmpdir_files" && \
+    mkdir "$archive_tmpdir_output"
+  if [ $? != 0 ] ;then 
+    echo "Failed to create work directory $my_tmpdir"
+    my_exit 11
+  fi
+  chmod 700 "$my_tmpdir" # Belt and suspenders
+  my_trap 10
+}
+
+create_tarball() {
+  cwdbak="`pwd`"
+  cd "$my_tmpdir"
+  # Make all directories user writable so the extracted
+  # output data directory can be easily deleted.
+  find . -type d -exec chmod u+w \{\} \;
+  echo $SSH_TROUBLESHOOT_OUTFILE | grep '^/' >/dev/null 2>&1
+  if [ $? = 0 ]; then
+    trg="$SSH_TROUBLESHOOT_OUTFILE"
+  else
+    trg="${cwdbak}/$SSH_TROUBLESHOOT_OUTFILE"
+  fi
+  tar -${tar_extra_opts}cf "$trg" *
+  if [ $? != 0 ]; then
+    echo Failed to create "$trg"
+    my_exit 5
+  else
+    handle_with_care="
+Please note that the output file may contain security critical data which
+must be handled and distributed with appropriate care.
+"
+    if $i_have_tty; then
+      echo_bold "$handle_with_care"
+    else
+      echo_bold "$handle_with_care" >&2
+    fi
+    sleep 2
+    echo Output file is "$SSH_TROUBLESHOOT_OUTFILE"
+  fi
+  cd "$cwdbak"
+}
+
+case "$command" in
+  info)
+    include_private_keys=false
+    create_archive=true # Might/will be configurable?
+
+    while [ X != "X$*" ]; do
+      case "$1" in
+        --include-private-keys)
+          include_private_keys=true
+          shift
+          ;;
+        *)
+          printf "$USAGE" 1>&2
+          my_exit 9
+          ;;
+      esac
+    done
+
+    verbose "User is $tectia_user, home directory is $user_home"
+    if [ "-" != "$SSH_TROUBLESHOOT_OUTFILE" ]; then
+      :>"$SSH_TROUBLESHOOT_OUTFILE"
+      if [ $? != 0 ]; then
+        echo "Cannot create output file $SSH_TROUBLESHOOT_OUTFILE"
+        my_exit 3
+      fi
+      rm "$SSH_TROUBLESHOOT_OUTFILE"
+    fi
+    $create_archive && setup_archive
+    if [ "X$myname_long" != X -a -r "$myname_long" ]; then
+      get_file "$myname_long"
+    fi
+    redirect_output ssh_troubleshoot_revision
+      echo "Revision $Rev$Date: 2009-11-12 17:54:36 +0200 (Thu, 12 Nov 2009)"
+    restore_output
+
+    get_environment_et_al # printenv, id, ...
+
+    redirect_output installed_software # swlist/pkginfo/rpm -q
+      list_os_software_tectia
+      list_os_software_all
+    restore_output
+    print_tectia_versions  # Find Tectia binaries and run them with -V
+
+    if $include_private_keys; then
+      # Brutally get everything if we are allowed to get private keys
+      get_etc_ssh2
+      get_user_ssh2
+    else
+      # Carefully pick well known public keys and configuration files
+      get_configuration_tectia_global # Tectia configuration from /etc/ssh2
+      get_configuration_tectia_user   # Tectia configuration from .ssh2 under user home
+      get_public_keys_tectia_global # Public keys from /etc/ssh2: server public key,
+                                    # known hosts (for public key server authentication),
+                                    # trusted hosts (for host-based user authentication).
+      get_public_keys_tectia_user   # Public keys from .ssh2 under user home: known
+                                    # hosts and user public keys
+    fi
+    get_public_keys_openssh_global  # Recent Tectia products honor also OpenSSH
+    get_public_keys_openssh_user    # known hosts
+
+    get_os_info # OS version and patches
+    get_os_configuration # Misc OS configuration files from /etc/
+    get_os_state # Run ifconfig, ps and the like, get selected items from /proc/
+    get_syslog_output # Try to include selected syslog output files.
+
+    $create_archive && create_tarball # Finalize
+    my_exit 0
+    ;;
+   *)
+    printf "$USAGE" 1>&2
+    my_exit 1
+    ;;
+esac

@@ -1,0 +1,373 @@
+.TH ssh-cmpclient-g3 1 "16 June 2017"  
+.SH NAME
+ssh-cmpclient-g3 \- CMP enrollment client
+.SH SYNOPSIS
+.nf
+ssh\-cmpclient\-g3 command [options] access [name]
+
+Where command is one of the following:
+
+     INITIALIZE psk|racerts keypair template
+     ENROLL certs|racerts keypair template
+     UPDATE certs [keypair]
+     POLL psk|certs|racerts id
+
+     RECOVER psk|certs|racerts template
+     REVOKE psk|certs|racerts template
+     
+     TUNNEL racerts template
+
+Most commands can accept the following options:
+     \-B            Perform key backup for subject keys.
+     \-o prefix     Save result into files with given prefix.
+     \-O filename   Save the result into the specified file. 
+                   If there is more than one result file, 
+                   the remaining results are rejected.
+     \-C file       CA certificate from this file.
+     \-S url        Use this SOCKS server to access the CA.
+     \-H url        Use this HTTP proxy to access the CA.
+     \-E            PoP by encryption (CA certificate needed).
+     \-v num        Protocol version 1|2 of the CA platform. Default is 2.
+     \-y            Non\-interactive mode. All questions answered with 'y'.
+     \-N file       Specifies a file to stir to the random pool.
+     \-d level      Set debug level.
+     \-Z provspec   Specifies external key provider for the private key.
+                   The format of provspec is "providername:initstring".
+     
+
+The following identifiers are used to specify options:
+     psk      \-p refnum:key (reference number and pre\-shared key)
+              \-p file (containing refnum:key)
+              \-i number (iteration count, default 1024)
+     certs    \-c file (certificate file) \-k url (private\-key URL) 
+     racerts  \-R file (RA certificate file) \-k url (RA private\-key URL)
+     keypair  \-P url (private\-key URL)
+     id       \-I number (polling ID)
+     template \-T file (certificate template)
+              \-s subject\-ldap[;type=value]
+              \-u key\-usage\-name[;key\-usage\-name]
+              \-U extended\-key\-usage\-name[;extended\-key\-usage\-name]
+     access   URL where the CA listens for requests.
+     name     LDAP name for the issuing CA (if \-C is not given).
+
+Key URLs are either valid external key paths or in the format:
+     "generate://savetype:passphrase@keytype:size/save\-file\-prefix"
+     "file://passphrase/relative\-key\-file\-path"
+     "file:relative\-key\-file\-path"
+     "any\-key\-file\-path"
+
+The key generation "savetype" can be:
+ \- ssh2, secsh2, secsh (Secure Shell 2 key type)
+ \- ssh1, secsh1 (legacy Secure Shell 1 key type)
+ \- pkcs1 (PKCS #1 format)
+ \- pkcs8s (passphrase\-protected PKCS #8, "shrouded PKCS #8")
+ \- pkcs8 (plain\-text PKCS #8)
+ \- x509 (Tectia\-proprietary X.509 library key type)
+
+     \-h Prints usage message.
+     \-F Prints key usage extension and keytype instructions.
+     \-e Prints command\-line examples.
+.fi
+.SH DESCRIPTION
+The ssh\-cmpclient\-g3 command-line tool is a 
+certificate enrollment client that uses the CMP protocol. It can generate an 
+RSA or DSA public-key pair and get certificates for their public components. 
+CMP is specified by the IETF PKIX Working Group for certificate life-cycle 
+management, and is supported by some CA platforms, such as RSA Keon.
+.SH COMMANDS
+The ssh\-cmpclient\-g3 command-line command keywords are listed below. 
+Shorthands longer than three letters can be used to identify the 
+command. The commands are case-insensitive. The user must specify the CA 
+address URL for each command. Here the term "user" refers to a user, program, 
+or hardware device.
+.TP 
+\fBINITIALIZE\fR
+Requests the user's initial certificate. The request is 
+authenticated using the reference number and the corresponding key 
+(PSK) received from the CA or RA using some out-of-band mechanism. 
+
+The user must specify the PSK, the asymmetric key pair, and a 
+subject name.
+.TP 
+\fBENROLL\fR
+Requests a new certificate when the user already has a valid 
+certificate for the key. This request is similar to 
+initialize except that it is authenticated using 
+public-key methods.
+.TP 
+\fBPOLL\fR
+Polls for a certificate when a request was not immediately 
+accepted. 
+.TP 
+\fBUPDATE\fR
+Requests an update of an existing certificate (replacement). The 
+issued certificate will be similar to the existing certificate (names, 
+flags, and other extensions). The user can change the key, and the 
+validity times are updated by the CA. This request is authenticated by 
+a valid existing key pair and a certificate.
+.TP 
+\fBRECOVER\fR
+Requests recovery of a backed-up key. This request is 
+authenticated either by PSK-based or certificate-based authentication. 
+The template describes the certificate whose private key has already 
+been backed up and should be recovered. Users can only recover keys 
+they have backed up themselves.
+.TP 
+\fBREVOKE\fR
+Requests revocation for a key specified in the template. 
+Authentication of the request is made using a PSK or a certificate 
+belonging to the same user as the subject of revocation.
+.TP 
+\fBTUNNEL\fR
+Operates in RA tunnel mode. Reads requests and optionally 
+modifies the subject name, alternative names, and extensions based on 
+the command line. Approves the request and sends it to the CA.
+.SH OPTIONS
+The ssh\-cmpclient\-g3 command-line options are listed below. Note 
+that when a file name is specified, an existing file with the same name 
+will be overwritten. When specifying subject names or other strings that contain spaces, enclose 
+them in quotation marks ("").
+.TP 
+\fB\-B\fR
+Requests private key backup to be performed for the initialize, 
+enroll, and update commands.
+.TP 
+\fB\-o \fR\fIprefix\fR
+Saves resulting certificates and CRLs into files with the given 
+\fIprefix\fR. The prefix is first appended by a number, followed by the file 
+extension .crt or .crl, depending on the type of object.
+.TP 
+\fB\-O \fR\fIfilename\fR
+Saves the result into the specified absolute filename. If there 
+is more than one result file, the remaining results are 
+rejected.
+.TP 
+\fB\-C \fR\fIfile\fR
+Specifies the file path that contains the CA certificate. If key 
+backup is done, the file name must be given, but in most cases the 
+LDAP name of the CA can be given instead.
+.TP 
+\fB\-S \fR\fIurl\fR
+Specifies the SOCKS URL if the CA is located behind a SOCKS-
+enabled firewall. The format of the URL is: 
+socks://[username@]server[:port][/network/bits[,network/bits]]
+.TP 
+\fB\-H \fR\fIurl\fR
+Uses the given HTTP proxy server to access the CA. The format of 
+the URL is: http://server[:port]/
+.TP 
+\fB\-E\fR
+Performs encryption proof of possession if the CA supports it. 
+In this method of PoP, the request is not signed, but instead the PoP 
+is established based on the ability to decrypt the certificates 
+received from the CA. The CA encrypts the certificates with the user's 
+public key before sending them to the user.
+.TP 
+\fB\-v \fR\fInum\fR
+Selects the CMP protocol version. This is either value 1, for an 
+RFC 2510-based protocol, or 2 (the default) for CMPv2.
+.TP 
+\fB\-N \fR\fIfile\fR
+Specifies a file to be used as an entropy source during key generation.
+.TP 
+\fB\-d \fR\fIlevel\fR
+Sets the debug level string to \fIlevel\fR.
+.TP 
+\fB\-Z \fR\fIprovspec\fR
+Specifies the external key provider for the private key. Give 
+\fIprovspec\fR in the format 
+\fI"providername:initstring"\fR.
+.PP
+The usage line uses the following meta commands:
+.TP 
+\fBpsk\fR
+The reference number and the corresponding key value given by the CA 
+or RA.
+.RS 
+.TP 
+\fB\-p \fR\fIrefnum:key|file\fR
+refnum and key are character strings 
+shared among the CA and the user. refnum identifies the 
+secret key used to authenticate the message. The 
+refnum string must not contain colon characters. 
+
+Alternatively, a filename containing the reference number and 
+the key can be given as the argument.
+.TP 
+\fB\-i \fR\fInumber\fR
+number indicates the key hashing iteration count.
+.RE
+.TP 
+\fBcerts\fR
+The user's existing key and certificate for authentication.
+.RS 
+.TP 
+\fB\-k \fR\fIurl\fR
+URL specifying the private key location. This is an external 
+key URL whose format is specified in \fBssh-cmpclient-g3\fR(1).
+.TP 
+\fB\-c \fR\fIfile\fR
+Path to the file that contains the certificate issued to the 
+public key given in the \fB\-k\fR option argument.
+.RE
+.TP 
+\fBracerts\fR
+In RA mode, the RA key and certificate for authentication.
+.RS 
+.TP 
+\fB\-k \fR\fIurl\fR
+URL specifying the private key location. This is an external 
+key URL whose format is specified in \fBssh-cmpclient-g3\fR(1).
+.TP 
+\fB\-R \fR\fIfile\fR
+Path to the file that contains the RA certificate issued to 
+the public key given in the \fB\-k\fR option 
+argument.
+.RE
+.TP 
+\fBkeypair\fR
+The subject key pair to be certified.
+.RS 
+.TP 
+\fB\-P \fR\fIurl\fR
+URL specifying the private key location. This is an external 
+key URL whose format is specified in \fBssh-cmpclient-g3\fR(1).
+.RE
+.TP 
+\fBid\fR
+Polling ID used if the PKI action is left pending.
+.RS 
+.TP 
+\fB\-I\fR \fInumber\fR
+Polling transaction ID \fInumber\fR given by the RA or 
+CA if the action is left pending. 
+.RE
+.TP 
+\fBtemplate\fR
+The subject name and flags to be certified.
+.RS 
+.TP 
+\fB\-T \fR\fIfile\fR
+The file containing the certificate used as the template for 
+the operation. Values used to identify the subject are read from 
+this, but the user can overwrite the key, key-usage flags, or 
+subject names.
+.TP 
+\fB\-s \fR\fIsubject-ldap[;type=value]*\fR
+A subject name in reverse LDAP format, that is, the most 
+general component first, and alternative subject names. The name 
+subject-ldap will be copied into the request verbatim. 
+
+A typical choice would be a DN in the format 
+"C=US,O=SSH,CN=Some Body", but in principle this can be 
+anything that is usable for the resulting certificate. 
+
+The possible type values are ip, 
+email, dn, dns, 
+uri, and rid.
+.TP 
+\fB\-u \fR\fIkey-usage-name[;key-usage-name]*\fR
+Requested key usage purpose code. The following codes are 
+recognized: digitalSignature, 
+nonRepudiation, keyEncipherment, 
+dataEncipherment, keyAgreement, 
+keyCertSign, cRLSign, 
+encipherOnly, decipherOnly, and 
+help. The special keyword help lists the supported key 
+usages which are defined in RFC 3280.
+.TP 
+\fB\-U \fR\fIextended-key-usage-name[;extended-key-usage-name]*\fR
+Requested extended key usage code. The following codes, in 
+addition to user-specified dotted OID values are recognized: 
+serverAuth, clientAuth, 
+codeSigning, emailProtection, 
+timeStamping, ikeIntermediate, and 
+smartCardLogon.
+.RE
+.TP 
+\fBaccess\fR
+Specifies the CA address in URL format. Possible access 
+methods are HTTP (http://host:port/path), or plain TCP 
+(tcp://host:port/path). If the host address is an IPv6 
+address, it must be enclosed in square brackets (http://[IPv6-address]:port/). 
+.TP 
+\fBname\fR
+Optionally specifies the destination CA name for the operation, 
+in case a CA certificate was not given using the option \fB\-C\fR.
+.SH EXAMPLES
+.SS "INITIAL CERTIFICATE ENROLLMENT"
+This example provides commands for enrolling an initial certificate for 
+digital signature use. It generates a private key into a PKCS #8 plaintext file named 
+initial.prv, and stores the enrolled certificate into file 
+initial-0.crt. The user is authenticated to the CA with the key 
+identifier (refnum) 62154 and the key ssh. The subject 
+name and alternative IP address are given, as well as key-usage flags. 
+The CA address is pki.ssh.com, the port 8080, and the CA name 
+to access Test CA 1.
+.PP
+.nf
+$ ssh\-cmpclient\-g3 INITIALIZE \\
+   \-P generate://pkcs8@rsa:2048/initial \-o initial \\
+   \-p 62154:ssh \\
+   \-s 'C=FI,O=SSH,CN=Example/initial;IP=1.2.3.4' \\
+   \-u digitalsignature \\
+   http://pki.ssh.com:8080/pkix/ \\
+   'C=FI, O=SSH Communications Security Corp, CN=SSH Test CA 1 No Liabilities'
+.fi
+.PP
+As a response the command presents the issued certificate to the 
+user, and the user accepts it by typing yes at the prompt.
+.PP
+.nf
+Certificate =
+  SubjectName = <C=FI, O=SSH, CN=Example/initial>
+  IssuerName = <C=FI, O=SSH Communications Security Corp, 
+    CN=SSH Test CA 1 No Liabilities>
+  SerialNumber= 8017690
+  SignatureAlgorithm = rsa\-pkcs1\-sha1
+  Validity = ...
+  PublicKeyInfo = ...
+  Extensions =
+      Viewing specific name types = IP = 1.2.3.4
+    KeyUsage = DigitalSignature
+    CRLDistributionPoints = ...
+    AuthorityKeyID =
+      KeyID = 3d:cb:be:20:64:49:16:1d:88:b7:98:67:93:f0:5d:42:81:2e:bd:0c
+    SubjectKeyID =
+      KeyId = 6c:f4:0e:ba:b9:ef:44:37:db:ad:1f:fc:46:e0:25:9f:c8:ce:cb:da
+  Fingerprints =
+    MD5 = b7:6d:5b:4d:e0:94:d1:1f:ec:ca:c2:ed:68:ac:bf:56
+    SHA\-1 = 4f:de:73:db:ff:e8:7d:42:c4:7d:e1:79:1f:20:43:71:2f:81:ff:fa
+
+Do you accept the certificate above? yes
+
+.fi
+.SS "KEY UPDATE"
+Before the certificate expires, a new certificate with updated validity 
+period should be enrolled. ssh\-cmpclient\-g3 supports key update, 
+where a new private key is generated and the key update request is 
+authenticated with the old (still valid) certificate. The old 
+certificate is also used as a template for issuing the new certificate, 
+so the identity of the user will not be changed during the key update. 
+With the following command you can update the key pair, which was 
+enrolled in the previous example. Presenting the resulting certificate has 
+been left out.
+.PP
+.nf
+$ ssh\-cmpclient\-g3 UPDATE \\
+   \-k initial.prv \-c initial\-0.crt \-P \\
+   generate://pkcs8@rsa:2048/updatedcert \-o updatedcert \\
+   http://pki.ssh.com:8080/pkix/ \\
+   "C=FI, O=SSH Communications Security Corp, CN=SSH Test CA 1 No Liabilities"
+.fi
+.PP
+The new key pair can be found in the files with the updatedcert 
+prefix. The policy of the issuing CA needs to also allow automatic key 
+updates if ssh\-cmpclient\-g3 is used in the UPDATE mode. 
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-certview-g3\fR(1),
+\fBssh-scepclient-g3\fR(1) 

@@ -1,0 +1,942 @@
+Release Notes for Tectia Client 6.4.15
+---------------------------------------------
+
+21 June 2017
+
+
+(C) 2017 SSH Communications Security Corporation
+This software is protected by international copyright laws.
+All Rights Reserved.
+
+
+Table of Contents
+
+1.   About This Release
+2.   New Features
+3.   Bug Fixes
+4.   Known Issues
+5.   Further Information
+
+
+1.   About This Release
+-----------------------
+
+  The 6.4 release of Tectia Client is declared feature complete and Long
+  Term Supported (LTS). Therefore, it is supported for 3 years from the
+  release date of 6.4.12, until October 2018. It is possible to further
+  extend that support for 2 more years (until October 2020). There will
+  be 6.4 maintenance releases which will fix critical bugs, but no new
+  features will be added to any future 6.4 release.
+
+  Items addressed in this release are listed under the "6.4.15" section.
+
+  We recommend uninstalling any SSH Secure Shell and SSH Tectia 4.x products
+  before installing Tectia 6.4 products.
+  For the installation instructions, refer to the Tectia Server Administrator
+  Manual.
+
+2.   New Features
+-----------------
+
+The following new features have been implemented in Tectia Client:
+
+New Features in 6.4.15
+----------------------
+
+(FB #53144)
+- Windows: Added support for using environment variable DISPLAY to
+  overwrite default X11 display setting. The default for display is
+  ":0", and this can be changed on Windows command line by issuing
+  command: "set DISPLAY=:1", for example.
+
+
+New Features in 6.4.14
+----------------------
+
+(FB #47742)
+- Windows: Added support for Windows Server 2016 for Tectia Client and
+  Server.
+
+(FB #48552)
+- Windows: Added support for Windows 10 Anniversary Update for Tectia
+  Client and Server.
+
+
+New Features in 6.4.13
+----------------------
+
+(FB #40754)
+- Windows: Added support for Windows 10 for Tectia Client and Server.
+
+(FB #43071)
+- AIX: IBM AIX 5.3 is no longer supported.
+- Solaris: Oracle Solaris 9 is no longer supported.
+- Linux: SLED 10 and 11 and SLES 9 are no longer supported.
+
+(FB #42520)
+- All platforms: Installed host key is now 2048 bits by default.
+
+(FB #43942)
+- All platforms: Default key type in key generation is now RSA by default.
+
+
+New Features in 6.4.12
+----------------------
+
+(FB #39128)
+- All Platforms: The key-exchange method diffie-hellman-group1-sha1 was
+  removed from the Connection Broker's factory default configuration. The
+  diffie-hellman-group1-sha1 KEX method uses the 1024-bit Oakley group1,
+  which is small by current standards, as shown by the LogJam paper.
+
+  The ssh-keyfetch utility uses from now on diffie-hellman-group14-sha1
+  instead of group1.
+
+(FB #38034)
+- All Platforms: When 'end-point-identity-check="yes"', user logon with a
+  short hostname is allowed in addition to FQDN in server authentication
+  with host certificate. With a short hostname, a warning indicating the
+  matched certificate is issued.
+
+(FB #39511)
+- Windows: Tectia Connections Configuration GUI now allows creation of
+  keys larger than 3072 bits (up to 8192 bits).
+
+(FB #36435)
+- Windows: The Tectia Server package now includes also Tectia Client
+  components. If you previously have Tectia Client installed, the Server
+  installation will fold that installation in, resulting in a Server
+  installation. It is possible to install the package without the client
+  components. Installing Tectia ConnectSecure and Server is supported
+  only if the two packages are of the same version.
+
+(FB #37320)
+- Linux: SLES 12 and SLED 12 are now officially supported platforms.
+
+(FB #34058)
+- All Platforms: The Connection Broker configuration (XML) file now has
+  options for certificate validation similar to the Server: cache-size,
+  max-crl-size, external-search-timeout, max-ldap-response-length, and
+  ldap-idle-timeout. This allows configuring the Broker to accept very
+  large CRLs, for example. No GUI support as of yet.
+
+(FB #39932)
+- Windows: Upgraded Qt to 4.8.3 and ICU to 51.2. The software is now
+  built with Visual Studio 2013. The created MSI packages will require
+  a Microsoft update to install on Windows 2003 and XP.
+
+(FB #41355)
+- Windows: Upgraded the OpenSSL cryptographic library used in FIPS mode
+  to version 1.0.2a.
+
+
+New Features in 6.4.11
+----------------------
+
+  Release 6.4.11 was z/OS specific, and there was no release for the
+  rest of the platforms.
+
+
+New Features in 6.4.10
+----------------------
+
+(FB #36108)
+- Linux, Solaris, HP-UX(IA-64): Upgraded the OpenSSL cryptographic
+  library used in FIPS mode to version 1.0.2a. HP-UX (PA-RISC) and IBM
+  AIX will continue to use the OpenSSL cryptographic library version
+  0.9.8.
+
+(FB #6373)
+- Windows: Added support for configuring signature algorithms in Tectia
+  Connections Configuration GUI.
+
+(FB #7588)
+- All Platforms: Added support for Elliptic Curve Diffie-Hellmann (ECDH) for
+  key exchange and Elliptic Curve Digital Signature Algorithm (ECDSA) for
+  keys, host keys and X.509 certificates. The curves used are NISTP256,
+  NISTP384 and NISTP521.
+
+(FB #35758)
+- All Platforms: Entrust certificates are no longer supported.
+
+
+New Features in 6.4.8
+---------------------
+
+(FB #32437)
+- Windows: Added support for Windows 8.1 for Tectia Client and Server.
+
+(FB #32330)
+- Linux: Added support for Red Hat Enterprise Linux 7 for Tectia Client,
+  Server and ConnectSecure.
+
+(FB #2327)
+- Windows: Added an "Authentication Method" drop-down list in the Quick
+  Connect dialog of Tectia SSH Terminal GUI for selecting the authentication
+  method to use regardless of what is specified in the configuration.
+
+(FB #28924)
+- All Platforms: Added standard MACs hmac-sha2-256 and hmac-sha2-512 as
+  specified in RFC 6668. This enables third-party compatibility when using
+  SHA-2 MACs in Tectia products.
+
+(FB #11528)
+- Windows: Tectia Client now provides SHA-2 support with certificates stored
+  in tokens via MSCAPI.
+
+
+New Features in 6.4.7
+---------------------
+
+(FB #27820)
+- Windows, Linux, Solaris, HP-UX(IA-64): Upgraded the OpenSSL cryptographic
+  library used in FIPS mode to version 1.0.1e. The OpenSSL library version
+  1.0.1e was compiled with -DOPENSSL_NO_HEARTBEATS. Tectia Client, Server and
+  ConnectSecure use only the fipscannister object of the OpenSSL library, and
+  therefore do not contain the Heartbleed vulnerability.
+  HP-UX (PA-RISC) and IBM AIX will continue to use the OpenSSL cryptographic
+  library version 0.9.8. This does not affect Tectia Server for Linux on IBM
+  System z, as the OpenSSL library is not provided.
+
+
+New Features in 6.4.6
+---------------------
+
+(FB #27640)
+- Windows: Updated the certificate used for signing the Windows packages.
+  Note that the new certificate uses SHA-2 to verify its signature. Microsoft
+  XP with Service Pack 2 does not support SHA-2 and therefore cannot guarantee
+  the integrity of the certificate (KB968730). For Microsoft Windows Server
+  2003 with Service Pack 2, to validate the certificate, apply the hotfix
+  to KB968730.
+
+(FB #27934)
+- Windows: Added support for Windows 2012 R2 for Tectia Client and Server.
+
+
+New Features in 6.4.5
+---------------------
+
+(FB #26129)
+- All Platforms: When the standard output of sftpg3/scpg3 is redirected to a
+  file, it will now contain the file transfer progress percentage.
+
+(FB #24430)
+- Windows: Added support for Windows 8 for Tectia Client and Server.
+
+
+New Features in 6.4.2
+---------------------
+
+(FB #19057)
+- All Platforms: Added to Server authentication CA Certificate an option
+  "endpoint identity check". Moreover, included options to ask, deny or accept
+  a certificate if the host name does not match the certificate's host name.
+
+(FB #21445)
+- Windows: Added support for Windows 2012 for SSH Tectia Client and Server.
+
+(FB #9607)
+- Solaris 11 SPARC: New installation packages available for Oracle Solaris 11
+  (SPARC).
+
+(FB #21784)
+- Solaris 11 x86-64: New installation packages available for Oracle Solaris 11
+  (x86-64).
+
+
+New Features in 6.4.0
+---------------------
+
+(FB #9829)
+- All platforms: Added support for agent protocol versions 1 and 2 in client
+  side - server side already supported it.
+
+(FB #19421)
+- All Platforms: scpg3, sftpg3 and FTP Conversion will now notify the JOBID
+  when dealing with SITE Filetype=JES. Please, refer to documentation to
+  obtain those JOBID with older Tectia clients or with third-party clients.
+
+
+3.   Bug Fixes
+--------------
+
+The following fixes have been implemented in Tectia Client:
+
+Bug Fixes in 6.4.15
+-------------------
+
+(FB #51740, FB #53819)
+
+- All platforms: Fixed a race condition on X.509 certificate validation
+  code causing rare server side crashes when client authentication using
+  certificates was enabled.
+
+  Certificate validator configuration parameters were adjusted upwards
+  to allow use of large revocation lists up to 50MB of size.
+
+(FB #53871)
+
+- All platforms: TCP socket listener backlog parameter increased to
+  facilitate higher port forwarding rate.
+
+(FB #54176)
+
+- All platforms: Fixed an error, where valid CRL's were dropped from
+  the local cache without a good reason.
+
+(FB #53226)
+
+- All platforms: Fixed a bug that caused OCSP responses to be
+  rejected, in case when the OCSP responses do not contain a
+  responseNonce (e.g. are pre-produced), and the response thisUpdate,
+  and producedAt timestamps were not within expected interval.
+
+
+Bug Fixes in 6.4.14
+-------------------
+
+(FB #51386)
+- All platforms: The sftpg3 chmod command with wildcards (*) no longer
+  sets incorrect permissions when only one subdirectory is present in the
+  directory.
+
+(FB #50407)
+- Windows/Linux: The passwords that are stored for connection profiles using
+  the Tectia Connections Configuration GUI are now masked in the GUI.
+
+
+Bug Fixes in 6.4.13
+-------------------
+
+(FB #40888)
+- Windows: On a machine with UAC enabled Tectia Client no longer fails when
+  run with elevated privileges while the Connection Broker is run with non-
+  elevated privileges.
+
+(FB #41019)
+- All platforms: Fixed an issue with certificate-based authentication where
+  an ampersand in the subject OU caused a broker XML error and client
+  disconnection.
+
+(FB #43853)
+- Windows: To avoid misunderstandings, the "Enable DoD PKI compliancy" label
+  on the CA Certificates page of Tectia Connections Configuration GUI was
+  renamed to "Enforce digital signature in key usage".
+
+(FB #28907)
+- All platforms: The last line in ssh_sftp_batch_file is no longer ignored.
+
+(FB #43094, #44961)
+- Linux: Removed unused files libgcc_s.so.1 and libstdc++.so.6 from the
+  packages.
+
+(FB #42057)
+- Windows: The text in the MSI installer notifying of an existing
+  installation is no longer truncated.
+
+
+Bug Fixes in 6.4.12
+-------------------
+
+(FB #41684)
+- All Platforms: Fixed an issue which caused automatic FTP tunnels to
+  intermittently fail to start.
+
+(FB #31609)
+- All Platforms: Fixed an issue that caused some file transfers using
+  streaming to fail silently, creating an empty file in the server.
+  NOTE: This issue was fixed in Tectia Server. To apply the fix,
+  Tectia Server must be upgraded.
+
+(FB #38874)
+- Windows: Command-line clients no longer print newline character
+  into standard output during authentication prompts. They are
+  printed to Windows console as the rest of the prompt to avoid
+  breaking tunneled applications (e.g., git) over sshg3.
+
+(FB #29477)
+- Windows: Fixed an issue in the Connections Configuration GUI which
+  caused copied profiles to occasionally get corrupted. This also
+  addresses a related issue where saving layouts caused the profiles
+  to get corrupted.
+
+(FB #34488)
+- Windows: Connections Configuration GUI: Copying profiles with dots in
+  their names no longer fails.
+
+(FB #36185)
+- Windows: Connections Configuration GUI: Copying profiles will no longer
+  overwrite profiles if they happen to have a conflicting name.
+
+(FB #38481)
+- All Platforms: "ssh-broker-ctl reload" with no Broker configuration
+  file no longer crashes.
+
+(FB #39648)
+- Windows: Setting debug level to 8 or higher no longer breaks
+  GUI client functionality.
+
+(FB #39130)
+- Unix: Host-based authentication should work with FIPS mode enabled.
+  AIX requires a work-around, see Known issues.
+
+(FB #37655)
+- Unix: OpenSSH agent forwarding for ECDSA keys now works.
+
+(FB #39749)
+- All Platforms: In FIPS mode, cryptographic operations with too small
+  keys (<1024 bits) will now be refused.
+
+(FB #38089)
+- All Platforms: Old or invalid licenses no longer cause warnings at
+  program startup if a valid license is found.
+
+
+Bug Fixes in 6.4.10
+-------------------
+
+(FB #33936)
+- Documentation: Generic improvements.
+
+(FB #35807)
+- All Platforms: Documented the SSH_SFTP_CHECKSUM_MODE environment variable.
+
+(FB #36392)
+- All Platforms: Documented the following deprecated elements and attributes
+  of the Tectia SSH Server and/or Client configuration files:
+  strict-host-key-checking
+  host-key-always-ask
+  accept-unknown-host-keys
+  transport-distribution
+  authentication-method
+  signature-algorithms (from the settings element)
+
+(FB #34417)
+- All Platforms: Fixed a potential crash in the Connection Broker that
+  occurred when handling a connection that was waiting for the passphrase,
+  and the SSH server that the Connection Broker was connecting to shut down.
+
+(FB #5732)
+- All Platforms: Removed the transport distribution element from the Tectia
+  Connections Configuration GUI, as the feature is no longer supported.
+
+(FB #13757)
+- Windows: Fixed a problem in the Tectia Connections Configuration GUI that
+  was preventing moving a connection profile from a folder to another folder.
+
+(FB #31290)
+- Windows, Linux, Solaris and HP-UX Itanium: On platforms where the OpenSSL
+  cryptographic library version 1.0.2a is used, ssh-keygen-g3 in FIPS mode
+  (--fips-mode) can now be used to generate RSA keys of length n*512,
+  where 2=<n=<24 (that is 1024, 1536, 2024, ... , 11776 and 12288 bits).
+
+(FB #36678)
+- All Platforms: ssh-broker-g3 will no longer crash if it fails to read its
+  configuration file because of faulty permissions.
+
+(FB #34693)
+- Windows: ssh-broker-ctl debug --log-file will always append the messages to
+  the log file (the same as with the --append option). This change does not
+  affect other platforms.
+
+(FB #34712)
+- All Platforms: ssh-broker-ctl will no longer busyloop when using add-crl or
+  add-certificate command without specifying a file name.
+
+
+Bug Fixes in 6.4.8
+------------------
+
+(FB #32851)
+- Windows: When using the Charismatics PKCS#11 interface to access a smart
+  card, the Connection Broker no longer crashes when inserting and removing
+  a smart card from the card reader.
+
+(FB #22128)
+- All Platforms: Fixed an issue in Tectia Client where short host name was
+  accepted in host authentication with certificate. It is no longer possible
+  to connect to a host without providing the FQDN.
+
+(FB #32440)
+- Documentation: Generic documentation improvements.
+
+(FB #32409)
+- Windows: Fixed a possible crash when shutting down Tectia Connections
+  Status GUI.
+
+(FB #32833)
+- Windows: Fixed a crash in the Connection Broker that was triggered when
+  attempting to use a certificate for authenticating and no valid signature
+  algorithms were available.
+
+
+Bug Fixes in 6.4.7
+------------------
+
+(FB #30784)
+- Documentation: Minor modifications to the documents.
+
+(FB #30811)
+- Documentation: References to MFT Events have been removed from the
+  documentation, as this version of the product does not support it.
+
+(FB #30186)
+- All Platforms: Active mode for static FTP tunneling no longer fails to work
+  when using IPv4 addresses.
+
+(FB #26499)
+- All Platforms: Removed sshg3 options +w/--try-empty-password and -w from the
+  manuals and help, as the feature is no longer supported.
+
+(FB #16364)
+- All Platforms: IPv6-wrapped IPv4 addresses are now rendered correctly in the
+  logs.
+
+(FB #29212)
+- Windows: In Tectia Connections Configuration GUI, added an input check to all
+  fields that accept numbers. The accepted range is 1-65535 for port numbers,
+  and 0-2147483647 (0x7fffffff) for other fields.
+
+(FB #29684)
+- All Platforms: With ssh-keygen-g3 in FIPS mode, it is now possible to
+  generate DSA keys larger than 1024 bits.
+
+(FB #19547)
+- All Platforms: sftpg3 and scpg3 no longer fail to get the current user name
+  when using the option (user=%username%) in a connection profile.
+
+(FB #25590)
+- Windows: In Tectia Connections Configuration GUI it is now possible to clear
+  previously added values of "Endpoint domain", "HTTP proxy URL" and "SOCKS
+  server URL".
+
+(FB #25630)
+- Windows: In Tectia Connections Configuration GUI, fixed inconsistent behavior
+  that occurred when adding new LDAP servers.
+
+(FB #29362)
+- Windows: The "Enable endpoint identity check" option in Tectia Connections
+  Configuration GUI had a wrong default value (Ask). It now has the correct
+  default value (Yes).
+
+(FB #22987)
+- All Platforms: In scpg3, when transferring a file, if the character code
+  set conversion of the file name fails for some characters, the conversion of
+  the file name is no longer aborted.
+
+
+Bug Fixes in 6.4.6
+------------------
+
+(FB #27191)
+- All Platforms: Newline conversions in Tectia file transfer clients no longer
+  fail to work when transferring files to a VShell Server (VanDyke).
+
+(FB #18435)
+- All Platforms: File transfers from Tectia Clients no longer crash when
+  transferring files in ASCII mode to a VShell Server (VanDyke).
+
+(FB #15146)
+- Windows: Fixed the display of certain incorrect error messages.
+
+(FB #27997)
+- Windows: GSSAPI authentication no longer fails in certain conditions when
+  the security authentication package is too large.
+
+(FB #27995)
+- Windows: Users are now able to authenticate via GSSAPI when using the host
+  name, the fully qualified domain name or an IP address to define the
+  destination server.
+
+(FB #27645)
+- All platforms: Fixed a potential memory corruption when transferring files
+  recursively and using a configuration file to specify the file transfer
+  advice strings.
+
+(FB #27943)
+- Windows: Fixed a bug in sshg3 which caused occasional hangs when run on
+  Windows 8.
+
+(FB #23843)
+- Windows: It is now possible to set GSSAPI ticket forwarding using the
+  Tectia Connections Configuration GUI.
+
+
+Bug Fixes in 6.4.5
+------------------
+
+(FB #19139)
+- All Platforms: Defining "summary-format" to print the file transfer progress
+  percentage no longer fails when connected to an OpenSSH server.
+
+Bug Fixes in 6.4.4
+------------------
+
+(FB #15430)
+- Windows: Fixed Tectia command-line clients to assume default window size if
+  they cannot obtain a proper value from the system.
+
+(FB #23697)
+- Windows: Fixed Tectia command-line clients to properly show
+  authentication prompts in nested connections.
+
+  When a user had a terminal session to Tectia Server on Windows running in
+  terminal mode "Stream" and within that session the user started a new
+  Tectia Client connection (from the host running Tectia Server), the
+  authentication prompts were not shown properly.
+
+Bug Fixes in 6.4.3
+------------------
+
+(FB #23393)
+- Windows: Enabled compatibility against third-party, non-standard
+  implementations of GSSAPI authentication.
+
+
+Bug Fixes in 6.4.2
+------------------
+
+(FB #21081)
+- All Platforms: In file transfer clients, ASCII and character set conversion
+  related site commands to Tectia SSH Server for IBM z/OS now work against
+  all versions of Tectia SSH Server for IBM z/OS.
+
+(FB #9610)
+- All Platforms: Fixed a memory leak in ssh-broker-g3 and in ssh-servant-g3.
+  The memory leak occurred in certain cases when GSSAPI authentication was
+  used.
+
+(FB #20335)
+- All Platforms: SSH_SFTP_CMD_GETPUT_MODE environment variable works again.
+
+(FB #20475)
+- All Platforms: The End-user license agreement (EULA) has been updated to
+  reflect the new company name.
+
+(FB #20710)
+- All Platforms: Tectia Client, Server and ConnectSecure executables no longer
+  fail to start when using relative path ./<executable_name>.
+
+(FB #16875)
+- All Platforms: scpg3 option "-a" no longer fails to do ASCII conversion.
+
+(FB #21380)
+- All Platforms: Broker acting as socks proxy no longer leaves connections
+  in close_wait state.
+
+
+Bug Fixes in 6.4.1
+------------------
+
+(FB #21081)
+- All Platforms: In file transfer clients, ASCII and character set conversion
+  related site commands to Tectia SSH Server for IBM z/OS now work against all
+  versions of Tectia SSH Server for IBM z/OS.
+
+
+Bug Fixes in 6.4.0
+------------------
+
+(FB #9829)
+- All platforms: Added support for agent protocol versions 1 and 2 in client
+  side - server side already supported it.
+
+(FB #18136)
+- All platforms: Broker no longer crashes when running in SOCKS proxy mode
+  and falling back to plain.
+
+(FB #13741)
+- Windows: Tectia Client on Windows Command Prompt no longer ignores errors
+  when sending terminal data to the server. Therefore, characters will no
+  longer be lost for this reason.
+
+(FB #16418)
+- Windows: Improved the efficiency of typing commands to the Tectia Client
+  on Windows Command Prompt.
+
+(FB #20335)
+- All Platforms: SSH_SFTP_CMD_GETPUT_MODE environment variable works again.
+
+(FB #20475)
+- All Platforms: The End-user license agreement (EULA) has been updated to
+  reflect the new company name.
+
+(FB #20710)
+- All Platforms: Tectia Client, Server and ConnectSecure executables no longer
+  fail to be started by relative path ./<executable_name>.
+
+
+4.   Known Issues
+-----------------
+The following issues are currently known to exist in Tectia Client:
+
+(FB #38886)
+- All Platforms: scpg3 and sftpg3 with --append overwrite the destination
+  file when the server is OpenSSH 6.4 or older.
+
+(FB# 39847)
+- AIX: Host-based authentication in FIPS mode requires copying or linking
+  the libcrypto.a to /lib or /usr/lib.
+
+(FB #36224, FB #36221)
+- Windows: Connections Configuration GUI: Dots do not work correctly in
+  profile names or profile folder names, because they are used internally
+  for the profile folder feature.
+
+(FB #36222)
+- Windows: Connections Configuration GUI: Empty connection profile folders
+  are not saved in the Broker configuration.
+
+(FB #36835)
+- All platforms: Remote translation tables only work when the site command
+  X=BIN is used. Local translation tables work as intended.
+
+(FB #37079)
+- Windows XP, 2003 and 2003R2: Authentication using ECDSA public keys and
+  certificates via MSCAPI is not supported on Windows XP, Windows Server
+  2003 and Windows Server 2003R2.
+
+(FB #19541)
+- Unix/Linux: When logged to the SSH Tectia Server, an executable will fail
+  to start if any parent of the current working directory is not readable
+  and relative paths are used to refer to the executable.
+
+(FB #13818)
+- All Platforms: The usage of IPv6 addresses in certificates is not yet
+  supported.
+
+(FB #3882)
+- z/OS: SFTP fails when attempting to transfer an empty MVS dataset. However,
+  FTP opens the file and proclaims that the transfer is completed without
+  generating an error.
+
+(FB #10425)
+- Unix: if OpenSSL 0.9.8 is installed on the host where Tectia Server is
+  installed, it may fail when using PAM with software that uses that OpenSSL
+  library.
+  Workaround if FIPS is not used: Rename the libcrypto.so.0.9.8 existent under
+  /opt/tectia/sshlib to another name (note that this will make FIPS mode
+  unusable).
+
+(FB #9840)
+- Solaris: On some Solaris configurations the ssh-capture tool does not
+  function without configuring the operating system. The runtime linking
+  environment must be adjusted to honor the LD_PRELOAD environment variable.
+  See the manual page of crle(1) for details.
+
+(FB #9367)
+- Windows: If the installation fails with error message "An error occurred
+  during the installation of assembly component {B708EB72-AA82-3EB7-8BB0-
+  D845BAB35C93D}. HRESULT: 0x80070BC9" use Windows Update to install
+  required operating system updates.
+
+(FB #9106)
+- AIX: Executables are now compiled in 64 bit. For PAM to work, the operating
+  system should point to the 64-bit versions of PAM libraries instead of the
+  32-bit versions.
+
+(FB #9530)
+- All platforms: Extra checks are done when starting the Tectia Server and
+  Connection Broker in the FIPS mode due to the OpenSSL FIPS cryptographic
+  library health check. This will lead to a noticeable delay in the start of
+  the process on slow machines.
+
+(FB #7726)
+- Windows: --summary-format newline option '\n' does not work on Windows.
+
+(FB #4725)
+- All platforms: The ssh-keygen will always use the default location of the
+  UserConfigDirectory, if no path is specified.
+
+(FB #4705)
+- Linux SE: If the common package is installed with SElinux disabled, the
+  following warning message will be given during the installation:
+    /usr/bin/chcon: can't apply partial context to unlabeled file
+    /opt/tectia/lib/shlib/libicudata.so.40
+    /usr/bin/chcon: can't apply partial context to unlabeled file
+    /opt/tectia/lib/shlib/libicuuc.so.40
+  This can be safely ignored.  However, if the SElinux enforcing is enabled
+  after the installation, the following command needs to be executed:
+    /usr/bin/chcon -t textrel_shlib_t /opt/tectia/lib/shlib/*.so
+
+(RQ #18958)
+- Windows: Password cannot be specified in a file with --password
+  command-line option.
+
+(RQ #18674)
+- Windows: Uploading files from "Upload Dialog" of the GUI file transfer
+  tool does not work when "Hide extensions for known file types" of Windows
+  Explorer is set to 'yes'.
+  Workaround: Enable file extensions. This issue will be fixed in an
+  upcoming maintenance release.
+
+(RQ #18484)
+- Windows Vista: When using an evaluation version of Tectia Client and
+  trying to import a commercial license on Windows Vista, the operation will
+  fail.
+  Workaround: Manually copy the license file to the licenses directory
+  under "%ProgramFiles%\SSH Communications Security\SSH Tectia\SSH Tectia
+  AUX\licenses".
+
+(RQ #18332)
+- Windows: When upgrading from a 4.x client, the connection profiles that
+  were migrated did not show up in the profile's drop-down menu on the
+  terminal client.  However, after restarting the Connection Broker the
+  migrated profiles will be shown on the client.
+
+(RQ #17537)
+- Windows: If the "Transparent tunneling" component of Tectia Client or
+  Tectia ConnectSecure is installed on a Windows XP computer in a domain
+  where firewall exceptions are managed by a group policy, the exceptions get
+  changed so that the computer becomes inaccessible from the network.
+  Workaround: Edit the exceptions manually so that, for example, the server
+  port becomes accessible.
+
+(RQ #17535)
+- Windows: SFTP GUI might cause the existing local copy of a file to be
+  partially overwritten in ASCII mode, when downloading of the file from the
+  remote server fails due to missing file permissions.
+
+(RQ #17528)
+- All platforms: The scpg3 command shows the transfer time incorrectly if
+  "--statistics=simple" is set.
+
+(RQ #17482)
+- All platforms: When trying to connect to a server that is not available
+  (i.e. the server is not running), the error message returned by
+  sshg3 is "Unable to connect to Broker". It should return "Unable to connect
+  to Server".
+
+(RQ #17368)
+- Windows: Reconnecting to the previously used Connection Profile by
+  pressing Enter in the Tectia Terminal or File Transfer GUI may fail in
+  some cases.
+  Workaround: Select the profile from the menu.
+
+(RQ #17343)
+- Windows: Removing a token while it is being read could in some cases
+  result in a Tectia Connection Broker failure.
+
+(RQ #17215)
+- Windows: Opening multiple remote tunnels in a profile against OpenSSH
+  servers can cause Tectia Connection Broker to fail.
+
+(RQ #17055)
+- Solaris: Installation packages do not detect the underlying Solaris
+  architecture to prevent installation of the x86-64 packages on x86
+  architecture. The packages can be installed but they will not work.
+
+(RQ #16986)
+- Windows: SFTP 'chmod' command is not supported against Tectia Server
+  running on Windows.
+
+(RQ #16902)
+- Unix: If scpg3 is used to copy a file to itself, the file will be
+  truncated and the scpg3 command hangs.
+
+(RQ #16573)
+- Unix: The 'finger' command does not show the idle time correctly when
+  logged in using SFTP.
+
+(RQ #16276)
+- Windows: When running sftpg3 in batch mode, the Connection Broker may log
+  the Broker_channel_process_exit_failed messages with status "Operation
+  failed". These are system internal events and do not indicate any failure
+  in the file transfer operation.
+
+(RQ #16270)
+- Windows: The exit values for scpg3 do not match the values mentioned in
+  the documentation in the following error situations: connection lost,
+  interrupting a file transfer using CTRL+C, trying to copy to a directory, but
+  the destination is not a directory. Nevertheless, in all these cases the
+  return value is non-zero.
+
+(RQ #15996)
+- All platforms: scpg3 does not warn about the existence of directories
+  when shell globbing is used, for example:
+  scpg3 "/tmp/testdir/*" user@server:/tmp
+  However, the correct warning is displayed if the scpg3 command is used
+  without globbing:
+  scpg3 /tmp/testdir/* user@server:/tmp
+
+(RQ #15973)
+- All platforms: The certificate validation path construction from LDAP
+  fails, if the LDAP server requires suffix ';binary' for the PKI binary blob
+  attribute names.
+
+(RQ #15948)
+- Windows: If the Connection Broker is started for another userID using the
+  'runas' command, the user dialogs are shown for the user who started the
+  process.
+
+(RQ #15921)
+- All platforms: The server creates empty files if a user tries to transfer
+  files without correct server-side permissions. The correct error message is
+  displayed.
+
+(RQ #15846)
+- Windows: Local TCP tunneling using listener port 0 does not work.
+
+(RQ #15006)
+- Windows: When accessing a Unix host using scpg3 or sftpg3, files with file
+  names that contain characters that are illegal in Windows file names (for
+  example: *, ? and ~) cannot be transferred or accessed if relative paths
+  are used.
+  Workaround: Use absolute paths for accessing the files on the Unix host
+  and escape the illegal characters with the tilde character '~'. Note also
+  that the files with illegal characters need to be renamed when transferred
+  to Windows. For example, to copy a file "file*name.txt" from user's Unix
+  home directory to Windows:
+  C:\> scpg3.exe user@server:/home/user/file~*name.txt filename.txt
+
+(RQ #14227)
+- Windows: If trying to connect from a Windows GUI client to an OpenSSH
+  server with a public key and option command="ls", the client hangs. When
+  performed with the Windows command-line client (sshg3) it works properly.
+
+(RQ #14226)
+- Windows: When using regular expressions in filter rules the dot character
+  '.' does not work as expected. For example, when using a filter rule for
+  tunneling of telnet.exe using regular expression: '.*.ssh.com' the
+  connection will not be tunneled even if the regular expression matched the
+  host address.
+  Workaround: Add a '\' in front of the '.' For example, the previous
+  regular expression should be:  '.*\.ssh\.com'
+
+(RQ #14222)
+- All platforms: If a wrong passphrase is provided several times for a key,
+  the Connection Broker skips it and proceeds to the next key. If it is an
+  OpenSSH key, once it has been skipped because of a decoding failure, the
+  Connection Broker makes no further attempts to use the key on subsequent
+  login attempts. The Connection Broker must be reloaded or restarted in order
+  to use that OpenSSH key for authentication.
+
+(RQ #14109)
+- Windows: Secure file transfer speed may be slower against Tectia
+  Server on Windows than against Tectia Server on Linux.
+
+(RQ #13377)
+- Windows: If multiple concurrent terminal services sessions are opened for
+  the same user, the services sessions share the same Connection Broker
+  session. This can cause the user banner and dialog boxes to be displayed to
+  the wrong session. Opening several concurrent terminal services sessions for
+  the same user does not provide secure separation of sessions.
+
+(RQ #11836)
+- All platforms: After changing the password on a Secure Shell server, but
+  before logging in with the new password, either the Connection Broker must be
+  restarted to close the previous connection, or the user must wait for the
+  connection to time out (by default 5 seconds). If this is not done, login
+  with the new password will not succeed.
+
+
+
+5.   Further Information
+------------------------
+
+  More information can be found on the man pages and in the Tectia manuals
+  that are also available at: http://www.ssh.com/services/online-resources/.
+
+  Additional licenses can be purchased from our online store at:
+  http://www.ssh.com/.

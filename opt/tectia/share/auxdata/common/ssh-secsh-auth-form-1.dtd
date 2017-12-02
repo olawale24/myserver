@@ -1,0 +1,134 @@
+<!--  									-->
+<!--  									-->
+<!-- secsh-auth-form.dtd						-->
+<!--  									-->
+<!-- Author: Timo J. Rinne <tri@ssh.com>				-->
+<!--  									-->
+<!-- Copyright (c) 2016 SSH Communications Security Corporation.	-->
+<!-- This software is protected by international copyright laws.	-->
+<!-- All rights reserved.						-->
+<!--  									-->
+<!-- Document type description for SecSh user authentication		-->
+<!-- forms XML format.  This should be a subset of xforms.		-->
+<!--									-->
+<!--									-->
+
+<!--									-->
+<!-- Attribute lang is a language tag according to RFC3066		-->
+<!--									-->
+<!ELEMENT label		(#PCDATA)>
+<!ATTLIST label		lang		CDATA		#IMPLIED>
+
+<!--									-->
+<!-- Attribute lang is a language tag according to RFC3066		-->
+<!--									-->
+<!ELEMENT hint		(#PCDATA)>
+<!ATTLIST hint		lang		CDATA		#IMPLIED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT value		(#PCDATA)>
+
+<!--									-->
+<!--									-->
+<!ELEMENT send		EMPTY>
+<!ATTLIST send		submission	NMTOKEN		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT input		(label,
+                         hint?,
+			 value?,
+			 send?)>
+<!ATTLIST input		ref		ID		#REQUIRED
+			maxinputlength	CDATA		#IMPLIED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT secret	(label,
+                         hint?,
+			 value?,
+			 send?)>
+<!ATTLIST secret	ref		ID		#REQUIRED
+			maxinputlength	CDATA		#IMPLIED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT output	(label,
+                         hint?,
+			 send?)>
+<!ATTLIST output	ref		NMTOKEN		#IMPLIED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT textarea	(label,
+                         hint?,
+			 value?,
+			 send?)>
+<!ATTLIST textarea	ref		ID		#REQUIRED
+			maxinputlength	CDATA		#IMPLIED>
+
+<!ELEMENT range		(label,
+			 hint?,
+			 value?,
+			 send?)>
+<!ATTLIST range		ref		ID		#REQUIRED
+			start		CDATA		#REQUIRED
+			end		CDATA		#REQUIRED
+			step		CDATA		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT trigger	(label,
+			 hint?,
+			 send?)>
+<!ATTLIST trigger	ref		ID		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT submit	(label,
+			 hint?)>
+<!ATTLIST submit	ref		ID		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT item		(label,
+			 hint?,
+			 value)>
+
+<!--									-->
+<!--									-->
+<!ELEMENT select1	(label,
+			 hint?,
+			 item+,
+			 value?,
+			 send?)>
+<!ATTLIST select1	ref		ID		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT select	(label,
+			 hint?,
+			 item+,
+			 value*,
+			 send?)>
+<!ATTLIST select	ref		ID		#REQUIRED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT group		(label,
+			 hint?,
+			 label*,
+    ((input|secret|textarea|submit|trigger|range|select|select1|output|group)+,
+			  label*)+)>
+<!ATTLIST group		id 		NMTOKEN		#IMPLIED>
+
+<!--									-->
+<!--									-->
+<!ELEMENT form		(label,
+			 hint?,
+			 (label|input|secret|textarea|submit|trigger|
+			  range|select|select1|output|group)+)>
+<!ATTLIST form		id		NMTOKEN		#REQUIRED
+			focus		NMTOKEN		#IMPLIED>
+

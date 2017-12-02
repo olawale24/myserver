@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="hostkeychanged">
+<label/>
+<label>Saved key for the host "%%%SERVERHOST-SERVERPORT%%%" does not match.</label>
+<label>
+@@
+@@ WARNING: SERVER HOST IDENTIFICATION HAS CHANGED!
+@@
+
+There are many possible reasons for this:
+1. The administrator of the remote host computer has changed the host key.
+2. The remote host computer is part of a server cluster.
+3. SOMEONE COULD BE EAVESDROPPING ON YOU RIGHT NOW (man-in-the-middle attack)!
+
+It is NOT RECOMMENDED to connect to the remote host computer until you have
+contacted the system administrator and found out why the host identification
+has changed.
+ 
+The fingerprint of the host public key is:
+"%%%HOSTKEYFINGERPRINT%%%"
+
+You can get a public key's fingerprint by running following command
+% ssh-keygen-g3 -F publickey.pub
+on the key file.  You should check the validity of the host key ASAP.
+
+If you choose to continue the connection without saving the changed
+key, the following steps will be taken to ensure your privacy:
+  - Agent forwarding is disabled to avoid attacks by corrupted servers.
+  - X11 forwarding is disabled to avoid attacks by corrupted servers.
+If you are not absolutely sure about what you are doing, choose Cancel
+and contact the administrator of the server system.
+</label>
+<select1 ref="hostkeycheck">
+<label>Please select how you want to proceed.</label>
+<item>
+  <label>Cancel the connection.</label>
+  <value>cancel</value>
+</item>
+<item>
+  <label>Proceed with the connection but do not save the new host key.</label>
+  <value>once</value>
+</item>
+<item>
+  <label>Proceed with the connection and replace the host key(s) in the database.</label>
+  <value>save</value>
+</item>
+<item>
+  <label>Proceed with the connection and add the host key as an alternate identification.</label>
+  <value>new</value>
+</item>
+<value>cancel</value>
+</select1>
+<submit ref="ok" >
+<label>OK</label>
+</submit>
+</form>

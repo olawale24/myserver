@@ -1,0 +1,850 @@
+<!--                                                                    -->
+<!--                                                                    -->
+<!-- secsh-server.dtd                                                   -->
+<!--                                                                    -->
+<!-- Copyright (c) 2016 SSH Communications Security Corporation.        -->
+<!-- This software is protected by international copyright laws.        -->
+<!-- All rights reserved.                                               -->
+<!--                                                                    -->
+<!-- Document type definition for the Tectia Server XML                 -->
+<!-- configuration files.                                               -->
+<!--                                                                    -->
+<!--                                                                    -->
+
+<!-- Tunable parameters used in the policy. -->
+
+<!-- Default connection action. -->
+<!ENTITY default-connection-action                      "allow">
+
+<!-- Default terminal action. -->
+<!ENTITY default-terminal-action                        "allow">
+
+<!-- Default subsystem action. -->
+<!ENTITY default-subsystem-action                       "allow">
+
+<!-- Default subsystem audit value. -->
+<!ENTITY default-subsystem-audit                        "yes">
+
+<!-- Default for allowing undefined blackboard entries by selectors. -->
+<!ENTITY default-allow-undefined-value                  "no">
+
+<!-- Default user-privileged value. -->
+<!ENTITY default-user-privileged-value                  "yes">
+
+<!-- Default user-password-change-needed value. -->
+<!ENTITY default-user-password-change-needed-value      "yes">
+
+<!-- Reverse mapping is not required by default in
+     publickey authentication. -->
+<!ENTITY default-auth-publickey-require-dns-match       "no">
+
+<!-- Default tunnel action. -->
+<!ENTITY default-tunnel-action                          "allow">
+
+<!-- Default command action. -->
+<!ENTITY default-command-action                         "allow">
+
+<!-- Default interactive command action. -->
+<!ENTITY default-interactive-command-action             "no">
+
+<!-- Default rekey interval in seconds. -->
+<!ENTITY default-rekey-interval-seconds                 "3600">
+
+<!-- Default rekey interval in bytes (1GB). -->
+<!ENTITY default-rekey-interval-bytes                   "1000000000">
+
+<!-- Default login grace time in seconds. -->
+<!ENTITY default-login-grace-time-seconds               "600">
+
+<!-- Default authentication action. -->
+<!ENTITY default-authentication-action                  "allow">
+
+<!-- Password authentication default failure delay in seconds. -->
+<!ENTITY default-auth-password-failure-delay            "2">
+
+<!-- Password authentication default maximum tries. -->
+<!ENTITY default-auth-password-max-tries                "3">
+
+<!-- Password cache is disabled by default -->
+<!ENTITY default-password-cache                         "no">
+
+<!-- DNS match not required by default in host-based authentication. -->
+<!ENTITY default-auth-hostbased-require-dns-match       "no">
+
+<!-- Keyboard-interactive authentication default failure delay in seconds. -->
+<!ENTITY default-auth-kbdint-failure-delay              "2">
+
+<!-- Keyboard-interactive authentication default maximum tries. -->
+<!ENTITY default-auth-kbdint-max-tries                  "3">
+
+<!-- Keyboard-interactive RADIUS server default port. -->
+<!ENTITY default-radius-server-port                     "1812">
+
+<!-- Keyboard-interactive RADIUS server default UDP recvfrom timeout. -->
+<!ENTITY default-radius-server-timeout                  "10">
+
+<!-- GSSAPI default ticket forwarding policy. -->
+<!ENTITY default-gssapi-ticket-forwarding-policy        "no">
+
+<!-- gssapi default library values. -->
+<!ENTITY default-gssapi-dll-path "/usr/lib/libgssapi_krb5.so,/usr/lib64/libgssapi_krb5.so,/usr/lib/libkrb5.so,/usr/lib/libgss.so,/usr/local/gss/gl/mech_krb5.so,/usr/local/lib/libgssapi_krb5.so,/usr/local/lib/libkrb5.so,/usr/kerberos/lib/libgssapi_krb5.so,/usr/kerberos/lib/libkrb5.so,/usr/lib/gss/libgssapi_krb5.so,/usr/kerberos/lib/libgssapi_krb5.so.2,/usr/lib/libgssapi_krb5.so.2,/usr/lib/amd64/gss/mech_krb5.so,/usr/lib/amd64/libgss.so">
+
+<!-- Default time in seconds for using expired CRLs. -->
+<!ENTITY default-use-expired-crls                       "0">
+
+<!-- CRLs are not disabled by default. -->
+<!ENTITY default-disable-crls                           "no">
+
+<!-- Digital signature in key usage is not enforced by default. -->
+<!ENTITY default-dod-pki                                "no">
+
+<!-- LDAP server default port. -->
+<!ENTITY default-ldap-server-port                       "389">
+
+<!-- Default CRL update minimum interval. -->
+<!ENTITY default-crl-update-min-interval                "30">
+
+<!-- Default interval for CRL prefetching. -->
+<!ENTITY default-crl-prefetch-interval                  "3600">
+
+<!-- Default crypto library mode ("fips" or "standard"). -->
+<!ENTITY default-crypto-lib-mode                        "standard">
+
+<!-- Both ipv4 and ipv6 are enabled by default -->
+<!ENTITY default-address-family-type                    "inet">
+
+<!-- Default terminate user started processes -->
+<!ENTITY default-terminate-user-processes               "no">
+
+<!ENTITY default-allow-configuration                    "no">
+
+<!-- Default log event facility. -->
+<!ENTITY default-log-event-facility                     "normal">
+
+<!-- Default log event severity. -->
+<!ENTITY default-log-event-severity                     "notice">
+
+<!ENTITY default-access-action                          "allow">
+
+<!-- Default value for the feature -->
+<!ENTITY default-load-control-enable                    "yes">
+
+<!-- Default value for the feature -->
+<!ENTITY default-white-list-size                        "1000">
+
+<!-- Default ignore AIX rlogin setting. -->
+<!ENTITY default-ignore-aix-rlogin                      "no">
+
+<!-- Default ignore AIX login setting. -->
+<!ENTITY default-ignore-aix-login                       "no">
+
+<!-- Default record sessions without PTYs. -->
+<!ENTITY default-record-ptyless-sessions                "yes">
+
+<!-- Default Windows logon type. -->
+<!ENTITY default-windows-logon-type                     "interactive">
+
+<!-- Default Windows terminal mode. -->
+<!ENTITY default-windows-terminal-mode                  "console">
+
+<!-- Default Ignore nisplus no permission error. -->
+<!ENTITY default-ignore-nisplus-no-permission           "no">
+
+<!-- TCP keepalives are disabled by default. -->
+<!ENTITY default-tcp-keepalive                          "no">
+
+<!-- Whether a plugin is allowed to not initialize (due to e.g. -->
+<!-- system configuration, missing shared libraries).           -->
+<!ENTITY default-allow-missing                          "no">
+
+<!-- Default connection idle timeout in seconds.  The value zero -->
+<!-- disables idle timeout. -->
+<!ENTITY default-idle-timeout                           "0">
+
+<!-- Message of the day (MOTD) is printed on login by default. -->
+<!ENTITY default-print-motd                             "yes">
+
+<!-- Authentication file permissions are checked by default. -->
+<!ENTITY default-strict-modes                           "yes">
+
+<!-- Default authentication file permission mask bits (octal). -->
+<!ENTITY default-mask-bits                              "022">
+
+<!-- Service name used with PAM. -->
+<!ENTITY default-pam-service-name                       "ssh-server-g3">
+<!-- Whether to perform PAM Account and Session management when executing -->
+<!-- commands, i.e. shells, subsystems and remote commands.               -->
+<!ENTITY default-pam-command-action                     "no">
+
+<!-- Whether to bind x11 listeners to the localhost interface or to the   -->
+<!-- 'any' interface. If the x11 listener is bound to the 'any' interface -->
+<!-- the SO_REUSEADDR socket option will not be set.                      -->
+<!ENTITY default-x11-listen-address                     "localhost">
+
+<!-- Whether to only use PAM to check if the user is allowed to login.    -->
+<!-- PAM can be used during authentication or via the                     -->
+<!-- pam-calls-with-commands setting. If PAM is not used in either        -->
+<!-- authentication or with pam-calls-with-commands the normal system     -->
+<!-- checks will be used to determine whether the user is allowed to      -->
+<!-- login i.e. account is not locked etc.                                -->
+<!ENTITY default-pam-account-checking-only              "no">
+
+<!-- Whether the server tries to resolve the client hostname during       -->
+<!-- connection setup                                                     -->
+<!ENTITY default-resolve-client-hostname                "yes">
+
+<!-- Whether to suppress last login, password expiry, motd etc. messages  -->
+<!-- during login.                                                        -->
+<!ENTITY default-quiet-login                            "no">
+
+<!-- Default certificate cache size in MBs. -->
+<!ENTITY default-cert-cache-size                        "150">
+
+<!-- Default CRL size limit (in MB). -->
+<!ENTITY default-max-crl-size                           "50">
+
+<!-- The default maximum path length for certificate validation. -->
+<!ENTITY default-max-path-length                        "10">
+
+<!-- Default timeout for external searches (LDAP, HTTP, OCSP) (seconds). -->
+<!ENTITY default-external-search-timeout                "360">
+
+<!-- Default limit of LDAP responses (MBs). -->
+<!ENTITY default-max-ldap-response-length               "50">
+
+<!-- Default LDAP connection idle timeout in seconds. -->
+<!ENTITY default-ldap-idle-timeout                      "30">
+
+<!-- Whether to enable AIX LAM password change by default. -->
+<!ENTITY default-aix-lam-password-change                "no">
+
+<!-- Keyboard-interactive RADIUS server default port. -->
+<!ENTITY default-tunnel-mapper-timeout                  "15">
+
+<!-- Policy elements. -->
+
+<!-- The top-level element. -->
+<!ELEMENT secsh-server  (params?,connections?,authentication-methods?
+                         ,services?)>
+
+<!-- Parameter element. Only "hostkey" and "listener" are allowed multiple -->
+<!-- times.                                                                -->
+<!ELEMENT params (crypto-lib|address-family|hostkey|listener|settings|domain-policy
+                  |logging|limits|cert-validation
+                  |pluggable-authentication-modules|protocol-parameters|password-cache|
+                  load-control|password-change-rules)*>
+
+<!-- Cryptographic library. -->
+<!ELEMENT crypto-lib    EMPTY>
+<!ATTLIST crypto-lib
+          mode          (fips|standard) "&default-crypto-lib-mode;">
+
+<!-- address-family mode setting ipv4 & ipv6-->
+<!ELEMENT address-family        EMPTY>
+<!ATTLIST address-family
+          type          (any|inet|inet6) "&default-address-family-type;">
+
+<!-- Settings - a block for stuff that is too minor to have its
+     own element in the params block. -->
+<!ELEMENT settings      EMPTY>
+<!ATTLIST settings
+      signature-algorithms    CDATA    #IMPLIED
+      proxy-scheme            CDATA    #IMPLIED
+      xauth-path              CDATA    #IMPLIED
+      x11-listen-address      (localhost|any)
+                                       "&default-x11-listen-address;"
+      pam-account-checking-only (yes|no)
+                                       "&default-pam-account-checking-only;"
+      ignore-aix-rlogin       (yes|no) "&default-ignore-aix-rlogin;"
+      ignore-aix-login        (yes|no) "&default-ignore-aix-login;"
+      record-ptyless-sessions (yes|no) "&default-record-ptyless-sessions;"
+      user-config-dir         CDATA    #IMPLIED
+      default-path            CDATA    #IMPLIED
+      windows-logon-type      (batch|interactive|network|network-cleartext)
+                                       "&default-windows-logon-type;"
+      windows-terminal-mode   (console|stream)
+                                       "&default-windows-terminal-mode;"
+      ignore-nisplus-no-permission (yes|no)
+                                       "&default-ignore-nisplus-no-permission;"
+      resolve-client-hostname (yes|no) "&default-resolve-client-hostname;"
+      quiet-login             (yes|no) "&default-quiet-login;"
+      default-domain          CDATA    #IMPLIED
+      terminate-user-processes (yes|no) "&default-terminate-user-processes;">
+
+<!ELEMENT pluggable-authentication-modules EMPTY>
+<!ATTLIST pluggable-authentication-modules
+          service-name            CDATA         "&default-pam-service-name;"
+          dll-path                CDATA         #IMPLIED
+          pam-calls-with-commands (yes|no)      "&default-pam-command-action;">
+
+<!ELEMENT protocol-parameters EMPTY>
+<!ATTLIST protocol-parameters
+          threads CDATA #IMPLIED>
+
+<!-- Hostkey specification. -->
+<!ELEMENT hostkey       ((private,(public|x509-certificate)?)|externalkey)>
+
+<!-- Private key specification. -->
+<!ELEMENT private       (#PCDATA)>
+<!ATTLIST private
+          file          CDATA   #IMPLIED>
+
+<!-- Public key. -->
+<!ELEMENT public        (#PCDATA)>
+<!ATTLIST public
+          file          CDATA   #IMPLIED>
+
+<!-- Certificate (host). -->
+<!ELEMENT x509-certificate      (#PCDATA)>
+<!ATTLIST x509-certificate
+          file          CDATA   #IMPLIED>
+
+<!-- External key. -->
+<!ELEMENT externalkey   EMPTY>
+<!ATTLIST externalkey
+          type          CDATA   #REQUIRED
+          init-info     CDATA   #IMPLIED>
+
+<!-- CA certificate. -->
+<!ELEMENT ca-certificate        (#PCDATA)>
+<!ATTLIST ca-certificate
+          file                  CDATA           #IMPLIED
+          name                  CDATA           #REQUIRED
+          disable-crls          (yes|no)        "&default-disable-crls;"
+          use-expired-crls      CDATA           "&default-use-expired-crls;"
+          trusted               (yes|no)        "yes">
+
+<!-- Certificate caching. -->
+<!ELEMENT cert-cache-file       EMPTY>
+<!ATTLIST cert-cache-file
+          file                  CDATA   #REQUIRED>
+
+<!-- CRL automatic updating. -->
+<!ELEMENT crl-auto-update       EMPTY>
+<!ATTLIST crl-auto-update
+          update-before         CDATA   #IMPLIED
+          minimum-interval      CDATA   "&default-crl-update-min-interval;">
+
+<!-- CRL prefetch. -->
+<!ELEMENT crl-prefetch          EMPTY>
+<!ATTLIST crl-prefetch
+          interval              CDATA   "&default-crl-prefetch-interval;"
+          url                   CDATA   #REQUIRED>
+
+<!-- LDAP server. -->
+<!ELEMENT ldap-server           EMPTY>
+<!ATTLIST ldap-server
+          address               CDATA   #REQUIRED
+          port                  CDATA   "&default-ldap-server-port;">
+
+<!-- OCSP responder. -->
+<!ELEMENT ocsp-responder        (#PCDATA)>
+<!ATTLIST ocsp-responder
+          validity-period       CDATA   #IMPLIED
+          url                   CDATA   #REQUIRED>
+
+<!-- Enforce digital signature in key usage. -->
+<!ELEMENT dod-pki               EMPTY>
+<!ATTLIST dod-pki
+          enable                (yes|no)        "&default-dod-pki;">
+
+<!-- Secure Shell server TCP listener address and port. -->
+<!ELEMENT listener      EMPTY>
+<!ATTLIST listener
+          id            ID      #REQUIRED
+          port          CDATA   "22"
+          address       CDATA   #IMPLIED>
+
+
+<!-- Server domain policy type -->
+<!ELEMENT domain-policy                 (windows-domain)*>
+<!ATTLIST domain-policy
+          windows-domain-precedence     CDATA   #IMPLIED>
+
+<!ELEMENT windows-domain      EMPTY>
+<!ATTLIST windows-domain
+    name    CDATA #REQUIRED
+    user    CDATA #REQUIRED>
+
+<!ELEMENT password-cache                        EMPTY>
+<!ATTLIST password-cache
+          file          CDATA   #REQUIRED>
+
+<!-- Logging. -->
+<!ELEMENT logging       (log-events*)>
+
+<!-- Log events. -->
+<!ELEMENT log-events    (#PCDATA)>
+<!ATTLIST log-events
+          facility      (normal|daemon|user|auth|local0|local1
+                         |local2|local3|local4|local5|local6|local7|discard)
+                        "&default-log-event-facility;"
+          severity      (informational|notice|warning|error|critical
+                         |security-success|security-failure)
+                        "&default-log-event-severity;">
+
+<!-- Certificate validation. Maximum one of each of "cert-cache-file", -->
+<!-- "crl-auto-update" and "dod-pki" can be present.                   -->
+<!ELEMENT cert-validation (ldap-server|ocsp-responder|cert-cache-file
+                           |crl-auto-update|crl-prefetch|dod-pki
+                           |ca-certificate)*>
+
+<!ATTLIST cert-validation
+          http-proxy-url           CDATA   #IMPLIED
+          socks-server-url         CDATA   #IMPLIED
+          cache-size               CDATA   "&default-cert-cache-size;"
+          max-crl-size             CDATA   "&default-max-crl-size;"
+          external-search-timeout  CDATA   "&default-external-search-timeout;"
+          max-ldap-response-length CDATA   "&default-max-ldap-response-length;"
+          ldap-idle-timeout        CDATA   "&default-ldap-idle-timeout;"
+          max-path-length          CDATA   "&default-max-path-length;">
+
+<!ELEMENT access EMPTY>
+
+<!ATTLIST access
+          user                     CDATA   #REQUIRED
+          action                   (allow|deny)      "&default-access-action;">
+
+
+<!-- Limits. -->
+<!-- max-connections is _per_servant_ .-->
+<!-- servant-lifetime    - how many connections a servant will handle -->
+<!-- before it is retired. -->
+
+<!ELEMENT limits                   (servant-lifetime)*>
+<!ATTLIST limits
+          max-connections          CDATA   #IMPLIED
+          max-processes            CDATA   #IMPLIED>
+
+<!ELEMENT servant-lifetime         EMPTY>
+<!ATTLIST servant-lifetime
+          total-connections        CDATA   #IMPLIED>
+
+<!ELEMENT load-control             EMPTY>
+<!ATTLIST load-control
+          enable                   (yes|no)      "&default-load-control-enable;"
+          discard-limit            CDATA   #IMPLIED
+          white-list-size          CDATA   "&default-white-list-size;">
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT password-change-rules  EMPTY>
+<!ATTLIST password-change-rules
+          allow-configuration   (yes|no) "&default-allow-configuration;">
+
+<!-- Connections. -->
+<!ELEMENT connections   (connection+)>
+
+<!-- Connection. -->
+<!ELEMENT connection    (selector*,rekey?,cipher*,mac*,kex*,hostkey-algorithm*)>
+<!ATTLIST connection
+          name          ID                      #IMPLIED
+          action        (allow|deny)            "&default-connection-action;"
+          tcp-keepalive (yes|no)                "&default-tcp-keepalive;">
+
+<!-- Rekey intervals. -->
+<!ELEMENT rekey         EMPTY>
+<!ATTLIST rekey
+          seconds       CDATA   "&default-rekey-interval-seconds;"
+          bytes         CDATA   "&default-rekey-interval-bytes;">
+
+<!-- Cipher. -->
+<!ELEMENT cipher        EMPTY>
+<!ATTLIST cipher
+          name          CDATA                   #REQUIRED
+          allow-missing (yes|no)                "&default-allow-missing;">
+
+<!-- MAC. -->
+<!ELEMENT mac           EMPTY>
+<!ATTLIST mac
+          name          CDATA                   #REQUIRED
+          allow-missing (yes|no)                "&default-allow-missing;">
+
+<!-- KEX. -->
+<!ELEMENT kex           EMPTY>
+<!ATTLIST kex
+          name          CDATA                   #REQUIRED
+          allow-missing (yes|no)                "&default-allow-missing;">
+
+<!-- Hostkey algorithm. -->
+<!ELEMENT hostkey-algorithm  EMPTY>
+<!ATTLIST hostkey-algorithm
+          name          CDATA                   #REQUIRED
+          allow-missing (yes|no)                "&default-allow-missing;">
+
+<!-- Selector element. -->
+<!ELEMENT selector      (interface|certificate|host-certificate|ip
+                         |user|user-group|user-privileged|blackboard
+                         |publickey-passed|user-password-change-needed)*>
+
+<!-- Interface selector. At least one parameter must be given. If id is -->
+<!-- set, the others MUST NOT be set. If id is not set, either or both  -->
+<!-- of address and port may be defined.                                -->
+<!ELEMENT interface       EMPTY>
+<!ATTLIST interface
+          id              IDREF    #IMPLIED
+          address         CDATA    #IMPLIED
+          port            CDATA    #IMPLIED
+          allow-undefined (yes|no) "&default-allow-undefined-value;">
+
+<!-- Public key (plain) passed selector. -->
+<!ELEMENT publickey-passed      EMPTY>
+<!ATTLIST publickey-passed
+          length                CDATA    #IMPLIED
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- Certificate selector. -->
+<!ELEMENT certificate   EMPTY>
+<!ATTLIST certificate
+          field           (ca-list|issuer-name|subject-name|serial-number
+                           |altname-email|altname-upn
+                           |altname-ip|altname-fqdn
+                           |extended-key-usage) #REQUIRED
+          pattern                CDATA  #IMPLIED
+          pattern-case-sensitive CDATA  #IMPLIED
+          regexp                 CDATA  #IMPLIED
+          ignore-prefix          (yes|no) #IMPLIED
+          ignore-suffix          (yes|no) #IMPLIED
+          explicit               (yes|no) #IMPLIED
+          allow-undefined        (yes|no)
+                                 "&default-allow-undefined-value;">
+
+<!-- Host certificate selector. -->
+<!ELEMENT host-certificate      EMPTY>
+<!ATTLIST host-certificate
+          field           (ca-list|issuer-name|subject-name|serial-number
+                           |altname-email|altname-upn
+                           |altname-ip|altname-fqdn
+                           |extended-key-usage) #REQUIRED
+          pattern                CDATA  #IMPLIED
+          pattern-case-sensitive CDATA  #IMPLIED
+          regexp                 CDATA  #IMPLIED
+          ignore-prefix          (yes|no) #IMPLIED
+          ignore-suffix          (yes|no) #IMPLIED
+          explicit               (yes|no) #IMPLIED
+          allow-undefined        (yes|no)
+                                 "&default-allow-undefined-value;">
+
+<!-- IP address selector. -->
+<!-- The address will be one of the following:                          -->
+<!--   - an IP range of the form x.x.x.x-y.y.y.y                        -->
+<!--   - an IP mask of the form x.x.x.x/y                               -->
+<!--   - a straight IP address x.x.x.x                                  -->
+<!--   - an FQDN pattern (form not checked, either it matches or not)   -->
+<!-- Exactly one of address or fqdn must be set. -->
+<!ELEMENT ip            EMPTY>
+<!ATTLIST ip
+          address               CDATA   #IMPLIED
+          fqdn                  CDATA   #IMPLIED
+          fqdn-regexp           CDATA   #IMPLIED
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- User name selector. -->
+<!ELEMENT user                  EMPTY>
+<!ATTLIST user
+          name                  CDATA   #IMPLIED
+          name-case-sensitive   CDATA   #IMPLIED
+          name-regexp           CDATA   #IMPLIED
+          id                    CDATA   #IMPLIED
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- User group selector. -->
+<!ELEMENT user-group            EMPTY>
+<!ATTLIST user-group
+          name                  CDATA   #IMPLIED
+          name-case-sensitive   CDATA   #IMPLIED
+          name-regexp           CDATA   #IMPLIED
+          id                    CDATA   #IMPLIED
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- User privileged (administrator) selector. -->
+<!ELEMENT user-privileged       EMPTY>
+<!ATTLIST user-privileged
+          value                 (yes|no)
+                                "&default-user-privileged-value;"
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- Selector for the need of user password change. -->
+<!ELEMENT user-password-change-needed   EMPTY>
+<!ATTLIST user-password-change-needed
+          value                 (yes|no)
+                                "&default-user-password-change-needed-value;"
+          allow-undefined       (yes|no)
+                                "&default-allow-undefined-value;">
+
+<!-- Blackboard selector. -->
+<!ELEMENT blackboard            EMPTY>
+<!ATTLIST blackboard
+          field                         CDATA   #REQUIRED
+          pattern                       CDATA   #IMPLIED
+          pattern-case-sensitive        CDATA   #IMPLIED
+          regexp                        CDATA   #IMPLIED
+          allow-undefined               (yes|no)
+                                        "&default-allow-undefined-value;">
+
+
+<!-- Authentication methods element. -->
+<!ELEMENT authentication-methods        (banner-message?,auth-file-modes?
+                                         ,authentication*)>
+<!ATTLIST authentication-methods
+          login-grace-time      CDATA   "&default-login-grace-time-seconds;">
+
+<!-- Banner message element. -->
+<!ELEMENT banner-message        (#PCDATA)>
+<!ATTLIST banner-message
+          file          CDATA   #IMPLIED>
+
+<!-- Authentication file permission checks. -->
+<!ELEMENT auth-file-modes       EMPTY>
+<!ATTLIST auth-file-modes
+          strict                (yes|no)        "&default-strict-modes;"
+          mask-bits             CDATA           "&default-mask-bits;"
+          dir-mask-bits         CDATA           #IMPLIED>
+
+<!-- Authentication element.  In an authentication element, different -->
+<!-- authentication methods are in OR-relation.  User must pass one of -->
+<!-- them. -->
+<!ELEMENT authentication        (selector*
+                                 ,(set-blackboard|login-restrictions)*
+                                 ,(auth-publickey|auth-hostbased|auth-password
+                                   |auth-keyboard-interactive|auth-gssapi)*
+                                 ,mapper?
+                                 ,set-user?
+                                 ,authentication*)>
+<!ATTLIST authentication
+        name            ID              #IMPLIED
+          action        (allow|deny)    "&default-authentication-action;"
+          set-group     CDATA           #IMPLIED
+          repeat-block  (yes|no)        "no"
+          password-cache (yes|no)       "&default-password-cache;" >
+
+
+
+<!ELEMENT set-user      EMPTY>
+<!ATTLIST set-user
+          name          CDATA           #REQUIRED>
+
+<!ELEMENT mapper        EMPTY>
+<!ATTLIST mapper
+          command       CDATA           #REQUIRED
+          timeout       CDATA           "&default-tunnel-mapper-timeout;">
+
+<!ELEMENT login-restrictions EMPTY>
+<!ATTLIST login-restrictions
+          ignore-password-expiration    CDATA #IMPLIED
+          ignore-aix-rlogin             CDATA #IMPLIED
+          ignore-aix-login              CDATA #IMPLIED
+          ignore-nisplus-no-permission  CDATA #IMPLIED>
+
+<!ELEMENT set-blackboard                (#PCDATA)>
+<!ATTLIST set-blackboard
+          field                         CDATA #REQUIRED
+          value                         CDATA #IMPLIED
+          file                          CDATA #IMPLIED>
+
+<!-- Public-key authentication. -->
+<!ELEMENT auth-publickey        EMPTY>
+<!ATTLIST auth-publickey
+          require-dns-match             (yes|no)
+                                        "&default-auth-publickey-require-dns-match;"
+          signature-algorithms          CDATA #IMPLIED
+          authorization-file            CDATA #IMPLIED
+          authorized-keys-directory     CDATA #IMPLIED
+          openssh-authorized-keys-file  CDATA #IMPLIED
+          allow-missing                  (yes|no)
+                                         "&default-allow-missing;">
+
+<!-- Host-based authentication. -->
+<!ELEMENT auth-hostbased        EMPTY>
+<!ATTLIST auth-hostbased
+          require-dns-match     (yes|no)
+                                "&default-auth-hostbased-require-dns-match;"
+          disable-authorization (yes|no) "no"
+          allow-missing         (yes|no)
+                                "&default-allow-missing;">
+
+<!-- Password authentication. -->
+<!ELEMENT auth-password         EMPTY>
+<!ATTLIST auth-password
+          failure-delay         CDATA "&default-auth-password-failure-delay;"
+          max-tries             CDATA "&default-auth-password-max-tries;"
+          allow-missing         (yes|no) "&default-allow-missing;" >
+
+<!-- Keyboard-interactive authentication. -->
+<!ELEMENT auth-keyboard-interactive     ((submethod-pam
+                                          |submethod-password
+                                          |submethod-securid
+                                          |submethod-radius
+                                          |submethod-aix-lam
+                                          |submethod-generic)*)>
+
+<!ATTLIST auth-keyboard-interactive
+          failure-delay         CDATA "&default-auth-kbdint-failure-delay;"
+          max-tries             CDATA "&default-auth-kbdint-max-tries;">
+
+<!-- Keyboard-interactive submethods. -->
+
+<!-- PAM. service-name is #IMPLIED, as it will be by default whatever is -->
+<!-- set in "params" block.                                              -->
+<!ELEMENT submethod-pam         EMPTY>
+<!ATTLIST submethod-pam
+          service-name          CDATA   #IMPLIED
+          dll-path              CDATA   #IMPLIED>
+
+<!-- Password. -->
+<!ELEMENT submethod-password    EMPTY>
+
+<!-- SecurID. -->
+<!ELEMENT submethod-securid     EMPTY>
+<!ATTLIST submethod-securid
+          dll-path              CDATA   #IMPLIED>
+
+<!-- RADIUS. -->
+<!ELEMENT submethod-radius      (radius-server+)>
+
+<!-- RADIUS server. -->
+<!ELEMENT radius-server         (radius-shared-secret)>
+<!ATTLIST radius-server
+          address               CDATA   #REQUIRED
+          port                  CDATA   "&default-radius-server-port;"
+          timeout               CDATA   "&default-radius-server-timeout;"
+          client-nas-identifier CDATA   #IMPLIED>
+
+<!-- Secret. "file" has precedence over #PCDATA. -->
+<!ELEMENT radius-shared-secret  (#PCDATA)>
+<!ATTLIST radius-shared-secret
+          file                  CDATA   #IMPLIED>
+
+<!-- AIX LAM. -->
+<!ELEMENT submethod-aix-lam      EMPTY>
+<!ATTLIST submethod-aix-lam
+          enable-password-change (yes|no) "&default-aix-lam-password-change;">
+
+<!-- Generic submethod. -->
+<!ELEMENT submethod-generic     EMPTY>
+<!ATTLIST submethod-generic
+          name                  CDATA   #REQUIRED
+          params                CDATA   #IMPLIED>
+
+<!-- GSSAPI authentication. -->
+<!ELEMENT auth-gssapi   EMPTY>
+<!ATTLIST auth-gssapi
+          dll-path                    CDATA     "&default-gssapi-dll-path;"
+          allow-ticket-forwarding     (yes|no)
+                                      "&default-gssapi-ticket-forwarding-policy;"
+          allow-missing               (yes|no)
+                                      "&default-allow-missing;">
+
+<!-- Services element. -->
+<!ELEMENT services      (group*,rule+)>
+
+<!-- Group element. -->
+<!ELEMENT group         (selector+)>
+<!ATTLIST group
+          name          ID      #REQUIRED>
+
+<!-- Rule element. Maximum one of each of "terminal", "tunnel-agent"    -->
+<!-- or "tunnel-x11" can be present.                                    -->
+<!ELEMENT rule          (environment|terminal|subsystem|command
+                         |tunnel-agent|tunnel-x11|tunnel-local
+                         |tunnel-remote)*>
+
+<!-- "group", if defined, will be used to match the rule. -->
+<!ATTLIST rule
+          group         CDATA           #IMPLIED
+          idle-timeout  CDATA           "&default-idle-timeout;"
+          print-motd    (yes|no)        "&default-print-motd;">
+
+<!-- Environment. -->
+<!-- The default allowed environment variables are:            -->
+<!-- allowed-case-sensitive="TERM,PATH,TZ,LANG,LC_*"           -->
+<!-- If neither allowed nor allowed-case-sensitive is set,     -->
+<!-- the default is used.                                      -->
+<!ELEMENT environment   EMPTY>
+<!ATTLIST environment
+          allowed                       CDATA   #IMPLIED
+          allowed-case-sensitive        CDATA   #IMPLIED>
+
+<!-- Terminal. -->
+<!ELEMENT terminal      EMPTY>
+<!ATTLIST terminal
+          action        (allow|deny)            "&default-terminal-action;"
+          chroot        CDATA                   #IMPLIED>
+
+<!-- Subsystem. -->
+<!ELEMENT subsystem     (attribute*)>
+<!ATTLIST subsystem
+          type          CDATA           #REQUIRED
+          action        (allow|deny)    "&default-subsystem-action;"
+          audit         (yes|no)        "&default-subsystem-audit;"
+          exec-directly CDATA   #IMPLIED
+          application   CDATA           #IMPLIED
+          chroot        CDATA           #IMPLIED>
+
+<!ELEMENT attribute     EMPTY>
+<!ATTLIST attribute
+          name          CDATA   #REQUIRED
+          value         CDATA   #IMPLIED>
+
+<!-- Tunnels. -->
+
+<!ELEMENT tunnel-x11    EMPTY>
+<!ATTLIST tunnel-x11
+          action        (allow|deny)            "&default-tunnel-action;">
+
+<!ELEMENT tunnel-agent  EMPTY>
+<!ATTLIST tunnel-agent
+          action        (allow|deny)            "&default-tunnel-action;">
+
+<!ELEMENT tunnel-local  (mapper|((src|dst)*))>
+<!ATTLIST tunnel-local
+          action        (allow|deny)            "&default-tunnel-action;">
+
+<!ELEMENT tunnel-remote ((src|listen)*)>
+<!ATTLIST tunnel-remote
+          action        (allow|deny)            "&default-tunnel-action;">
+
+<!-- Tunnel selectors. These apply only to TCP local and remote tunnels.-->
+<!-- src and dst are for local-tcp                                      -->
+<!-- src and listen are for remote-tcp                                  -->
+
+<!-- address or fqdn are not mandatory. If set, exactly one must be set -->
+<!-- (not both).                                                        -->
+
+<!-- Source. -->
+
+<!ELEMENT src           EMPTY>
+<!ATTLIST src
+          address       CDATA   #IMPLIED
+          fqdn          CDATA   #IMPLIED
+          fqdn-regexp   CDATA   #IMPLIED
+          port          CDATA   #IMPLIED>
+
+<!-- Destination. -->
+<!ELEMENT dst           EMPTY>
+<!ATTLIST dst
+          address       CDATA   #IMPLIED
+          fqdn          CDATA   #IMPLIED
+          fqdn-regexp   CDATA   #IMPLIED
+          port          CDATA   #IMPLIED>
+
+<!-- Listener. -->
+<!ELEMENT listen        EMPTY>
+<!ATTLIST listen
+          address       CDATA   #IMPLIED
+          port          CDATA   #IMPLIED>
+
+<!-- Command. -->
+<!ELEMENT command                       EMPTY>
+<!ATTLIST command
+          action                        (allow|deny|forced)
+                                                "&default-command-action;"
+          interactive                   (yes|no)
+                                                "&default-interactive-command-action;"
+          application                   CDATA   #IMPLIED
+          application-case-sensitive    CDATA   #IMPLIED
+          chroot                        CDATA   #IMPLIED>

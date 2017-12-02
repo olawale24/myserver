@@ -1,0 +1,79 @@
+.TH ssh-troubleshoot 8 "16 June 2017"  
+.SH NAME
+ssh-troubleshoot \- tool for collecting system information
+.SH SYNOPSIS
+.ad l
+\fBssh\-troubleshoot\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR] [\fBcommand\fR
+[\fBcommand\-options\fR]
+]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-troubleshoot 
+is a tool for collecting information on the operating system (its version, 
+patches, configuration settings, installed software components, and the 
+current environment and state) and on the Tectia installation (installed 
+product components and versions, their state, and the global and 
+user-specific configurations).
+.PP
+The collected information will be stored in a file named
+\fBssh_troubleshoot_<host>_<date>_<time>.tar\fR 
+\&.
+Send the file to the SSH technical support for analysis to help in 
+troubleshooting situations.
+.PP
+To get all necessary information, run the command as an administrator, 
+because it might need root access to some directories.
+.SH OPTIONS
+Enter each option separately, they cannot be combined. 
+The following options are available:
+.TP 
+\fB\-d, \-\-debug \fR\fILEVEL\fR
+Sets the debug level string to \fILEVEL\fR.
+.TP 
+\fB\-k, \-\-keep\-going\fR
+Defines that the data collecting is continued as long as possible, 
+even after errors are encountered.
+.TP 
+\fB\-o, \-\-output \fR\fIFILENAME\fR
+Defines a non-default output file for storing the collected data.
+
+If \fIFILENAME\fR is '\fB\-\fR', the 
+collected data is added to the standard output. The default output file is 
+created in a temporary archive directory and stored as 
+\fBssh\-troubleshoot\-data\-<hostname>\-<timestamp>.tar\fR. 
+The timestamp is in format: \fByyyymmdd\-hhmmUTC\fR.
+.TP 
+\fB\-u, \-\-user \fR\fIUSERNAME\fR
+Defines another user for the info command, the 
+default is the current user. This affects the home directory from which 
+the user-specific Tectia configuration files are fetched. 
+.TP 
+\fB\-q, \-\-quiet \fR
+Suppresses detailed reporting about the command progress, reports only errors.
+.TP 
+\fB\-h, \-\-help\fR
+Displays this help text.
+.SH COMMANDS
+ssh\-troubleshoot accepts the following command:
+.TP 
+\fBinfo\fR 
+Gathers information about the system configuration. 
+The collected data will be stored as a \fBtar\fR
+file.
+
+Options:
+.RS 
+.TP 
+\fB\-\-include\-private\-keys\fR
+Collects everything from the specified user's configuration directories,
+including the private keys. By default, the private keys nor unrecognized 
+files are not included in the result data.
+.RE
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.

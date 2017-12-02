@@ -1,0 +1,182 @@
+.TH ssh-certview-g3 1 "16 June 2017"  
+.SH NAME
+ssh-certview-g3 \- certificate viewer
+.SH SYNOPSIS
+.ad l
+\fBssh\-certview\-g3\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+.br
+[\fBoptions\fR]\&... \fBfile\fR 
+.br
+[\fBoptions\fR]\&... \fBfile ...\fR 
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+The ssh\-certview\-g3 program is a 
+simple command-line application, capable of decoding and showing X.509 
+certificates, CRLs, and certification requests. The command output is 
+written to the standard output.
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-h\fR
+Displays a short help.
+.TP 
+\fB\-verbose\fR
+Gives more diagnostic output.
+.TP 
+\fB\-quiet\fR
+Gives no diagnostic output.
+.TP 
+\fB\-auto\fR
+The next input file type is auto-detected (default).
+.TP 
+\fB\-cert\fR
+The next input file is a certificate.
+.TP 
+\fB\-certpair\fR
+The next input file is a cross-certificate pair.
+.TP 
+\fB\-crmf\fR
+The next input file is a CRMF certification request.
+.TP 
+\fB\-req\fR
+The next input file is a PKCS #10 certification request.
+.TP 
+\fB\-crl\fR
+The next input file is a CRL.
+.TP 
+\fB\-prv\fR
+The next input file is a private key.
+.TP 
+\fB\-pkcs12\fR
+The next input file is a PKCS#12 package.
+.TP 
+\fB\-ssh2\fR
+The next input file is an SSH2 public key.
+.TP 
+\fB\-spkac\fR
+The next input file is a Netscape-generated SPKAC request.
+.TP 
+\fB\-noverify\fR
+Does not check the validity of the signature on the input certificate.
+.TP 
+\fB\-autoenc\fR
+Determines PEM/DER automatically (default).
+.TP 
+\fB\-pem\fR
+Assumes that the input file is in PEM (ASCII base-64) format. 
+This option allows both actual PEM (with headers and footers), 
+and plain base-64 (without headers and footers).
+An example of PEM header and footer is shown below:
+
+.nf
+\-\-\-\-\-BEGIN CERTIFICATE\-\-\-\-\-
+encoded data
+\-\-\-\-\-END CERTIFICATE\-\-\-\-\-
+.fi
+.TP 
+\fB\-der\fR
+Assumes that the input file is in DER format.
+.TP 
+\fB\-hexl\fR
+Assumes that the input file is in Hexl format. (Hexl is a 
+common Unix tool for outputting binary files in a certain hexadecimal 
+representation.)
+.TP 
+\fB\-skip \fR\fInumber\fR
+Skips \fInumber\fR bytes from the beginning of input before trying to 
+decode. This is useful if the file contains some garbage before the 
+actual contents. 
+.TP 
+\fB\-ldap\fR
+Prints names in LDAP order.
+.TP 
+\fB\-utf8\fR
+Prints names in UTF-8.
+.TP 
+\fB\-latin1\fR
+Prints names in ISO-8859-1.
+.TP 
+\fB\-base10\fR
+Outputs big numbers in base-10 (default).
+.TP 
+\fB\-base16\fR
+Outputs big numbers in base-16.
+.TP 
+\fB\-base64\fR
+Outputs big numbers in base-64.
+.TP 
+\fB\-width \fR\fInumber\fR
+Sets output width (\fInumber\fR characters).
+.SH EXAMPLE
+For example, using a certificate downloaded from pki.ssh.com, 
+when the following command is given:
+.PP
+.nf
+$ ssh\-certview\-g3 \-width 70 ca\-certificate.cer
+.fi
+.PP
+The following output is produced:
+.PP
+.nf
+Certificate =
+  SubjectName = <C=FI, O=SSH Communications Security Corp, CN=Secure
+    Shell Test CA>
+  IssuerName = <C=FI, O=SSH Communications Security Corp, CN=Secure
+    Shell Test CA>
+  SerialNumber= 34679408
+  SignatureAlgorithm = rsa\-pkcs1\-sha1
+  Certificate seems to be self\-signed.
+      * Signature verification success.
+  Validity =
+    NotBefore = 2003 Dec  3rd, 08:04:27 GMT
+    NotAfter  = 2005 Dec  2nd, 08:04:27 GMT
+  PublicKeyInfo =
+    PublicKey =
+      Algorithm name (SSH) : if\-modn{sign{rsa\-pkcs1\-md5}}
+      Modulus n  (1024 bits) :
+        9635680922805930263476549641957998756341022541202937865240553
+        9374740946079473767424224071470837728840839320521621518323377
+        3593102350415987252300817926769968881159896955490274368606664
+        0759644131690750532665266218696466060377799358036735475902257
+        6086098562919363963470926690162744258451983124575595926849551
+        903
+      Exponent e (  17 bits) :
+        65537
+  Extensions =
+    Available = authority key identifier, subject key identifier, key
+      usage(critical), basic constraints(critical), authority
+      information access
+    KeyUsage = DigitalSignature KeyEncipherment KeyCertSign CRLSign
+        [CRITICAL]
+    BasicConstraints =
+      PathLength = 0
+      cA         = TRUE
+        [CRITICAL]
+    AuthorityKeyID =
+      KeyID =
+        eb:f0:4d:b5:b2:4c:be:47:35:53:a8:37:d2:8d:c8:b2:f1:19:71:79
+    SubjectKeyID =
+      KeyId =
+        eb:f0:4d:b5:b2:4c:be:47:35:53:a8:37:d2:8d:c8:b2:f1:19:71:79
+    AuthorityInfoAccess =
+      AccessMethod = 1.3.6.1.5.5.7.48.1
+      AccessLocation =
+        Following names detected =
+          URI (uniform resource indicator)
+        Viewing specific name types =
+          URI = http://pki.ssh.com:8090/ocsp\-1/
+  Fingerprints =
+    MD5 = c7:af:e5:3d:f6:ea:ce:da:07:93:d0:06:8d:c0:0a:f8
+    SHA\-1 =
+    27:d7:19:47:7c:08:3e:1a:27:4b:68:8e:18:83:e8:f9:23:e8:29:85
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-ekview-g3\fR(1), 
+\fBssh-scepclient-g3\fR(1) 

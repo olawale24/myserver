@@ -1,0 +1,319 @@
+.TH ssh-keygen-g3 1 "16 June 2017"  
+.SH NAME
+ssh-keygen-g3 \- authentication key pair generator
+.SH SYNOPSIS
+.ad l
+\fBssh\-keygen\-g3\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[
+\fBoptions\fR
+]\&...
+.br
+[
+\fBkey1 key2\fR
+]\&...
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-keygen\-g3
+is a tool that
+generates and manages authentication keys for Secure Shell. Each user wishing to use a Secure
+Shell client with public-key authentication can run this tool to create authentication keys.
+Additionally, the system administrator can use this to generate host keys for the Secure Shell
+server. This tool can also convert openSSH public or private keys to the Tectia key format, or,
+from Tectia key format to openSSH format. Tectia public keys use The Secure Shell (SSH) Public Key
+File Format (RFC 4716).
+.PP
+By default, if no path for the key files is specified, the key pair is generated under the
+user's home directory (\fB$HOME/.ssh2\fR on Unix,
+"\fB%APPDATA%\\SSH\\UserKeys\fR" on Windows). If no file name is specified, the
+key pair is likewise stored under the user's home directory with such file names as
+\fBid_rsa_2048_a\fR and \fBid_rsa_2048_a.pub\fR.
+.PP
+When specifying file paths or other strings that contain spaces, enclose them in quotation
+marks ("").
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-1 \fR\fIfile\fR
+Converts a key file from the SSH1 format to the SSH2 format. Note:
+"\fB1\fR" is number one (not letter L).
+.TP 
+\fB\-7 \fR\fIfile\fR
+Extracts certificates from a PKCS #7 file.
+.TP 
+\fB\-b \fR\fIbits\fR
+Specifies the length of the generated key in bits. The allowed and default lengths
+for different key types are:
+.RS 
+.TP 0.2i
+\(bu
+DSA/RSA: allowed 512 to 65536 bits, default 2048 bits
+.TP 0.2i
+\(bu
+ECDSA: allowed 256, 384 and 521 bits, default 256 bits
+.RE
+.TP 
+\fB\-B \fR\fInum\fR
+Specifies the number base for displaying key information (default:
+\fI10\fR).
+.TP 
+\fB\-c \fR\fIcomment\fR
+Specifies a comment string for the generated key. 
+.TP 
+\fB\-D \fR\fIfile\fR
+Derives the public key from the private key \fIfile\fR.
+.TP 
+\fB\-e \fR\fIfile\fR
+Edits the specified key. Makes ssh\-keygen\-g3 interactive. You can
+change the key's passphrase or comment.
+.TP 
+\fB\-F, \-\-fingerprint \fR\fIfile\fR
+Dumps the fingerprint and type (RSA, DSA or ECDSA) of the given public key. By
+default, the fingerprint is given in the SSH Babble format, which makes the fingerprint
+look like a string of "real" words (making it easier to pronounce). The output format
+can be changed with the \fB\-\-fingerprint\-type\fR option.
+
+The following options can be also used to modify the behavior of this option:
+\fB\-\-fingerprint\-type\fR
+\fB\-\-hash\fR, \fB\-\-hostkeys\-directory\fR,
+\fB\-\-known\-hosts\fR, \fB\-\-rfc4716\fR.
+.TP 
+\fB\-F, \-\-fingerprint \fR\fIhost_ID\fR
+Dumps the location, fingerprint and type (RSA, DSA or ECDSA) of the locally stored
+host key(s) identified with the given \fIhost_ID\fR. The
+\fIhost_ID\fR is a host name or string
+"\fIhost\fR\fB#\fR\fIport\fR".
+
+The following options can be used to modify the behavior of this option:
+\fB\-\-fingerprint\-type\fR, \fB\-\-hash\fR,
+\fB\-\-hostkeys\-directory\fR, \fB\-\-known\-hosts\fR,
+\fB\-\-rfc4716\fR.
+.TP 
+\fB\-H, \-\-hostkey\fR 
+Stores the generated key pair in the default host key directory
+(\fB/etc/ssh2\fR. Specify
+the \fB\-P\fR option to store the private key with an empty passphrase.
+.TP 
+\fB\-i \fR\fIfile\fR
+Loads and displays information on the key \fIfile\fR. 
+.TP 
+\fB\-k \fR\fIfile\fR
+Converts a PKCS #12 file to an SSH2-format certificate and private key.
+.TP 
+\fB\-m, \-\-generate\-moduli\-file\fR
+Generates moduli file \fBsecsh_dh_gex_moduli\fR for Diffie-Hellman
+group exchange.
+.TP 
+\fB\-p \fR\fIpassphrase\fR
+Specifies the passphrase for the generated key. 
+.TP 
+\fB\-P\fR 
+Specifies that the generated key will be saved with an empty passphrase.
+.TP 
+\fB\-q, \-\-quiet\fR 
+Hides the progress indicator during key generation.
+.TP 
+\fB\-r \fR\fIfile\fR
+Adds entropy from \fIfile\fR to the random pool. If
+\fIfile\fR contains 'relatively random' data (i.e. data
+unpredictable by a potential attacker), the randomness of the pool is increased. Good
+randomness is essential for the security of the generated keys.
+.TP 
+\fB\-t \fR\fBdsa\fR | \fBrsa\fR | \fBecdsa\fR 
+Selects the type of the key. Valid values are \fBrsa\fR (default),
+\fBdsa\fR and \fBecdsa\fR. 
+.TP 
+\fB\-x \fR\fIfile\fR
+Converts a private key from the X.509 format to the SSH2 format. 
+.TP 
+\fB\-\-append\fR [ \fB=yes\fR | \fBno\fR ] 
+Appends the keys. Optional values are \fByes\fR and \fBno\fR.
+The default is \fByes\fR to append. 
+.TP 
+\fB\-\-copy\-host\-id \fR\fIhost_ID \fR\fIdestination\fR
+Copies the host identity to the specified destination directory.
+
+The following options can be used to modify the behavior of this option:
+\fB\-\-append\fR, \fB\-\-hostkeys\-directory\fR,
+\fB\-\-known\-hosts\fR, \fB\-\-overwrite\fR.
+
+If \fB\-\-hostkey\-file\fR is given, the file is treated as a normal host
+identity file used by the Connection Broker, and its contents will be copied to the destination
+directory. 
+.TP 
+\fB\-\-delete\-host\-id \fR\fIhost_ID\fR
+Deletes the host key of the specified host ID. The
+\fIhost_ID\fR is a host name or string
+"\fIhost\fR\fB#\fR\fIport\fR".
+
+The following options can be used to modify the behavior of this option:
+\fB\-\-host\-key\-file\fR, \fB\-\-hostkeys\-directory\fR,
+\fB\-\-known\-hosts\fR.
+.TP 
+\fB\-\-fingerprint\-type \fR\fBbabble\fR | \fBbabble\-upper\fR | \fBpgp\-2\fR | \fBpgp\-5\fR | \fBhex\fR | \fBhex\-upper\fR 
+Specifies the output format of the fingerprint. If this option is given, the
+\fB\-F\fR option and the key file name must precede it. The default format
+is \fBbabble\fR.
+
+See 
+the section called "EXAMPLES"
+for examples of using this option.
+.TP 
+\fB\-\-fips\-mode\fR 
+Generates the key using the FIPS mode for the cryptographic library.
+
+On Linux, Windows, Solaris and HP-UX Itanium the OpenSSL cryptographic library
+version 1.0.2a is used and in the FIPS mode (conforming to FIPS 186-3) keys of the
+following lengths can be generated:
+.RS 
+.TP 0.2i
+\(bu
+DSA keys: 1024, 2048 and 3072 bits
+.TP 0.2i
+\(bu
+RSA keys: \fIn\fR * 512 bits, where 2 \(<= \fIn\fR
+\(<= 24 (that is, 1024, 1536, ... , 11776, and 12288 bits)
+.TP 0.2i
+\(bu
+ECDSA keys: 256, 384 and 521 bits
+.RE
+
+On HP-UX PA-RISC and IBM AIX the OpenSSL cryptographic library version 0.9.8 is used
+and in the FIPS mode (conforming to FIPS 186-2) DSA keys of 1024 bits and RSA keys of
+1024 to 16384 bits can be generated. ECDSA keys cannot be generated.
+
+The keys must have non-empty passphrases.
+
+By default (if this option is not given), the key is generated using the standard
+mode for the cryptographic library.
+.TP 
+\fB\-\-fips\-crypto\-dll\-path \fR\fIPATH\fR
+Specifies the location of the FIPS cryptographic DLL.
+.TP 
+\fB\-\-hash \fR\fBmd5\fR | \fBsha1\fR 
+Specifies the digest algorithm for fingerprint generation. Valid options are
+\fBmd5\fR and \fBsha1\fR.
+.TP 
+\fB\-\-hostkey\-file \fR\fIfile\fR
+When copying, uses the given file as the source host key, instead of autodetecting
+the location. When deleting, only deletes from the given location. If the specified file
+does not contain identities for the specified host, does nothing.
+.TP 
+\fB\-\-hostkeys\-directory \fR\fIdirectory\fR
+Specifies the directory for known host keys to be used instead of the default
+location.
+.TP 
+\fB\-\-import\-public\-key \fR\fIinfile \fR\fIoutfile\fR
+Attempts to import a public key from \fIinfile\fR and store it
+to \fIoutfile\fR in the format specified by --key-format parameter.
+If \fIoutfile\fR is not given, it will be requested. The default
+output format is SSH2 native format. 
+.TP 
+\fB\-\-import\-private\-key \fR\fIinfile \fR\fIoutfile\fR
+Attempts to import a private key from \fIinfile\fR and store it
+to \fIoutfile\fR in the format specified by --key-format parameter.
+If \fIoutfile\fR is not given, it will be requested. The default
+output format is SSH2 native private key format.
+.TP 
+\fB\-\-import\-ssh1\-authorized\-keys \fR\fIinfile \fR\fIoutfile\fR
+Imports an SSH1-style authorized_keys file \fIinfile\fR and
+generates an SSH2-style authorization file \fIoutfile\fR, and
+stores the keys from \fIinfile\fR to generated files into the same
+directory with \fIoutfile\fR.
+.TP 
+\fB\-\-key\-format \fR\fIformat\fR
+Output key format: secsh2, pkcs1, pkcs8, pkcs12, openssh2, or openssh2-aes. 
+.TP 
+\fB\-\-key\-hash \fR\fIhash\fR
+This option can be used for other than Tectia key formats. Specifies the hash
+algorithm to be used in passphrase-based private key derivation. The default value is
+\fBsha1\fR. Other supported algorithms are \fBsha224\fR,
+\fBsha256\fR, \fBsha384\fR, and \fBsha512\fR. Note
+that all key formats do not support all hash algorithms. 
+.TP 
+\fB\-\-known\-hosts \fR\fIfile\fR
+Uses the specified known hosts file. Enables fetching fingerprints for hosts defined
+in an OpenSSH-style known-hosts file. Using this option overrides the default locations
+of \fBknown_hosts\fR files (\fB/etc/ssh/ssh_known_hosts\fR
+and \fB$HOME/.ssh/known_hosts\fR). Giving an empty string will disable
+known-hosts usage altogether. 
+.TP 
+\fB\-\-moduli\-file\-name \fR\fIfile\fR
+Writes the moduli generated for Diffie-Hellman group exchange to
+\fIfile\fR. (The default file name for option \fB\-m\fR
+is \fBsecsh_dh_gex_moduli\fR.) 
+.TP 
+\fB\-\-overwrite\fR [ \fB=yes\fR | \fBno\fR ] 
+Overwrite files with the same file names. The default is to overwrite. 
+.TP 
+\fB\-\-rfc4716\fR 
+Displays the fingerprint in the format specified in \fIRFC4716\fR.
+The digest algorithm (hash) is md5, and the output format is the 16-bytes output in
+lowercase HEX separated with colons (:).
+.TP 
+\fB\-V\fR 
+Displays version string and exits.
+.TP 
+\fB\-h, \-\-help, \-?\fR 
+Displays a short summary of command-line options and exits.
+.SH EXAMPLES
+Create a 3072-bit RSA key pair and store the key pair in the default user key directory with file names
+\fInewkey\fR and \fInewkey.pub\fR:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-b 3072 newkey
+.fi
+.PP
+Convert an SSH1 key \fIoldkey\fR to SSH2 format:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-1 oldkey
+.fi
+.PP
+Display the fingerprint of a server host public key in SSH babble (default) format:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-F hostkey.pub
+Fingerprint for key:
+xeneh\-fyvam\-sotaf\-gutuv\-rahih\-kipod\-poten\-byfam\-hufeh\-tydym\-syxex
+.fi
+.PP
+Display the fingerprint of a server host public key in hex format:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-F hostkey.pub \-\-fingerprint\-type=hex
+Fingerprint for key:
+25533b8c7734f6eb1556ea2ab4900d854d5d088c
+.fi
+.PP
+Convert a private key into openSSH2-AES format:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-p <password> \-\-key\-format openssh2\-aes \\
+  \-\-import\-private\-key <source_key_file> <destination_key_file>
+.fi
+.PP
+Note: if the private key file that is being converted is encrypted with a passphrase, the
+passphrase must be provided with the '-p' option.
+.PP
+Convert a Tectia public key \fBtectiakey.pub\fR to an OpenSSH public key
+\fBopensshkey.pub\fR:
+.PP
+.nf
+$ ssh\-keygen\-g3 \-\-key\-format openssh2 \-\-import\-public\-key \\ 
+  tectiakey.pub opensshkey.pub 
+.fi
+.PP
+Generate moduli file \fBdhgex\-moduli\fR for Diffie-Hellman group exchange: 
+.PP
+.nf
+$ ssh\-keygen\-g3 \-m \-\-moduli\-file\-name dhgex\-moduli
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBsshg3\fR(1)

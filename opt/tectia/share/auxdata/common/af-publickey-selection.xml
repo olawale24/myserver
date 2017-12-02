@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd"
+  "ssh-secsh-auth-form-1.dtd"[
+  <!ENTITY rejected "[rejected]">
+  <!ENTITY failed "[failed]">
+]>
+<form id="certselect">
+<label/>
+<label>
+Client authentication is required. Please select the key to 
+authenticate yourself with.</label>
+<label>
+Server host is %%%SERVERHOST%%%:%%%SERVERPORT%%%</label>
+<!-- BEGIN BLOCK: FAILED-CERTIFICATE -->
+<label>
+Failed to authenticate with certificate %%%ID%%%:
+         Subject: %%%SUBJECTNAME%%%
+         Serial: %%%SERIALNUMBER%%%
+         %%%ERRORMESSAGE%%%
+</label>
+<!-- END BLOCK: FAILED-CERTIFICATE -->
+<!-- BEGIN BLOCK: FAILED-PUBLICKEY -->
+<label>
+Failed to authenticate with public key %%%ID%%%:
+         Label: %%%LABEL%%%
+         Key path: %%%PATH%%%
+         %%%ERRORMESSAGE%%%
+</label>
+<!-- END BLOCK: FAILED-PUBLICKEY -->
+<!-- BEGIN BLOCK: FAILED-NO-SUCH-KEY -->
+<label>
+Failed to authenticate: key %%%ID%%% not available.
+</label>
+<!-- END BLOCK: FAILED-NO-SUCH-KEY -->
+<select1 ref="client-publickey">
+<label>Please select one key.</label>
+<!-- BEGIN BLOCK: CERTIFICATE -->
+<item>
+  <label> Subject: %%%SUBJECTNAME%%% %%%STATUS%%%
+ Issuer: %%%ISSUERNAME%%%
+ Serial: %%%SERIALNUMBER%%%
+ Valid until: %%%VALID-NOT-AFTER%%%</label>
+ <!--
+   %%%ALGORITHM%%% [hash #%%%HASH%%%]
+   File name: %%%FILENAME%%%
+   Key path: %%%KEYPATH%%%
+ -->
+  <value>%%%ID%%%</value>
+</item>
+<!-- END BLOCK: CERTIFICATE -->
+<!-- BEGIN BLOCK: PUBLICKEY -->
+<item>
+  <label>
+ Label: %%%LABEL%%% %%%STATUS%%%
+ Key path: %%%PATH%%%</label>
+ <!--
+   %%%ALGORITHM%%% [hash #%%%HASH%%%]
+   File name: %%%FILENAME%%%
+ -->
+ <value>%%%ID%%%</value>
+</item>
+<!-- END BLOCK: PUBLICKEY -->
+
+<item><label>Cancel</label><value>cancel</value></item>
+<send submission="ok"></send>
+</select1>
+
+<submit ref="ok" >
+<label>OK</label>
+</submit>
+
+</form>
+

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE form PUBLIC "ssh-secsh-auth-form-1.dtd" "ssh-secsh-auth-form-1.dtd">
+<form id="certificateinfo">
+<label/>
+<label> </label>
+<label>Certificate:</label>
+%%%CERTDESCRIPTION%%%
+<label> </label>
+<select1 ref="certificateinfo">
+<label>Please select how you want to proceed.</label>
+<item>
+  <label>Back to accept dialog.</label>
+  <value>back</value>
+</item>
+<item>
+  <label>Cancel connection.</label>
+  <value>cancel</value>
+</item>
+<value>back</value>
+</select1>
+</form>

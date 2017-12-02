@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE secsh-broker SYSTEM "ssh-broker-ng-config-1.dtd">
+<!-- WARNING! This file contains the factory defaults     -->
+<!-- for the Connection Broker and is read-only.          -->
+<!-- Any changes to this file will be lost on upgrade.    -->
+<secsh-broker version = "1.0" >
+
+  <default-settings>
+    <ciphers>
+      <cipher name="crypticore128@ssh.com" />
+      <cipher name="aes128-cbc" />
+      <cipher name="aes192-cbc" />
+      <cipher name="aes256-cbc" />
+      <cipher name="aes128-ctr" />
+      <cipher name="aes192-ctr" />
+      <cipher name="aes256-ctr" />
+      <cipher name="3des-cbc" />
+      <cipher name="seed-cbc@ssh.com" />
+    </ciphers>
+
+    <macs>
+      <mac name="crypticore-mac@ssh.com" />
+      <mac name="hmac-md5" />
+      <mac name="hmac-sha1" />
+    </macs>
+
+    <kexs>
+      <kex name="diffie-hellman-group-exchange-sha256" />
+      <kex name="diffie-hellman-group-exchange-sha1" />
+      <kex name="diffie-hellman-group14-sha1" />
+    </kexs>
+
+    <transport-distribution num-transports="1" />
+
+    <rekey bytes="1000000000" />
+
+    <authentication-methods>
+      <authentication-method name="publickey" />
+      <authentication-method name="password" />
+      <authentication-method name="keyboard-interactive" />
+    </authentication-methods>
+
+    <idle-timeout type="connection" time="5" />
+
+    <server-banners visible="yes" />
+
+    <forwards>
+      <forward type="x11" state="off" />
+      <forward type="agent" state="on" />
+    </forwards>
+  </default-settings>
+
+  <gui hide-tray-icon="no"
+       show-exit-button="yes"
+       show-admin="yes"
+       enable-connector="yes"
+       show-security-notification="yes" />
+
+</secsh-broker>

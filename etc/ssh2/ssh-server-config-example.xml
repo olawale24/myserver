@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE secsh-server SYSTEM
+   "/opt/tectia/share/auxdata/ssh-server-ng/ssh-server-ng-config-1.dtd" [
+  <!ENTITY configdir PUBLIC "secsh:directory(config-server)" "">
+]>
+
+<!-- Tectia Server 6.x - ssh-server-config-example.xml
+
+     Copyright (c) SSH Communications Security Corporation.
+     This software is protected by international copyright laws.
+     All rights reserved.
+
+     NOTE: This file contains an annotated example configuration for
+     ssh-server-g3. It contains the most common settings and can be used
+     as the configuration file for ssh-server-g3.
+
+     For the settings not defined in this file, default values are used.
+     See "ssh-server-config-default.xml".
+
+     To use this file as a basis of your server configuration, copy it to
+     the same directory with the name "ssh-server-config.xml". Edit the file
+     using a text editor or an XML editor. For more information on the
+     configuration syntax, see the ssh-server-config(5) manual page or SSH
+     Tectia Server Administrator Manual.
+
+     ssh-server-g3 locates the DTD automatically. The DOCTYPE declaration
+     shows the path on Unix platforms. 
+     On 32-bit Windows platforms, the default path to the DTD is:
+     "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+     On 64-bit windows platforms, the default path to the DTD is:
+     "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+
+     The &configdir; entity is expanded by ssh-server-g3 as the default
+     configuration directory on each platform.
+      On Unix: "/etc/ssh2"
+      On 32-bit Windows platforms: "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia Server"
+      On 64-bit Windows platforms: "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia Server"
+
+     If you edit the configuration file using an XML editor and want to
+     validate the XML, change the contents of the DOCTYPE declaration
+     according to your platform.
+-->
+
+<secsh-server>
+
+  <params>
+    <!-- By default, the crypto libraries are used in the "standard" mode.
+         They can also be used in the "fips" mode. -->
+    <crypto-lib mode="standard" />
+
+    <hostkey>
+      <private file="&configdir;/hostkey" />
+      <!-- Giving the public key in the configuration file is not
+           mandatory. It will be derived from the private key if it is
+           not found otherwise. However, specifying the public key will
+           decrease the start-up time for the software, as deriving the
+           public key is a rather slow operation. -->
+      <public file="&configdir;/hostkey.pub" />
+    </hostkey>
+
+    <listener id="default" port="22" />
+    <address-family type="inet" />
+  </params>
+
+
+  <!-- Some of the ciphers, macs, or authentication methods might be
+       missing depending on your architecture. -->
+
+  <connections>
+
+    <connection name="connection" action="allow" tcp-keepalive="no">
+      <!-- Rekey happens every hour or after 1GB of data, which ever is
+           sooner. -->
+      <rekey seconds="3600" bytes="1000000000" />
+
+      <cipher name="aes128-cbc" />
+      <cipher name="aes192-cbc" />
+      <cipher name="aes256-cbc" />
+      <!-- AES in SDCTR mode is not available in if the crypto-lib mode
+           attribute is set to FIPS. -->
+      <cipher name="aes128-ctr" />
+      <cipher name="aes192-ctr" />
+      <cipher name="aes256-ctr" />
+      <cipher name="3des-cbc" />
+      <!-- The following ciphers are not available if the crypto-lib mode
+           attribute is set to FIPS. -->
+      <cipher name="seed-cbc@ssh.com" />
+      <!-- The following cipher is only available on Windows and Linux
+           x86 platforms. -->
+      <cipher name="crypticore128@ssh.com" allow-missing="yes" />
+
+      <mac name="hmac-sha1" />
+      <!-- The following MACs are not available if the crypto-lib mode
+           attribute is set to FIPS. -->
+      <mac name="hmac-md5" />
+      <!-- The following mac is only available on Windows and Linux
+           x86 platforms. -->
+      <mac name="crypticore-mac@ssh.com" allow-missing="yes" />
+
+      <!-- The following two (group exchange) KEX methods are not
+           available if the crypto-lib mode attribute is set to FIPS. -->
+      <kex name="diffie-hellman-group-exchange-sha256" />
+      <kex name="diffie-hellman-group-exchange-sha1" />
+      <kex name="diffie-hellman-group14-sha1" />
+    </connection>
+  </connections>
+
+
+  <authentication-methods login-grace-time="600">
+    <!-- By default, the banner message is empty. -->
+    <banner-message />
+
+    <!-- This is the default strict file modes setting. Note that this
+         is Unix-specific, and has no effect on Windows. -->
+    <auth-file-modes strict="yes" mask-bits="022" />
+
+    <!-- The following authentication block denies access by the named users.
+         Give denied usernames as a comma-separated list.
+         Remove the comments to take it into use. -->
+    <!--
+    <authentication action="deny" name="deny-users">
+      <selector>
+        <user name="baduser,hax0r" />
+      </selector>
+    </authentication>
+    -->
+
+    <!-- The following block allows the default authentication methods. -->
+    <authentication action="allow" name="allow-default">
+      <!-- Not all authentication methods are available everywhere.
+         GSS-API, for example, is only available on select platforms.
+
+         The 'allow-missing' attribute allows configuration to succeed even
+         if the plugin is missing. Otherwise listing missing authentication
+         plugins in the authentication block of a config file will make the
+         configuration fail if the plugin is not found.
+
+         For the above reason, gssapi has the allow-missing
+         attribute set to 'yes' out in this example config file. -->
+      <auth-gssapi allow-missing="yes" />
+      <auth-publickey />
+      <auth-password />
+      <auth-keyboard-interactive />
+
+      <!-- The following authentication block denies access by privileged
+           users. Remove the comments to take it into use. -->
+      <!--
+      <authentication action="deny" name="deny-privileged">
+        <selector>
+          <user-privileged value="yes" />
+        </selector>
+      </authentication>
+      -->
+    </authentication>
+  </authentication-methods>
+
+
+  <services>
+
+    <!-- On Unix, the following selector defines a group of users that need
+         to change their password. Remove the comments to take the group
+         into use. Remove also the comments from the
+         <rule group="passwd-change" /> element. -->
+    <!--
+    <group name="passwd-change">
+      <selector>
+        <user-password-change-needed />
+      </selector>
+    </group>
+    -->
+
+    <!-- The following selector defines a group of users that have only
+         SFTP allowed. Change the selector based on your policy. Remove the
+         comments to take the group into use. Remove also the comments from
+         the <rule group="sftp-only" /> element. -->
+    <!--
+    <group name="sftp-only">
+      <selector>
+        <user-group name="sftusers" />
+      </selector>
+    </group>
+    -->
+
+    <!-- This rule is used to force password change on Unix for the
+         "passwd-change" group defined above. -->
+    <!--
+    <rule group="passwd-change">
+      <terminal action="deny" />
+      <subsystem type="sftp" application="sft-server-g3" action="deny" /> 
+      <command application="/usr/bin/passwd" action="forced" />
+      <tunnel-local action="deny" />
+      <tunnel-remote action="deny" />
+    </rule>
+    -->
+
+    <!-- The following rule allows only SFTP access for the "sftp-only" group
+         defined above. Add the chroot="directory" attribute to the <subsystem />
+         element to enforce chrooting on Unix. -->
+    <!--
+    <rule group="sftp-only" idle-timeout="0">
+      <environment allowed-case-sensitive="TERM,PATH,TZ,LANG,LC_*" />
+      <terminal action="deny" />
+      <subsystem type="sftp" application="sft-server-g3" action="allow" />
+      <command action="deny" />
+      <tunnel-agent action="deny" />
+      <tunnel-x11 action="deny" />
+      <tunnel-local action="deny" />
+      <tunnel-remote action="deny" />
+    </rule>
+    -->
+
+    <!-- The following default rule is used for all other users. -->
+    <rule idle-timeout="0">
+      <environment allowed-case-sensitive="TERM,PATH,TZ,LANG,LC_*" />
+      <terminal action="allow" />
+      <subsystem type="sftp" application="sft-server-g3" action="allow" />
+      <command action="allow" />
+      <tunnel-agent action="allow" />
+      <tunnel-x11 action="allow" />
+      <tunnel-local action="allow" />
+      <tunnel-remote action="allow" />
+    </rule>
+
+  </services>
+
+</secsh-server>

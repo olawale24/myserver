@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE secsh-server SYSTEM
+   "/opt/tectia/share/auxdata/ssh-server-ng/ssh-server-ng-config-1.dtd" [
+  <!ENTITY configdir PUBLIC "secsh:directory(config-server)" "">
+]>
+
+<!-- Tectia Server 6.x - ssh-server-config-tutorial.xml
+
+     Copyright (c) SSH Communications Security Corporation.
+     This software is protected by international copyright laws.
+     All rights reserved.
+
+     About this document
+
+     This is a valid ssh-server-g3 configuration file, at least in the sense
+     that it validates with the ssh-server-g3 DTD and can be given as a
+     configuration file to the server (naturally some things, such as the
+     host keys, might be missing from the locations given here). However, this
+     configuration is not intended for use, but instead to give an idea on
+     how the server policy can be configured.
+
+     ssh-server-g3 locates the DTD automatically. The DOCTYPE declaration
+     shows the path on Unix platforms.
+     On 32-bit Windows platforms, the default path to the DTD is:
+     "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+     On 64-bit windows platforms, the default path to the DTD is:
+     "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia AUX\ssh-server-ng\ssh-server-ng-config-1.dtd"
+
+     The &configdir; entity is expanded by ssh-server-g3 as the default 
+     configuration directory on each platform.
+      On Unix: "/etc/ssh2"
+      On 32-bit Windows platforms: "C:\Program Files\SSH Communications Security\SSH Tectia\SSH Tectia Server"
+      On 64-bit Windows platforms: "C:\Program Files (x86)\SSH Communications Security\SSH Tectia\SSH Tectia Server"
+-->
+
+<secsh-server>
+
+  <params>
+
+    <!-- By default, the crypto libraries are used in the "standard" mode.
+         They can also be used in the "fips" mode. -->
+    <crypto-lib mode="standard" />
+
+    <hostkey>
+
+      <!-- The order of the elements in the configuration matters. 
+           For example, <private> must appear before <public>. -->
+      <private file="&configdir;/hostkey" />
+
+      <!-- Giving the public key in the configuration file is not 
+           mandatory. It will be derived from the private key if it is 
+           not found otherwise. However, specifying the public key will 
+           decrease the start-up time for the software, as deriving the 
+           public key is a rather slow operation. -->
+      <public file="&configdir;/hostkey.pub" />
+
+    </hostkey>
+
+    <hostkey>
+
+      <private file="&configdir;/hostkey-rsa" />
+
+      <!-- Key data can also be inlined in the configuration file, like
+           the following. -->
+      <public>
+        ---- BEGIN SSH2 PUBLIC KEY ----
+        Subject: sjl
+        Comment: "1024-bit rsa, sjl@SJLD01, Fri Feb 04 2005 14:34:41"
+        AAAAB3NzaC1yc2EAAAADAQABAAAAgQC7J4Qd5gJvYRup+MqQTrOt3qevN/Ne56ruvvPnWu
+        5rORTYVAQZFLF4qAcglj9x4V1a95keTPP+jabMRH62B72vdGV3Vr5uzXeKIIQAfSAu5Oss
+        EvsPlFnS42fT+N2/nsU+nc+Ryywg0RCODuBzFQtDmmLcOv/QiAl+OJ5h/D6jRQ==
+        ---- END SSH2 PUBLIC KEY ----
+      </public>
+    </hostkey>
+
+    <hostkey>
+
+      <private file="&configdir;/hostkey3" />
+
+      <!-- The public part can also be a certificate. The certificate
+           and the ordinary public key must not be configured for the
+           same hostkey. -->
+      <x509-certificate file="&configdir;/hostkey3.crt" />
+    </hostkey>
+
+    <hostkey>
+      <externalkey type="software" init-info="directory(&configdir;)" />
+    </hostkey>
+
+    <!-- Listeners have port 22, if not specified otherwise. The
+         attribute "id" is required and must be unique. -->
+    <listener id="internet" address="192.0.2.1" />
+    <listener id="intranet" address="10.20.0.1" />
+    <listener id="admin-private" port="222" />
+
+    <logging>
+      <!-- Severity and facility for different events can be set here. -->
+      <!-- These have reasonable defaults (which are listed in the
+           documentation). -->
+      <log-events facility="auth" severity="notice">
+        Auth_method_failure
+      </log-events>
+      <log-events facility="daemon" severity="informational">
+        Server_listener_failed Server_listener_started
+        Server_listener_stopped Server_reconfig_finished
+      </log-events>
+      <!-- Facility "discard" will make the server ignore the specified
+           events. -->
+      <log-events facility="discard">
+        Server_reconfig_started Server_starting
+      </log-events>
+
+    </logging>
+
+    <limits max-connections="256" max-processes="40" />
+
+    <!-- The CA certificates used in validation of the host-based and
+         public-key authentication certificates. -->
+    <cert-validation>
+      <!-- Configures an LDAP server from which intermediate CA
+           certificates and CRLs are fetched. -->
+      <ldap-server address="ldap.example.com" port="389" />
+
+      <!-- Configures an OCSP responder, which will be used instead
+           of a CRL. -->
+      <ocsp-responder validity-period="60"
+                      url="http://ca.example.com:8090/ocsp/" />
+
+      <!-- Certificate caching into a file when the server goes down. -->
+      <cert-cache-file file="/var/cert-cache.dat" />
+
+      <!-- CRL auto update, goes to find a new CRL from the same
+           address when a CRL is about to expire. Minimum interval
+           can be set to prevent trying to fetch a new CRL too often. -->
+      <crl-auto-update update-before="30" minimum-interval="600" />
+
+      <!-- CRL prefetching. Tries to retrieve a CRL from an URL
+           at the startup and at specified intervals. -->
+      <crl-prefetch interval="3600" url="http://ca.example.com/foo.crl" />
+
+      <!-- The old ca certificate. -->
+      <ca-certificate name="myca" file="&configdir;/cas/ca-certificate.crt" />
+      <!-- The new ca certificate. -->
+      <ca-certificate name="myca" file="&configdir;/cas/my-ca/my-ca.crt" />
+      <ca-certificate name="test-ca">
+        -----BEGIN CERTIFICATE-----
+        MIIDyjCCArKgAwIBAgIEBDH50zANBgkqhkiG9w0BAQUFADBfMQswCQYDVQQG
+        EwJGSTEpMCcGA1UEChMgU1NIIENvbW11bmljYXRpb25zIFNlY3VyaXR5IENv
+        cnAxJTAjBgNVBAMTHFNTSCBUZXN0IENBIDEgTm8gTGlhYmlsaXRpZXMwHhcN
+        MDQwNzMwMTQyOTM0WhcNMDYwNzMwMTQyOTM0WjBfMQswCQYDVQQGEwJGSTEp
+        MCcGA1UEChMgU1NIIENvbW11bmljYXRpb25zIFNlY3VyaXR5IENvcnAxJTAj
+        BgNVBAMTHFNTSCBUZXN0IENBIDEgTm8gTGlhYmlsaXRpZXMwggEiMA0GCSqG
+        SIb3DQEBAQUAA4IBDwAwggEKAoIBAQDEkhUZfHcdq7G6DnYPrPv1EhuGgBus
+        9hMKzBTD4r8/Gmvwbsg9rMRO0MqAIhGXDFd2Lj/hZD1heJUFulFi9R+9Bykw
+        aRPKWKIOEEu8jbZqdpNTtukzdIMarsQcCf6GSxGvHw53/WHR9To/fFXjhV+x
+        CmGJWDpk1iPQeLSm5yvlheb+JuswSZCAK01sr3sNFcY71tknKaOqcVYQjyrr
+        Isur7KtJ3ud0LOqh1Mxe73D1vTyhx4/OAH3bZRkxO4Vtb693zConynlPE32v
+        IYa6K9ROJi4tXQvQcTDY0Bjq9eGdZ+f7AK3JFuICq0JA5C43gmU7CHgWeywL
+        ymqW+UoxRAYxAgMBAAGjgY0wgYowHwYDVR0jBBgwFoAUfAP5WzId6bzQg5G+
+        kj6AKH7DIc4wHQYDVR0OBBYEFHwD+VsyHem80IORvpI+gCh+wyHOMA4GA1Ud
+        DwEB/wQEAwIBpjAkBgNVHREEHTAbgRljZXJ0aWZpZXItc3VwcG9ydEBzc2gu
+        Y29tMBIGA1UdEwEB/wQIMAYBAf8CAQAwDQYJKoZIhvcNAQEFBQADggEBAE/z
+        281+ugfeACYe4U+KJMPmFtcuzYYJovDQ+yW4fhhJaIhnSZ+lZJ5jkz6lfR2V
+        pEPdA/mf3vhorh5O2M/ohTE//Ubf0GX4PpnRcx2BO6+mbD9c9Rzo7EXhYt6O
+        oZKm9QP1Kf0Vvqac7J3uh1EgFCQJwnZnPU/Zriqhs9DZbH4JZ/3KVj+c7X67
+        iYr8VEX/796RxyYMww/6rSN0tx8niuSLwiFQBdRU8jrM2lboIpPZzh9MHYKh
+        SfqY5wq5CjCnLrHTe3z23YQtHJz50AeNWawIQeSiOlgQyyBD1rtzwoY2UMiO
+        HdOEJBpvaQdvnKRzAwYQv15kH2xfPy/WLiLx8EM=
+        -----END CERTIFICATE-----
+      </ca-certificate>
+
+      <!-- The CA certificate can be configured to allow outdated
+           CRLs. The argument is the age in seconds. -->
+      <ca-certificate name="unsafe-ca" file="&configdir;/cas/unsafe.crt"
+         use-expired-crls="3600" />
+
+      <!-- The CA can also have the CRLs completely disabled.
+           Only recommended for debugging purposes. -->
+      <ca-certificate name="unsafer-ca" file="&configdir;/cas/unsafer.crt"
+         disable-crls="yes" />
+
+    </cert-validation>
+
+  </params>
+
+
+  <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  <!-- The basic idea with <connections>, <authentication-methods>, and
+       <services> is that the first functional block matched will be used,
+       and the rest will be ignored. For example, if <connections> has
+       multiple <connection> elements, but the first one has an empty
+       selector, or no selectors at all, that <connection> element will
+       always match and the remaining are never used. -->
+  <!-- +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+
+
+  <!-- Connections. -->
+  <connections>
+    <!-- Selector usage -->
+    <connection action="deny" name="example-conn-deny">
+      <!-- Multiple <selector/> elements are in an OR-relation (one of the 
+           selector elements must match for the parent element to match). -->
+      <selector>
+        <ip address="192.0.2.6" />
+      </selector>
+
+      <selector>
+        <!-- Selector attributes inside the same <selector/> element are in 
+             an AND-relation (all attributes must match for the element 
+             to match). -->
+        <ip address="192.0.2.10" />
+        <!-- However, selector attributes matching to the same attribute 
+             type are in OR-relation, so if address is either 192.0.2.10 
+             or 192.0.2.16, it matches. -->
+        <ip address="192.0.2.16" />
+        <!-- There is no interface listened with the given attributes,
+             so this selector never matches. -->
+        <interface address="10.1.1.254" port="2222" />
+      </selector>
+
+      <!-- Empty selector always matches (commented out, so that this
+           connection block will not automatically match). -->
+      <!--
+      <selector />
+      -->
+      <!-- Also, typically, if a block accepts selectors, but none are
+           given, the block is assumed to have an empty selector, which
+           will then always match. -->
+    </connection>
+
+    <!-- Available (= working) selectors in the <connections> block:
+           - ip (address, fqdn)
+           - interface (id, address, port)
+    -->
+
+    <!-- Connection 1 -->
+    <connection action="deny" name="connection1-deny">
+      <selector>
+        <!-- This selector never matches in connection phase,
+             as we do not have the username available. -->
+        <user id="200" allow-undefined="yes" />
+        <ip address="192.0.2.100" />
+      </selector>
+      <cipher name="aes128-cbc" />
+    </connection>
+
+    <!-- Connection 2 -->
+    <connection action="allow" name="connection2-allow">
+      <selector>
+        <!-- This selector never matches in connection phase,
+             as we do not have the username available. -->
+        <user id="200" allow-undefined="yes" />
+      </selector>
+      <selector>
+        <interface address="10.20.0.1" />
+      </selector>
+      <cipher name="aes192-cbc" />
+      <kex name="diffie-hellman-group14-sha1" />
+    </connection>
+
+    <!-- Connection 3 -->
+    <connection action="deny" name="connection3-deny">
+      <selector>
+        <!-- mask -->
+        <ip address="10.20.0.0/16" />
+      </selector>
+      <selector>
+        <interface address="192.0.2.1" />
+        <ip fqdn="quux.example.com" />
+        <!-- FQDN selectors are always case-insensitive. The following
+             matches the same address as the preceding item.-->
+        <ip fqdn="QUUX.EXAMPLE.COM" />
+      </selector>
+      <cipher name="3des-cbc" />
+    </connection>
+
+    <!-- Connection 4 -->
+    <connection action="allow" name="connection4-allow">
+      <selector>
+        <!-- range -->
+        <ip address="10.20.0.42-10.20.0.82" />
+      </selector>
+      <!-- Rekey every ten minutes or 500MB, which ever is sooner. -->
+      <rekey seconds="600" bytes="500000000" />
+      <cipher name="crypticore128@ssh.com" allow-missing="yes" />
+      <cipher name="aes128-cbc" />
+      <kex name="diffie-hellman-group-exchange-sha256" />
+    </connection>
+
+    <!-- Connection 99 -->
+    <!-- This connection is the default case (no selectors). -->
+    <connection action="deny" name="connection99-deny">
+      <cipher name="aes128-cbc" />
+    </connection>
+
+    <!-- Connection 100 -->
+    <!-- This connection should never be reached, as the
+         connection above does not have selectors, so processing
+         should stop there. -->
+    <connection action="allow" name="connection100-allow">
+      <cipher name="none" />
+    </connection>
+  </connections>
+
+  <!-- Authentication chains. -->
+  <authentication-methods login-grace-time="10">
+
+    <banner-message file="&configdir;/banner-message">
+      This is the server banner message. If file attribute is set, this
+      inlined text will be ignored, and the file will be read instead
+      (like in this example).
+    </banner-message>
+
+    <!-- First matching <authentication/> block on the same level will
+         be used. The authentication-blocks are only traversed to the right,
+         never to the left (we go "down the chain"). -->
+    <authentication name="auth1-allow">
+
+      <!-- case 1 -->
+      <selector>
+        <user name="mtr" />
+      </selector>
+
+      <!-- Multiple <selector/> blocks are in OR-relation. -->
+      <selector>
+        <user name="sjl" />
+      </selector>
+
+      <!-- case 2 -->
+      <selector>
+        <user name="sjl" />
+        <user name="mtr" />
+      </selector>
+
+      <!-- case 3 -->
+      <selector>
+        <user name="sjl,mtr" />
+      </selector>
+
+      <!-- -case-sensitive patterns will match case-sensitively. -->
+      <selector>
+        <user name-case-sensitive="ImportantCaseSensitiveUsername" />
+      </selector>
+
+      <!-- All above cases (1, 2, 3) match identically (user with login
+           name of "mtr" or "sjl" matches) -->
+
+      <auth-publickey />
+      <auth-keyboard-interactive max-tries="4">
+        <submethod-radius>
+          <radius-server address="192.168.0.1">
+            <radius-shared-secret file="&configdir;/radius-secret-file" />
+          </radius-server>
+        </submethod-radius>
+        <submethod-pam />
+      </auth-keyboard-interactive>
+
+      <!-- After either public-key or keyboard-interactive authentication
+           is completed (any of the given methods) the block is
+           satisfied. If the authentication block has children, i.e.
+           other authentication blocks, they are matched, and
+           authentication continues.
+
+           When no further <authentication/> blocks can be matched, and
+           the method, if any, in the block is satisfied, the attribute
+           "action" is checked. If this is the default, "allow", the
+           authentication was successfully completed. If it is "deny",
+           the authentication will be failed.
+
+           If the authentication was successful, and the attribute
+           "set-group" is present in the block, the user will be put to
+           that group. After this, the <group> blocks in <services/> are
+           ignored, and the group in "set-group" is used.
+
+           The attributes of an <authentication/> block are NOT
+           inherited. -->
+      <authentication name="auth1.1-allow">
+        <selector>
+          <ip address="10.20.0.42" />
+        </selector>
+
+        <auth-publickey />
+      </authentication>
+
+      <!-- This demonstrates using authentication chains to require
+           multiple keyboard-interactive submethods. Notice the child
+           <authentication/> elements. -->
+      <authentication name="auth1.2-allow">
+        <selector>
+          <user name="test" />
+        </selector>
+
+        <auth-keyboard-interactive>
+          <submethod-password />
+        </auth-keyboard-interactive>
+
+        <authentication name="auth1.2.1-allow">
+          <auth-keyboard-interactive>
+            <submethod-securid />
+          </auth-keyboard-interactive>
+
+          <authentication name="auth1.2.1.1-allow">
+            <auth-keyboard-interactive>
+              <submethod-pam />
+            </auth-keyboard-interactive>
+          </authentication>
+
+        </authentication>
+
+      </authentication>
+
+      <authentication action="deny" name="auth1.3-deny">
+      </authentication>
+
+      <!-- A block with no selectors is equivalent to a block with an
+           empty selector. These will always be matched when encountered
+           during matching. In this case, the "allow" block below will
+           never be reached, as the block above always matches.-->
+      <authentication action="allow" name="auth1.4-allow">
+        <selector />
+      </authentication>
+
+    </authentication>
+
+    <!-- If the username was not "sjl" or "mtr", matching continues to 
+         the next block. -->
+
+    <authentication name="auth2-allow">
+      <auth-hostbased require-dns-match="no" />
+
+      <authentication name="auth2.1-allow">
+        <selector>
+          <user name="root" />
+        </selector>
+        <auth-keyboard-interactive>
+        </auth-keyboard-interactive>
+      </authentication>
+      <authentication name="auth2.2-allow">
+        <selector>
+          <user name="guest" />
+        </selector>
+        <auth-keyboard-interactive>
+          <!-- May set radius-AVP-filter-id -->
+        </auth-keyboard-interactive>
+        <authentication  name="auth2.2.1-allow" set-group="finance-inspector">
+          <selector>
+            <blackboard field="kbdint-radius-AVP-filter-id"
+             pattern="inspector" />
+          </selector>
+          <auth-password />
+        </authentication>
+      </authentication>
+
+      <!-- Certificate authentication. Typically the first
+           authentication block controls the authorization of
+           users offering certificates, and the second block
+           with a publickey-passed selector lets users in with
+           a public key (otherwise the public-key users would fall
+           through to the deny block and never get in). -->
+
+      <authentication name="auth2.3-allow">
+        <auth-publickey />
+        <authentication action="allow" name="auth2.3.1-allow">
+
+          <!-- Certificate selectors have always a field name and
+               a pattern. The format of the pattern depends on the
+               type of the field. "issuer-name" and "subject-name"
+               fields contain distinguished names, "serial-number"
+               a positive integer. "ip-fqdn" contains a hostname and
+               "ip-addr" a IP address or a range. "altname-email"
+               contains the email address and "altname-upn" the
+               principal name.
+
+               The fqdn, upn, email, subject name and issuer name
+               selectors may contain %username% keyword which is
+               replaced with the user's name before comparing with
+               the actual certificate data. These patterns may
+               also contain "*" and "?" globbing characters. -->
+
+          <selector>
+            <user name="ttsalo" />
+            <certificate field="issuer-name"
+                    pattern="C=FI, O=*, CN=Test CA" />
+            <certificate field="serial-number" pattern="123456" />
+            <certificate field="subject-name"
+              pattern="C=FI, O=SSH, CN=%username%" />
+            <certificate field="ca-list" pattern="test-ca" />
+          </selector>
+
+          <!-- %hostname% is replaced by the client fqdn hostname. -->
+          <selector>
+            <user name="sjl" />
+            <certificate field="issuer-name"
+                    pattern="C=FI, O=*, CN=Test CA" />
+            <certificate field="serial-number" pattern="123456" />
+            <certificate field="subject-name"
+              pattern="C=FI, O=SSH, CN=%username%" />
+            <certificate field="altname-fqdn" pattern="%hostname%" />
+            <certificate field="ca-list" pattern="test-ca" />
+          </selector>
+
+          <selector>
+            <user name="ttsalo" />
+            <certificate field="serial-number" pattern="2" />
+            <certificate field="altname-email"
+                         pattern="%username%@example.com" />
+            <certificate field="altname-fqdn" pattern="foobar.example.com" />
+            <certificate field="altname-upn" pattern="%username%" />
+            <certificate field="altname-ip" pattern="10.2.3.5" />
+            <certificate field="ca-list" pattern="test-ca,blah-ca" />
+          </selector>
+
+          <!-- user-privileged is used to match whether the user has
+               administrative privileges (on Unix this means UID of 0,
+               in Windows that the user belongs, for example,
+               to the Administrators group). 
+               This particular example demonstrates mathching to a user 
+               that is NOT an administrator. -->
+          <selector>
+            <user-privileged value="no" />
+          </selector>
+
+        </authentication>
+
+        <authentication action="allow" name="auth2.3.2-allow">
+          <selector>
+            <publickey-passed length="1024-2048" />
+          </selector>
+        </authentication>
+
+        <!-- Specifying an explicit "deny" action in a restrictive
+             policy is necessary, as otherwise non-matching connection
+             would use the "allow" action of the parent element (if it 
+             passed public-key authentication with any key length). -->
+
+        <authentication action="deny"  name="auth2.3.3-deny" />
+
+      </authentication>
+    </authentication>
+  </authentication-methods>
+
+  <!-- Services-block defines the policy for the various services the
+       server offers. -->
+  <services>
+
+    <!-- Group selectors. -->
+    <!-- Partners. -->
+    <group name="partners">
+      <selector>
+        <ip address="10.20.0.0/16" />
+        <user name="sjl" id="24814" />
+        <user-group name="wheel" />
+        <user name="mtr" id="17692" />
+      </selector>
+      <selector>
+        <certificate field="issuer-name" pattern="C=FI, O=Friend Oyj" />
+      </selector>
+    </group>
+
+    <!-- Remote access. -->
+    <group name="remote-access">
+      <selector>
+        <certificate field="subject-name"
+          pattern="C=FI, O=Friend Oyj, CN=%username%" />
+      </selector>
+      <selector>
+        <interface address="192.0.2.1" />
+      </selector>
+    </group>
+
+    <!-- Administrators. -->
+    <group name="admin">
+      <selector>
+        <user-privileged />
+      </selector>
+    </group>
+
+    <!-- The backup account. -->
+    <group name="backup">
+      <selector>
+        <user name="backup" />
+      </selector>
+    </group>
+
+    <!-- Users that need to change their password -->
+    <group name="passwd-change">
+      <selector>
+        <user-password-change-needed />
+      </selector>
+    </group>
+
+    <!-- The finance inspector. -->
+    <rule group="finance-inspector">
+      <tunnel-local action="allow">
+        <!-- Microsoft SQL ports. -->
+        <dst fqdn="finance-db.example.com" port="1433" />
+        <dst fqdn="finance-db.example.com" port="1434" />
+      </tunnel-local>
+      <!-- Can execute commands and shells, as no overriding behaviour
+           is defined. -->
+    </rule>
+
+
+    <!-- Trusted employees from partner sites can do anything. -->
+    <rule group="partners" />
+
+    <!-- Remote access. -->
+    <rule group="remote-access">
+
+      <!-- Setting terminal action to "deny" also denies shell
+           commands, unless they are specifically allowed.     -->
+      <terminal action="deny" />
+
+      <!-- This chroot type requires that the named subsystem
+           application binary can be found from the chrooted
+           environment, along with the user's shell. -->
+
+      <subsystem type="sftp" application="sft-server-g3" chroot="%homedir%" />
+
+      <!-- Specifying home directory on Windows.
+      <subsystem type="sftp" application="sft-server-g3">
+        <attribute name="home" value="%USERPROFILE%" />
+      </subsystem>  
+      -->
+
+      <!-- Specifying virtual folders on Windows. 
+           All drive letters are available by default, but if 
+           any virtual folders are defined in the configuration, none 
+           of the default folders are used.
+      <subsystem type="sftp" application="sft-server-g3">
+        <attribute name="virtual-folder" value="C=D:\" />
+        <attribute name="virtual-folder" value="D=D:\sftp" />
+      </subsystem>  
+      -->
+
+      <tunnel-local action="allow">
+        <!-- IMAP. -->
+        <dst fqdn="imap.example.com" port="143" />
+        <dst fqdn="imap.example.com" port="993" />
+        <!-- POP. -->
+        <dst fqdn="imap.example.com" port="109" />
+        <dst fqdn="imap.example.com" port="110" />
+        <dst fqdn="imap.example.com" port="995" />
+      </tunnel-local>
+    </rule>
+
+    <rule group="backup">
+      <terminal action="deny" />
+      <!-- This account is only used to backup the disk drive. -->
+      <command application="dd if=/dev/hda" action="forced" />
+      <tunnel-local action="deny" />
+      <tunnel-remote action="deny" />
+    </rule>
+
+    <!-- This rule is used to force password change. -->
+    <rule group="passwd-change">
+      <terminal action="deny" />
+      <subsystem type="sftp" application="sft-server-g3" action="deny" />
+      <command application="/usr/bin/passwd" action="forced" />
+      <tunnel-local action="deny" />
+      <tunnel-remote action="deny" />
+    </rule>
+
+    <!-- Default miscellaneous rule. -->
+    <!-- Ten-minute idle-timeout. -->
+    <rule idle-timeout="600">
+
+      <!-- All others will be denied. There is no "denied" setting. -->
+      <environment allowed-case-sensitive="TERM,PATH,TZ,LANG,LC_*" />
+
+      <terminal action="deny" />
+
+      <subsystem type="sftp"
+                 application="sft-server-ng" />
+
+      <!-- Other commands will be denied. -->
+      <command application="date" action="allow" />
+      <command application="echo" action="allow" />
+
+      <!-- command application="date" action="deny"-style configuration
+           is essentially futile, as there are about one-thousand and
+           one ways to go around any means to check the given
+           command-line.
+
+           This is why
+
+             <command application="foo" action="deny" />
+
+           will cause a configuration time error. It would only serve to
+           give the admin a false sense of security.
+
+             <command action="deny" />
+
+           is valid, and is implicit with <terminal action="deny" />.
+      -->
+
+      <tunnel-local action="allow">
+        <dst port="460" />
+      </tunnel-local>
+
+      <tunnel-local action="deny">
+        <dst fqdn="foo.example.com" port="260" />
+      </tunnel-local>
+
+      <tunnel-local action="allow">
+        <dst fqdn="imap.example.com" port="143" />
+        <dst fqdn="imap.example.com" port="220" />
+        <dst fqdn="imap.example.com" port="993" />
+        <dst fqdn="*.example.com" port="260" />
+      </tunnel-local>
+
+      <!-- This is implicit if any "allow" rules for the given
+           tunnel-type are given. -->
+
+      <tunnel-local action="deny" />
+
+      <tunnel-remote action="allow">
+        <listen address="10.20.0.1" port="8000-9000" />
+        <src fqdn="test.example.com" />
+        <src fqdn="test.example.com" />
+      </tunnel-remote>
+
+      <tunnel-remote action="deny" />
+
+    </rule>
+
+  </services>
+
+</secsh-server>

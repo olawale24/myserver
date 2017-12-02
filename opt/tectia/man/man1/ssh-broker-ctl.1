@@ -1,0 +1,279 @@
+.TH ssh-broker-ctl 1 "16 June 2017"  
+.SH NAME
+ssh-broker-ctl \- Tectia Connection Broker control utility
+.SH SYNOPSIS
+.ad l
+\fBssh\-broker\-ctl\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+\fBcommand\fR 
+.br
+[\fBoptions\fR]\&...
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-broker\-ctl
+is a control
+utility for the Connection Broker (ssh\-broker\-g3). It can be used, for example, to view
+the status of the Connection Broker, to reconfigure or stop the Connection Broker, to manage keys and certificates,
+and to manage connections.
+.SH OPTIONS
+The following general options are available:
+.TP 
+\fB\-a, \-\-broker\-address \fR\fIADDRESS\fR
+Defines an address to a separate Tectia Connection Broker process to which a connection is
+made.
+
+The same effect can be achieved by defining a Connection Broker address with environment
+variable \fBSSH_SECSH_BROKER\fR.
+.RS 
+\fBTip\fR
+
+If you are running ssh\-broker\-ctl using a userID other than
+that of the ssh\-broker\-g3 process owner, the \fB\-a\fR
+option must be given so that ssh\-broker\-ctl knows where to connect.
+In this case, you must also run ssh\-broker\-ctl as a privileged user
+(root).
+
+For example, when user \fISSHBRKR\fR owns the
+ssh\-broker\-g3 process, run the ssh\-broker\-ctl
+with commands:
+
+.nf
+# ssh\-broker\-ctl \-a /tmp/ssh\-SSHBRKR/ssh\-broker status \-s
+# ssh\-broker\-ctl \-a /tmp/ssh\-SSHBRKR/ssh\-broker status \-\-pid
+# ssh\-broker\-ctl \-a /tmp/ssh\-SSHBRKR/ssh\-broker list\-connections
+.fi
+.RE
+.TP 
+\fB\-D, \-\-debug \fR\fISTR\fR
+Defines the debug level.
+.TP 
+\fB\-e, \-\-charset=\fR\fICS\fR
+Defines the character set to be used in the output. The supported character sets are
+\fButf8\fR, \fBiso\-8895\-1\fR, \fBlatin1\fR,
+\fBiso\-8859\-15\fR, \fBlatin9\fR, and
+\fBascii\fR.
+.TP 
+\fB\-q, \-\-quiet \fR
+Defines that little or no output is to be displayed, depending on the
+command.
+.TP 
+\fB\-s, \-\-short\fR
+Defines that a shorter, more machine readable, output format is to be used.
+.TP 
+\fB\-\-time\-format=\fR\fIFMT\fR
+Defines the time format to be used in the output. The default depends on the system
+locale settings.
+.TP 
+\fB\-v, \-\-verbose \fR
+Defines that more information, if available, is to be output.
+.TP 
+\fB\-V, \-\-version\fR
+Displays the version string.
+.TP 
+\fB\-w, \-\-wide \fR
+Defines that the output will not be truncated, even if it means long lines.
+.TP 
+\fB\-h, \-\-help\fR
+Displays a context-sensitive help text on command-line options. Help is available
+also on specific commands. For example, to get help on the \fBstatus\fR
+command, run:
+
+.nf
+$ ssh\-broker\-ctl status \-\-help
+.fi
+.SH COMMANDS
+.RS 
+\fBNote\fR
+.PP
+For a detailed description of the command options, use the command-specific
+\fB\-\-help\fR option.
+.RE
+.PP
+ssh\-broker\-ctl accepts the following commands:
+.TP 
+\fBadd\-certificate\fR [\fBoptions\fR] \fB<certificate\-file>\fR 
+Adds the given X.509 sub-CA certificate to the Connection Broker certificate cache. The
+certificate can be used in certificate validations but it is not stored permanently.
+Restarting the Connection Broker will remove the certificate. 
+.TP 
+\fBadd\-crl\fR [\fBoptions\fR] \fB<crl\-file>\fR 
+Adds the given X.509 CRL to the Connection Broker CRL cache. The CRL can be used in certificate
+validations but it is not stored permanently. Restarting the Connection Broker will remove the CRL.
+.TP 
+\fBadd\-key\fR \fBfilename\fR 
+Adds a new private key from the given file name. The private key is not stored
+permanently in the configuration. Stopping the Connection Broker will remove the key.
+.TP 
+\fBadd\-provider\fR \fBtype\fR \fBparameter\fR 
+Registers a key provider to the Connection Broker. The \fBtype\fR option is one of
+the supported provider types and the \fBparameter\fR option is a parameter
+string specific to the provider type. 
+
+For a list of the supported key provider types and the corresponding parameter
+formats, use the command-specific \fB\-\-help\fR option.
+.TP 
+\fBauth\-handler\fR [\fBoptions\fR] 
+Registers itself as the default authentication form handler. All authentication
+prompts for clients that are unable to handle them (mostly SOCKS proxy and other
+tunnels) are directed to this client. 
+
+For a list of the supported key provider types and the corresponding parameter
+formats, use the command-specific \fB\-\-help\fR option.
+.TP 
+\fBclose\-channel\fR \fBchannel\-id ...\fR 
+Closes the defined channel. You can also enter multiple channel-IDs to close several
+channels. 
+.TP 
+\fBclose\-connection\fR \fBconnection\-id ...\fR 
+Closes the defined connection. You can also enter multiple connection-IDs to close
+several connections.
+.TP 
+\fBclose\-tunnel\-listener\fR \fBtunnel\-id ...\fR 
+Closes open tunnel listener. Tunnel id is either the id number returned by
+ssh\-broker\-ctl list\-tunnel\-listeners command or a listen address
+and port pair separated by a colon. If the listen address is omitted, local listeners
+(127.0.0.1) are selected. As an example, the following command closes the listener with
+id 7, and the ones listening at 168.192.0.15 port 1234 and 127.0.0.1 port 2112:
+
+.nf
+$ ssh\-broker\-ctl ctl 7 168.192.0.15:1234 :2112
+.fi
+.TP 
+\fBconfig\-value\fR [\fBoptions\fR] \fBpath\fR 
+Retrieves configuration values from the Connection Broker based on the defined path and displays
+them.
+.TP 
+\fBconnection\-status\fR [\fB\-\-show\-channels\fR] [\fB\-\-write\-hostkey=\fR \fBFILE\fR] \fBconnection\-id \fR
+Displays a detailed connection status for the connection ID (the numeric identifier
+shown by the list\-connections) command.
+.TP 
+\fBconnector\fR [\fBoptions\fR] [\fBenable|disable\fR] 
+Enables and disables the Connector functionality in the Connection Broker. Without parameters
+prints the current state.
+.TP 
+\fBdisconnect\-client\fR \fBclient\-id\fR 
+Disconnects a Connection Broker client process.
+.TP 
+\fBdebug\fR [\fB\-\-append\fR] [\fB\-\-clear\fR] [\fB\-\-log\-file=\fR \fBfile\fR] [\fB\-\-monitor\fR] [\fB\-\-protocol\-dump\fR] [\fBdebug\-level\fR] 
+Sets the Connection Broker debug level to the defined level. If no \fBdebug\-level\fR
+parameter is given here, the current debug level is not changed.
+.TP 
+\fBkeylog\fR [\fB\-\-remove\fR] [\fB\-\-all\fR] [\fB\-\-update\fR \fB<key\-id|key\-hash>\fR] [\fB\-\-init\fR] [\fB\-\-uninit\fR] [\fB\-\-close\fR] [\fB\-v, \-\-verbose\fR] [\fBkey\-id|key\-hash|hostname\fR] 
+Keylog is used to manage uploaded public keys and to display a log of them. The
+Keylog does not store the public keys, it only stores information about the keys and the
+hosts where the keys have been uploaded to. The information can be used to manage the
+keys at a later stage, for example, to track hosts where a key has been uploaded to. The
+keylog is not on by default, it must be enabled first.
+
+Without the options, displays a list of the uploaded keys. If a key or a hostname is
+specified, only the selected keys are displayed.
+.TP 
+\fBkey\-passphrase\fR [\fB\-\-all\fR] [\fB\-\-clear\fR] [\fB\-\-passphrase\-file=\fR \fBfilename\fR] [\fB\-\-passphrase\-string=\fR \fBpassphrase\fR] [\fBkey\-id|key\-hash\fR] 
+Prompts the user's private-key passphrase or PIN code.
+.TP 
+\fBkey\-upload\fR [\fBoptions\fR] \fBkey\fR [\fBuser\fR@] \fBserver\fR [\fB#port\fR] 
+Uploads the selected key (\fBkey\fR can be a key ID number, a public key
+hash or a file name) into the authorized keys directory or file on the server, depending
+on the automatically detected upload method. After the operation, the key can be used in
+public-key authencation to log in to the server without a password. If the keylog is
+enabled, the command prompts for a keylog passphrase (if needed), and information about
+the public keys is stored in the key upload log.
+.TP 
+\fBlist\-connections\fR [\fB\-c, \-\-show\-channels\fR] [\fB\-s, \-\-short\fR] [\fB\-\-client\-pid=\fR \fBPID\fR] [\fB\-\-disconnected\fR] 
+Displays a list of the currently open connections together with connection
+parameters and traffic statistics. Displays also the connection ID which can used with
+other commands to identify the connection.
+.TP 
+\fBlist\-channels\fR [\fB\-s, \-\-short\fR] 
+Displays a list of the currently open connection channels, together with channel
+type and traffic statistics. Displays also the channel ID which is used by other
+commands to identify the connection.
+.TP 
+\fBlist\-clients\fR [\fB\-c, \-\-show\-channels\fR] [\fB\-s, \-\-short\fR] [\fB\-\-all\fR] 
+Displays a list of the currently connected client processes.
+.TP 
+\fBlist\-keys\fR [\fB\-s, \-\-short\fR] [\fB\-\-extra certificates\fR] [\fB\-\-provider=\fR \fBID\fR] 
+Displays a list of the user's private keys, together with the basic key attributes
+such as the key type, size, and possible file name or key provider information. Outputs
+also the fingerprint and the identifier of the key. The identifier is used by other
+Connection Broker commands to identify the private key.
+.TP 
+\fBlist\-profiles\fR [\fB\-s, \-\-short\fR] [\fB\-v, \-\-verbose\fR] [\fB name ...\fR] 
+Displays a list of connection profiles in the Connection Broker. Shows the profile name and
+basic connection settings, such as the host and the user name. If profile names are
+given, only those profiles are listed.
+.TP 
+\fBlist\-providers\fR [\fB provider ...\fR] 
+Displays a list of the key providers in the Connection Broker. If one or more provider names or
+ID numbers are given, only those providers will be listed. The provider name can be
+either a full provider name or a prefix.
+.TP 
+\fBlist\-tunnel\-listeners\fR [\fBoptions\fR]
+Displays a list of the currently active tunnel listeners (also called port
+forwards).
+.TP 
+\fBopen\-tunnel\-listener\fR [\fBoptions\fR] \fBlisten\-port\fR [\fBuser\fR@] \fBserver\fR [#\fBport\fR] [\fBdst\-host\fR] [\fBdst\-port\fR] 
+Opens a tunnel listener, similar to sshg3
+\fB\-L\fR and \fB\-R\fR options. The difference is that
+ssh\-broker\-ctl will exit after the tunnel is opened. The tunnel
+status can be viewed with ssh\-broker\-ctl list\-tunnel\-listeners
+command and the tunnel can be closed with ssh\-broker\-ctl
+close\-tunnel\-listener command.
+
+In local mode (default), the listener is opened to localhost listen-port. All
+connections will be tunneled through server and from there to the final destination
+address and port. Tunnel types \fBsocks\fR and \fBsocks\-proxy\fR
+do not require destination information as it will be obtained from SOCKS client. Tunnel
+types \fBtcp\fR, \fBftp\fR and \fBlocal\fR require
+destination information.
+.TP 
+\fBpkcs10\-sign\fR [\fBoptions\fR] \fBkey\-id\fR [\fBsubject\-name\fR] 
+Signs a PKCS#10 certificate request with the given key. The
+\fBkey\-id\fR can be either a key id or a key hash. The subject name
+parameter is required unless the \fBtemplate\fR option is used. If the
+subject name is not a valid distinguished name, it will be wrapped automatically into a
+common name component. For example, a subject name string \fBMy Name\fR will
+be converted to \fBCN=My Name\fR. 
+.TP 
+\fBprobe\-key\fR [\fBoptions\fR] \fBaddress#port\fR 
+Probes for a Secure Shell server hostkey. Connects to the given address and port
+(defaults to 22) and displays the server's public key or certificate.
+.TP 
+\fBreload\fR 
+Rereads the Connection Broker configuration file.
+.TP 
+\fBremove\-key\fR [\fBoptions\fR] \fBkey\-id\fR 
+Removes a private key permanently.
+.TP 
+\fBremove\-provider\fR [\fB\-\-all\fR] \fBprovider\-id\fR 
+Removes a key provider from the Connection Broker.
+.TP 
+\fBstart\fR 
+Starts the Connection Broker in daemon mode if it is not already running.
+.TP 
+\fBstart\-gui\fR 
+Starts the Connection Broker GUI process unless it is already running.
+.TP 
+\fBstatus\fR [\fB\-s, \-\-short\fR] [\fB\-q, \-\-quiet\fR] [\fB\-\-pid\fR] [\fB\-\-all\fR] 
+Without parameters, displays short statistics and a configuration summary for the
+currently running Connection Broker process.
+.TP 
+\fBstop\fR 
+Stops the Connection Broker.
+.TP 
+\fBvalidate\-certificate\fR [\fBoptions\fR] \fB<certificate\-file>\fR 
+Validates the given X.509 certificate. If a host name is given, also checks if the
+certificate would be accepted as a host certificate for the host.
+.TP 
+\fBview\-key\fR [\fB\-s, \-\-short\fR] [\fB\-v, \-\-verbose\fR] [\fB\-\-clear\fR] [\fB\-\-write\-key=\fR \fBfile\fR] \fBkey\-id \fR
+Displays information on the defined key. If the key has certificates, a short
+summary of them is also shown.
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-broker-g3\fR(1),
+\fBssh-broker-config\fR(5)

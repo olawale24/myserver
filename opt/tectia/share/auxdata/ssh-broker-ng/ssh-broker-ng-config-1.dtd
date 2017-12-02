@@ -1,0 +1,546 @@
+<!--									-->
+<!--									-->
+<!-- secsh-broker.dtd							-->
+<!--									-->
+<!-- Copyright (c) 2016 SSH Communications Security Corporation.        -->
+<!-- This software is protected by international copyright laws.        -->
+<!-- All rights reserved.                                               -->
+<!--									-->
+<!-- Document type definition for the Connection Broker XML		-->
+<!-- configuration files.						-->
+<!--									-->
+<!--									-->
+
+<!-- Tunable parameters used in the policy. -->
+
+<!-- Both ipv4 and ipv6 are enabled by default -->
+<!ENTITY default-address-family-type		"any">
+
+<!-- The top-level element -->
+<!ELEMENT secsh-broker	(general?,default-settings?,profiles?,
+			 static-tunnels?,gui?,
+			 filter-engine?,logging?)>
+<!ATTLIST secsh-broker
+	  version	CDATA #IMPLIED>
+
+<!-- General element. Only "known-hosts" can appear multiple times. -->
+<!ELEMENT general	(crypto-lib|cert-validation|key-stores|
+			 strict-host-key-checking|host-key-always-ask|
+			 accept-unknown-host-keys|known-hosts|
+	                 user-config-directory|file-access-control|
+	                 protocol-parameters)*>
+
+<!-- Cryptographic library. -->
+<!ELEMENT crypto-lib	EMPTY>
+<!ATTLIST crypto-lib
+	  mode	(fips|standard) "standard">
+
+<!-- PKI settings. "dod-pki" element may appear only once, other elements -->
+<!-- may be specified multiple times. -->
+
+<!ELEMENT cert-validation	(ldap-server|
+                                 ocsp-responder|
+                                 crl-prefetch|
+                                 dod-pki|
+				 ca-certificate|
+				 key-store)*>
+
+<!ATTLIST cert-validation
+	  end-point-identity-check (yes|no|YES|NO|ask|ASK) "yes"
+	  default-domain      CDATA   #IMPLIED
+	  http-proxy-url      CDATA   #IMPLIED
+	  socks-server-url    CDATA   #IMPLIED
+	  max-path-length     CDATA   "10"
+	  cache-size          CDATA   "300"
+	  max-crl-size        CDATA   "50"
+	  external-search-timeout  CDATA  "600"
+	  max-ldap-response-length CDATA  "50"
+	  ldap-idle-timeout   CDATA   "30">
+
+<!ELEMENT ldap-server	EMPTY>
+<!ATTLIST ldap-server
+	  address	CDATA #REQUIRED
+	  port		CDATA "389">
+
+<!ELEMENT ocsp-responder (#PCDATA)>
+<!ATTLIST ocsp-responder
+	  url		  CDATA #REQUIRED
+	  validity-period CDATA "0"
+	  responder-certificate CDATA #IMPLIED>
+
+<!-- CRL prefetch. -->
+<!ELEMENT crl-prefetch		EMPTY>
+<!ATTLIST crl-prefetch
+	  interval		CDATA	"3600"
+	  url			CDATA	#REQUIRED>
+
+<!-- CA certificates. -->
+<!ELEMENT ca-certificate (#PCDATA)>
+<!ATTLIST ca-certificate
+	  name		CDATA #REQUIRED
+	  file		CDATA #IMPLIED
+	  disable-crls	(yes|no|YES|NO) "no"
+	  use-expired-crls CDATA "0" >
+
+<!-- Enforce digital signature in key usage. -->
+<!ELEMENT dod-pki		EMPTY>
+<!ATTLIST dod-pki
+	  enable	(yes|no|YES|NO) "no" >
+
+<!ELEMENT key-stores ((key-store|user-keys|identification)*)>
+
+<!ELEMENT key-store EMPTY>
+<!ATTLIST key-store
+	  type		 CDATA #REQUIRED
+	  init		 CDATA #IMPLIED
+	  disable-crls	(yes|no|YES|NO) "no"
+	  use-expired-crls CDATA "0" >
+
+<!ELEMENT user-keys EMPTY>
+<!ATTLIST user-keys
+          directory               CDATA #IMPLIED
+	  poll-interval           CDATA "10"
+          passphrase-timeout      CDATA "0"
+          passphrase-idle-timeout CDATA "0">
+
+<!ELEMENT identification EMPTY>
+<!ATTLIST identification
+          file                    CDATA #REQUIRED
+          base-path               CDATA #IMPLIED
+          passphrase-timeout      CDATA "0"
+          passphrase-idle-timeout CDATA "0">
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT strict-host-key-checking EMPTY>
+<!ATTLIST strict-host-key-checking
+	  enable (yes|no|YES|NO) #REQUIRED>
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT host-key-always-ask EMPTY>
+<!ATTLIST host-key-always-ask
+	  enable (yes|no|YES|NO) #REQUIRED>
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT accept-unknown-host-keys EMPTY>
+<!ATTLIST accept-unknown-host-keys
+          enable (yes|no|YES|NO) #REQUIRED>
+
+<!ELEMENT exclusive-connection EMPTY>
+<!ATTLIST exclusive-connection
+          enable (yes|no|YES|NO) #REQUIRED>
+
+<!ELEMENT known-hosts (key-store*)>
+<!ATTLIST known-hosts
+	  path		CDATA #IMPLIED
+	  file		CDATA #IMPLIED
+	  directory	CDATA #IMPLIED
+          filename-format	(hash|plain|default) "default" >
+
+<!-- Extended plugin configuration -->
+<!ELEMENT extended (ext)*>
+
+<!ELEMENT ext (#PCDATA | EMPTY | ext)*>
+<!ATTLIST ext
+          name CDATA #REQUIRED>
+
+<!-- Default settings element.  No element may appear multiple times. -->
+<!ELEMENT default-settings	(ciphers|macs|kexs|hostkey-algorithms|
+				 transport-distribution|rekey|
+				 authentication-methods|
+				 hostbased-default-domain|
+				 compression|proxy|idle-timeout|
+                                 tcp-connect-timeout|keepalive-interval|
+	                         exclusive-connection|server-banners|
+	                         forwards|extended|remote-environment|
+				 server-authentication-methods|
+				 authentication-success-message|
+				 sftpg3-mode|terminal-selection|terminal-bell|
+	                         close-window-on-disconnect|quiet-mode|
+	                         checksum|address-family)*>
+
+<!ATTLIST default-settings
+	  user	CDATA #IMPLIED>
+
+<!-- Server banners. -->
+<!ELEMENT server-banners	EMPTY>
+<!ATTLIST server-banners
+	  visible	(yes|no|YES|NO) "yes">
+
+<!-- Ciphers element. -->
+<!ELEMENT ciphers	(cipher*)>
+
+<!-- Cipher. -->
+<!ELEMENT cipher	EMPTY>
+<!ATTLIST cipher
+	  name	CDATA #REQUIRED>
+
+<!-- Macs element. -->
+<!ELEMENT macs	(mac*)>
+
+<!-- Mac. -->
+<!ELEMENT mac	EMPTY>
+<!ATTLIST mac
+	  name	CDATA #REQUIRED>
+
+<!-- Kexs element. -->
+<!ELEMENT kexs	(kex*)>
+
+<!-- Kex. -->
+<!ELEMENT kex	EMPTY>
+<!ATTLIST kex
+	  name	CDATA #REQUIRED>
+
+<!-- Hostkey algorithms element. -->
+<!ELEMENT hostkey-algorithms (hostkey-algorithm*)>
+
+<!-- Hostkey algorithm. -->
+<!ELEMENT hostkey-algorithm   EMPTY>
+<!ATTLIST hostkey-algorithm
+	  name  CDATA #REQUIRED>
+
+<!ELEMENT rekey	  EMPTY>
+<!ATTLIST rekey
+	  bytes CDATA "0">
+
+<!-- Hostbased default domain. -->
+<!ELEMENT hostbased-default-domain EMPTY>
+<!ATTLIST hostbased-default-domain
+          name  CDATA #REQUIRED>
+
+<!-- Authentication methods element. -->
+<!ELEMENT authentication-methods (authentication-method|auth-hostbased
+				  |auth-password|auth-publickey|auth-gssapi
+				  |auth-keyboard-interactive)*>
+<!ELEMENT server-authentication-methods (authentication-method
+					 |auth-server-publickey
+					 |auth-server-certificate)*>
+
+<!ELEMENT auth-server-publickey	EMPTY>
+<!ATTLIST auth-server-publickey
+	  policy	CDATA #IMPLIED>  <!-- "strict", "ask", "tofu", -->
+                                         <!-- "advisory" -->
+
+<!ELEMENT auth-server-certificate	EMPTY>
+
+
+<!ELEMENT remote-environment (environment*)>
+
+<!ELEMENT environment EMPTY>
+<!ATTLIST environment
+          name		CDATA #REQUIRED
+	  value         CDATA #REQUIRED
+          format	(yes|no|YES|NO) "no">
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT transport-distribution EMPTY>
+<!ATTLIST transport-distribution
+	  num-transports	CDATA #REQUIRED>
+
+<!-- This element is deprecated and included for backwards compatibility only -->
+<!ELEMENT authentication-method	EMPTY>
+<!ATTLIST authentication-method
+	  name	CDATA #REQUIRED>
+
+<!ELEMENT auth-hostbased	(local-hostname?)>
+<!ELEMENT local-hostname EMPTY>
+<!ATTLIST local-hostname
+	  name CDATA #REQUIRED>
+
+<!ELEMENT auth-password EMPTY>
+
+<!ELEMENT auth-publickey (key-selection?)>
+<!ATTLIST auth-publickey
+	  signature-algorithms CDATA #IMPLIED>
+<!ELEMENT key-selection (public-key|issuer-name|subject-name|
+	                 extended-key-usage|key-usage|policy-info)*>
+<!ATTLIST key-selection
+	  policy                   CDATA #IMPLIED
+	  exclude                  (yes|no|YES|NO) "no"
+     	  require-all              (yes|no|YES|NO) "no">
+<!ELEMENT public-key EMPTY>
+<!ATTLIST public-key
+	  type                     CDATA #REQUIRED>
+<!ELEMENT issuer-name EMPTY>
+<!ATTLIST issuer-name
+	  name                     CDATA #IMPLIED
+	  pattern                  CDATA #IMPLIED
+          match-server-certificate (yes|no|YES|NO) "no">
+<!ELEMENT subject-name EMPTY>
+<!ATTLIST subject-name
+	  name                     CDATA #IMPLIED
+	  pattern                  CDATA #IMPLIED>
+<!ELEMENT extended-key-usage (#PCDATA)>
+<!ATTLIST extended-key-usage
+          oid                      CDATA #IMPLIED
+          explicit                 (yes|no|YES|NO) "no">
+<!ELEMENT key-usage (#PCDATA)>
+<!ATTLIST key-usage
+          bit                      CDATA #IMPLIED>
+<!ELEMENT auth-keyboard-interactive EMPTY>
+<!ELEMENT auth-gssapi EMPTY>
+
+<!-- Actually, the default for allow-ticket-forwarding is "no", but we
+     don't want to override value if it is left undefined. -->
+<!ATTLIST auth-gssapi
+	  dll-path		      CDATA   "/usr/lib/libgssapi_krb5.so,/usr/lib64/libgssapi_krb5.so,/usr/lib/libkrb5.so,/usr/lib/libgss.so,/usr/local/gss/gl/mech_krb5.so,/usr/local/lib/libgssapi_krb5.so,/usr/local/lib/libkrb5.so,/usr/kerberos/lib/libgssapi_krb5.so,/usr/kerberos/lib/libkrb5.so,/usr/lib/gss/libgssapi_krb5.so,/usr/kerberos/lib/libgssapi_krb5.so.2,/usr/lib/libgssapi_krb5.so.2,/usr/lib/amd64/gss/mech_krb5.so,/usr/lib/amd64/libgss.so"
+	  allow-ticket-forwarding     (yes|no)  #IMPLIED>
+
+<!-- User identities. -->
+<!ELEMENT user-identities (identity*)>
+<!ELEMENT identity EMPTY>
+<!ATTLIST identity
+          identity-file CDATA #IMPLIED
+          file CDATA #IMPLIED
+          hash CDATA #IMPLIED
+          id CDATA #IMPLIED
+          data  CDATA #IMPLIED>
+
+<!-- Password. -->
+<!ELEMENT password (#PCDATA)>
+<!ATTLIST password
+          string    CDATA #IMPLIED
+          file      CDATA #IMPLIED
+          command   CDATA #IMPLIED>
+
+<!-- Proxy rules. -->
+<!ELEMENT proxy	EMPTY>
+<!ATTLIST proxy
+	  ruleset	CDATA #REQUIRED>
+
+<!-- Idle timeout. -->
+<!ELEMENT idle-timeout	EMPTY>
+<!ATTLIST idle-timeout
+	  type	(connection) "connection"
+	  time	CDATA #IMPLIED>
+
+<!-- Connect timeout. -->
+<!ELEMENT tcp-connect-timeout	EMPTY>
+<!ATTLIST tcp-connect-timeout
+	  time	CDATA #REQUIRED>
+
+<!-- Keepalive interval. -->
+<!ELEMENT keepalive-interval	EMPTY>
+<!ATTLIST keepalive-interval
+	  time	CDATA #REQUIRED>
+
+<!-- Forwards element. -->
+<!ELEMENT forwards	(forward*)>
+
+<!-- Forward. -->
+<!ELEMENT forward	EMPTY>
+<!ATTLIST forward
+	  type	(x11|agent)    #REQUIRED
+	  state	(on|off|denied) #REQUIRED>
+
+
+<!-- Compression. -->
+<!ELEMENT compression	EMPTY>
+<!ATTLIST compression
+	  name	CDATA #IMPLIED
+	  level CDATA #IMPLIED>
+
+<!ELEMENT authentication-success-message EMPTY>
+<!ATTLIST authentication-success-message
+	  enable		(yes|no|YES|NO) "yes">
+
+<!ELEMENT quiet-mode EMPTY>
+<!ATTLIST quiet-mode
+	  enable		(yes|no|YES|NO) "no">
+
+<!ELEMENT sftpg3-mode EMPTY>
+<!ATTLIST sftpg3-mode
+	  compatibility-mode	CDATA "tectia">
+
+<!ELEMENT terminal-selection EMPTY>
+<!ATTLIST terminal-selection
+    selection-type (select-words|select-paths) "select-words">
+
+<!ELEMENT terminal-bell EMPTY>
+<!ATTLIST terminal-bell
+    bell-style (none|pc-speaker|system-default) "system-default">
+
+<!ELEMENT close-window-on-disconnect EMPTY>
+<!ATTLIST close-window-on-disconnect
+    enable (yes|no) "no">
+
+<!ELEMENT checksum EMPTY>
+<!ATTLIST checksum
+          type     (yes|no|md5|sha1|md5-force|sha1-force|checkpoint|
+                    YES|NO|MD5|SHA1|MD5-FORCE|SHA1-FORCE|CHECKPOINT) "yes">
+
+<!ELEMENT user-config-directory EMPTY>
+<!ATTLIST user-config-directory
+	  path	CDATA "%USER_CONFIG_DIRECTORY%">
+
+<!ELEMENT file-access-control EMPTY>
+<!ATTLIST file-access-control
+	  enable (yes|no|YES|NO) "no">
+
+<!-- address-family mode setting ipv4 & ipv6-->
+<!ELEMENT address-family	EMPTY>
+<!ATTLIST address-family
+	  type		(any|inet|inet6) "&default-address-family-type;">
+
+<!ELEMENT protocol-parameters EMPTY>
+<!ATTLIST protocol-parameters
+	  threads CDATA #IMPLIED>
+
+<!-- Profiles element. -->
+<!ELEMENT profiles	(profile*)>
+
+<!-- Connection profile.  No element may appear multiple times. -->
+<!ELEMENT profile	(hostkey|ciphers|macs|kexs|hostkey-algorithms|
+			 transport-distribution|rekey|
+			 authentication-methods|
+                         user-identities|
+			 compression|proxy|idle-timeout|
+                         tcp-connect-timeout|keepalive-interval|
+	                 exclusive-connection|server-banners|
+	                 forwards|tunnels|extended|remote-environment|
+			 server-authentication-methods|password|
+                         profile-group)*>
+<!ATTLIST profile
+	  id	CDATA #IMPLIED
+	  name	CDATA #IMPLIED
+	  host	CDATA #REQUIRED
+	  port	CDATA "22"
+          protocol CDATA "secsh2"
+	  host-type (unix|windows|default) "default"
+	  connect-on-startup (yes|no|YES|NO) "no"
+	  user	CDATA #IMPLIED
+	  gateway-profile CDATA #IMPLIED>
+
+<!ELEMENT profile-group EMPTY>
+<!ATTLIST profile-group
+          name  CDATA #REQUIRED>
+
+<!-- Hostkey. -->
+<!ELEMENT hostkey	(#PCDATA)>
+<!ATTLIST hostkey
+	  file	CDATA #IMPLIED>
+
+<!-- Tunnels element. -->
+<!ELEMENT tunnels	(local-tunnel*,remote-tunnel*)>
+
+<!-- Local tunnel. -->
+<!ELEMENT local-tunnel	EMPTY>
+<!ATTLIST local-tunnel
+	  type	CDATA "tcp"
+	  listen-address	CDATA "127.0.0.1"
+	  listen-port	CDATA #REQUIRED
+	  dst-host CDATA "127.0.0.1"
+	  dst-port CDATA #REQUIRED
+	  allow-relay (yes|no|YES|NO) "no">
+
+<!-- Remote tunnel. -->
+<!ELEMENT remote-tunnel	EMPTY>
+<!ATTLIST remote-tunnel
+	  type	CDATA "tcp"
+	  listen-address	CDATA "127.0.0.1"
+	  listen-port	CDATA #REQUIRED
+	  dst-host CDATA "127.0.0.1"
+	  dst-port CDATA #REQUIRED
+	  allow-relay (yes|no|YES|NO) "no">
+
+<!-- Static tunnels element. -->
+<!ELEMENT static-tunnels	(tunnel*)>
+
+<!-- Static tunnel. -->
+<!ELEMENT tunnel	EMPTY>
+<!ATTLIST tunnel
+	  type	CDATA "tcp"
+	  listen-address	CDATA "127.0.0.1"
+	  listen-port	CDATA #REQUIRED
+	  dst-host CDATA "127.0.0.1"
+	  dst-port CDATA #REQUIRED
+	  allow-relay (yes|no|YES|NO) "no"
+	  profile CDATA #REQUIRED>
+
+<!-- GUI. -->
+<!ELEMENT gui EMPTY>
+<!ATTLIST gui
+	  hide-tray-icon		(yes|no|YES|NO) "no"
+	  show-exit-button		(yes|no|YES|NO) "yes"
+	  show-admin			(yes|no|YES|NO) "yes"
+	  enable-connector		(yes|no|YES|NO) "yes"
+	  show-security-notification	(yes|no|YES|NO) "yes">
+
+<!ELEMENT filter-engine (network|dns|filter|rule)*>
+<!ATTLIST filter-engine
+      ip-generate-start   CDATA "198.18.0.1"
+      ip6-generate-start  CDATA "2001:db8::ff00:42:8329"
+      ftp-filter-at-signs (yes|no|YES|NO) "no">
+
+<!ELEMENT network EMPTY>
+<!ATTLIST network
+	  id		      ID    #REQUIRED
+	  address	      CDATA #IMPLIED
+	  domain	      CDATA #IMPLIED
+	  ip-generate-start   CDATA #IMPLIED
+	  ip6-generate-start   CDATA #IMPLIED>
+
+<!ELEMENT dns EMPTY>
+<!ATTLIST dns
+	  id		      ID    #REQUIRED
+	  network-id	      IDREF #IMPLIED
+	  application	      CDATA #IMPLIED
+	  host		          CDATA #IMPLIED
+	  ip-address	      CDATA #IMPLIED
+	  pseudo-ip (yes|no|YES|NO) "no">
+
+<!ELEMENT filter EMPTY>
+<!ATTLIST filter
+	  dns-id	      IDREF #REQUIRED
+	  ports		      CDATA #REQUIRED
+	  action	       (block|direct|tunnel|ftp-tunnel|ftp-proxy|
+                                BLOCK|DIRECT|TUNNEL|FTP-TUNNEL|FTP-PROXY)
+                              #REQUIRED
+	  profile-id	      CDATA #IMPLIED
+    destination         CDATA #IMPLIED
+    destination-port    CDATA #IMPLIED
+	  fallback-to-plain (yes|no|YES|NO) "no">
+
+<!ELEMENT rule EMPTY>
+<!ATTLIST rule
+	  application	      	CDATA #IMPLIED
+	  host		      			CDATA #IMPLIED
+	  ip-address	      	CDATA #IMPLIED
+	  pseudo-ip 					(yes|no|YES|NO) "no"
+	  ports		      			CDATA #REQUIRED
+	  action	            (block|direct|tunnel|ftp-tunnel|ftp-proxy|
+                         BLOCK|DIRECT|TUNNEL|FTP-TUNNEL|FTP-PROXY)
+                              #REQUIRED
+	  profile-id	      	CDATA #IMPLIED
+    destination         CDATA #IMPLIED
+    destination-port    CDATA #IMPLIED
+    username            CDATA #IMPLIED
+    hostname-from-app   (yes|no|YES|NO) "no"
+    username-from-app   (yes|no|YES|NO) "no"
+	  fallback-to-plain 	(yes|no|YES|NO) "no"
+    show-sftp-server-banner    (yes|no|YES|NO) "no">
+
+
+
+<!ELEMENT logging	(log-target*,log-events*)>
+
+<!-- Log events. -->
+<!-- Log event facility. -->
+<!ENTITY default-log-event-facility		  "normal">
+
+<!-- Log event severity. -->
+<!ENTITY default-log-event-severity		  "notice">
+
+<!ELEMENT log-target	EMPTY>
+<!ATTLIST log-target
+	  file		CDATA			#IMPLIED
+	  type		(file|syslog|socket|discard) 	"file"
+	  format	(syslog|csv|xml)        "syslog" >
+
+<!ELEMENT log-events	(log-target|#PCDATA)*>
+<!ATTLIST log-events
+	  facility	(normal|daemon|user|auth|local0|local1|
+			local2|local3|local4|local5|local6|local7|discard)
+			"&default-log-event-facility;"
+	  severity	(informational|notice|warning|error|critical|
+			security-success|security-failure)
+			"&default-log-event-severity;">

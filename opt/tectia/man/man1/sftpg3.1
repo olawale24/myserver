@@ -1,0 +1,1851 @@
+.TH sftpg3 1 "16 June 2017"  
+.SH NAME
+sftpg3 \- Secure Shell file transfer client - Generation 3
+.SH SYNOPSIS
+.ad l
+\fBsftpg3\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR]\&...
+.br
+[
+\fBprofile\fR | 
+[\fBuser@\fR]
+\fBhost\fR 
+[\fB#port\fR]
+]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+sftpg3
+is an FTP-like client
+that can be used for secure file transfer over the network. sftpg3 launches
+ssh\-broker\-g3 to provide a secure transport using the Secure Shell
+version 2 protocol. ssh\-broker\-g3 will ask for passwords or passphrases if
+they are needed for authentication. sftpg3 uses the configuration specified
+in the \fBssh\-broker\-config.xml\fR file.
+.PP
+When started interactively, sftpg3 displays a prompt where the SFTP
+commands can be entered. It is also possible to start sftpg3
+non-interactively with a batch file that contains the commands to be run. For information on
+the available commands, see 
+\fICommands\fR below.
+.PP
+As an alternative to using the command line to set default values for various parameters,
+it is possible to define the commands in a startup batch file that is run each time
+sftpg3 is started.
+By default, sftpg3 looks for a file named
+\fBssh_sftp_batch_file\fR in the user-specific directory
+\fB$HOME/.ssh2/\fR on Unix or \fB%APPDATA%\\SSH\\\fR on
+Windows.
+.PP
+sftpg3 has two connection end points, local and remote, and both of
+them can be connected to other hosts than the SFTP client host. If started without arguments,
+the local end point is connected to the file system of the SFTP client host and the remote end
+point is unconnected. The connected host(s), with the exception of the SFTP client host, must
+be running a Secure Shell version 2 server with the sftp\-server (or
+sft\-server\-g3) subsystem enabled. Tectia Server has
+sft\-server\-g3 enabled by default.
+.PP
+The remote connection end point can be given directly as an argument to the
+sftpg3 command or it can be given with the open SFTP
+command after sftpg3 has started. The local connection end point can be
+given with the lopen SFTP command.
+.PP
+When connecting, you can give either the name of a connection profile defined in the
+\fBssh\-broker\-config.xml\fR file (\fIprofile\fR) or the
+IP address or DNS name of the remote host, optionally with the remote user name and the port
+of the Secure Shell server 
+(\fIuser@\fR\fIhost\fR\fI#port\fR). 
+If no user name is given, the local user name is assumed. If no port is given, the default 
+Secure Shell port 22 is assumed.
+.RS 
+\fBNote\fR
+.PP
+When entering a connection profile in sftpg3, note that Tectia Client/Server
+deduces the meaning of the argument differently depending on its format. If there is an
+@ sign in the given attribute value, Tectia Client/Server always interprets it to be
+\fI<username@hostname>\fR, i.e. not a profile.
+.PP
+Also, if there are dots in a profile name (for example
+\fBhost.x.example.com\fR, the dots need to be escaped on command line.
+Enter
+\fBhost\\.x\\.example\\.com\fR, instead. 
+Otherwise the profile name is taken as a host name and the current local user name is used
+for logging in.
+.RE
+.PP
+For information on special characters in filenames, see 
+\fIFilename Support\fR below.
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-4\fR 
+Defines that all connection-related DNS resolutions will be resolved as an IPv4
+address.
+.TP 
+\fB\-6\fR 
+Defines that all connection-related DNS resolutions will be resolved as an IPv6
+address.
+.TP 
+\fB\-b \fR\fIbuffer_size_bytes\fR 
+Defines the maximum buffer size for one SFTP protocol read or write request
+(default: \fI32768\fR bytes).
+
+The maximum number of SFTP protocol read or write requests sent in parallel within
+the transfer of a single file can be specified with the 
+\fB\-N\fR
+option.
+
+Note that when streaming (see 
+\fB\-\-streaming\fR)
+is used (as it is by default when transferring files larger than
+\fIbuffer_size_bytes\fR to/from Tectia Server), this option is not used
+for defining buffer sizes.
+.TP 
+\fB\-B \fR[\fB\-\fR | \fBbatch_file\fR] 
+The \fB\-B \-\fR option enables reading from the standard input. This
+option is useful when you want to launch processes with sftpg3 and
+redirect the stdin pipes. 
+
+By defining the name of a \fIbatch_file\fR as an attribute, you
+can execute SFTP commands from the given file in batch mode. The file can contain any
+allowed SFTP commands. For a description of the commands, see 
+\fICommands\fR below.
+
+Using batch mode requires that you have previously saved the server host key on the
+client and set up a non-interactive method for user authentication (for example,
+host-based authentication or public-key authentication without a passphrase).
+.TP 
+\fB\-C\fR 
+Disables compression from the current connection.
+.TP 
+\fB+C\fR 
+Enables zlib compression for this particular connection.
+.TP 
+\fB\-c, \-\-ciphers=\fR\fILIST\fR 
+Sets the allowed ciphers to be offered to the server. List the cipher names in a
+comma-separated list. For example:
+
+.nf
+\-\-ciphers seed\-cbc@ssh.com,aes256\-cbc
+.fi
+
+Enter \fBhelp\fR as the value to view the currently supported cipher
+names.
+.TP 
+\fB\-D, \-\-debug=\fR\fILEVEL\fR 
+Sets the debug level. \fILEVEL\fR is a number from 0 to 99,
+where 99 specifies that all debug information should be displayed. This should be the
+first argument on the command line.
+.RS 
+\fBNote\fR
+
+The debug level can be set only when the sftpg3 command starts
+the Connection Broker. This option has no effect in the command if the Connection Broker is already
+running.
+.RE
+.TP 
+\fB\-i \fR\fIFILE\fR 
+Defines that private keys defined in the identification file are used for public-key
+authentication.
+.TP 
+\fB\-K, \-\-identity\-key\-file=\fR\fIFILE\fR 
+Defines that the given key file of a private key or certificate is used in user
+authentication. The path to the key file is given in the command.
+
+If the file is a private key, it will be read and compared to the keys already known
+by the Connection Broker key store. If the key is not known, it will be decoded and added to the key
+store temporarily. If the file is a certificate and Connection Broker knows a matching private key,
+it will be used. Both the certificate and the private key can be given using multiple
+\fB\-K\fR options on command line.
+.TP 
+\fB\-N \fR\fImax_requests\fR 
+Defines the maximum number of SFTP protocol read or write requests sent in parallel
+(default: 10).
+
+The size of the buffer used in each read or write request can be specified with the
+\fB\-b\fR
+option.
+
+Note that this value applies within the transfer of a single file; it cannot be
+used to define the number of files sent in parallel.
+
+When streaming (see 
+\fB\-\-streaming\fR)
+is used (as it is by default when transferring files larger than 
+\fIbuffer_size_bytes\fR specified with the \fB\-b\fR 
+option to/from Tectia Server), this option is not used.
+.TP 
+\fB\-P \fR\fIport\fR 
+Connects to this Secure Shell port on the remote machine (default:
+\fI22\fR).
+.TP 
+\fB\-q, \-\-quiet\fR 
+Suppresses the printing of error, warning, and informational messages. This option
+overrides the \fBquiet\-mode\fR setting made in the Connection Broker configuration
+file.
+.TP 
+\fB\-v, \-\-verbose\fR 
+Uses verbose mode (equal to \fB\-D 2\fR).
+.TP 
+\fB\-\-aa, \-\-allowed\-authentications=\fR\fIMETHODS\fR 
+Defines the only allowed methods that can be used in user authentication. List the
+methods in a comma-separated list. For example:
+
+.nf
+\-\-allowed\-authentications keyboard\-interactive,password
+.fi
+
+Enter \fBhelp\fR as the value to view the currently supported
+authentication methods.
+.TP 
+\fB\-\-compressions=\fR\fIMETHODS\fR 
+Sets the allowed compression methods to be offered to the server. List the methods
+in a comma-separated list.
+
+Enter \fBhelp\fR as the value to view the currently supported compression
+methods.
+.TP 
+\fB\-\-exclusive\fR 
+Defines that a new connection will be opened for each connection attempt, otherwise
+Connection Broker can reuse recently closed connections.
+.TP 
+\fB\-\-fips\fR 
+Performs the checksums using the FIPS cryptographic library.
+.TP 
+\fB\-\-hostkey\-algorithms=\fR\fIalgorithms\fR 
+Sets the allowed host key algorithms to be offered to the server. List the host key
+algorithms in a comma-separated list. For example:
+
+.nf
+\-\-hostkey\-algorithms ssh\-dss\-sha224@ssh.com,ssh\-dss\-sha256@ssh.com
+.fi
+
+Enter \fBhelp\fR as the value to view the currently supported host key
+algorithms.
+.TP 
+\fB\-\-identity=\fR\fIID\fR 
+Defines that the ID of the private key is used in user authentication. The ID can be
+Connection Broker-internal ordinary number of the key, the key hash or the key file name.
+.TP 
+\fB\-\-identity\-key\-hash=\fR\fIID\fR 
+Defines the private key used in user authentication with the corresponding public
+key hash.
+.TP 
+\fB\-\-identity\-key\-id=\fR\fIID\fR 
+Defines that the Connection Broker-internal ordinary number of the key is used in user
+authentication.
+.TP 
+\fB\-\-keep\-alive=\fR\fIVALUE\fR 
+Defines how often keep-alive messages are sent to the Secure Shell server. Enter the
+value as seconds. The default value is 0, meaning that keep-alive messages are
+disabled.
+.TP 
+\fB\-\-kexs=\fR\fIkexs\fR 
+Sets the allowed key exchange (KEX) methods to be offered to the server. List the
+KEX names in a comma-separated list. For example:
+
+.nf
+\-\-kexs diffie\-hellman\-group14\-sha224@ssh.com,diffie\-hellman\-group14\-sha256@ssh.com
+.fi
+
+Enter \fBhelp\fR as the value to view the currently supported KEX
+methods.
+
+All the supported KEXs can operate in the FIPS mode on Linux, Windows,
+Solaris and HP-UX Itanium. However,
+\fBdiffie\-hellman\-group15\-sha256@ssh.com\fR,
+\fBdiffie\-hellman\-group15\-sha384@ssh.com\fR,
+\fBecdh\-sha2\-nistp256\fR, \fBecdh\-sha2\-nistp384\fR and
+\fBecdh\-sha2\-nistp521\fR that are supported KEXs, cannot operate in the
+FIPS mode on HP-UX PA-RISC and IBM AIX due to issues in the OpenSSL cryptographic
+library version 0.9.8. 
+.TP 
+\fB\-\-kip\fR 
+Defines keyboard-interactive and password as the allowed methods for user
+authentication; the same as
+
+.nf
+\-\-allowed\-authentications keyboard\-interactive,password
+.fi
+.TP 
+\fB\-\-macs=\fR\fILIST\fR 
+Sets the allowed MACs to be offered to the server. List the MAC names in a
+comma-separated list. For example:
+
+.nf
+\-\-macs hmac\-sha1\-96,hmac\-md5,hmac\-md5\-96
+.fi
+
+Enter \fBhelp\fR as the value to view the currently supported MAC
+names.
+.TP 
+\fB\-\-password=\fR \fBPASSWORD\fR | \fBfile://\fR \fBPASSWORDFILE\fR | \fBextprog://\fR \fBPROGRAM\fR 
+Sets the user password or passphrase that the client will send as a response to an
+authentication method requesting a password or passphrase (hereafter: password). This
+can be used also with password-protected certificates and public-keys.
+
+The \fIPASSWORD\fR can be given directly as an argument to this
+option (not recommended). Better alternatives are entering a path to a file containing
+the password
+(\fB\-\-password=file://\fR\fIPASSWORDFILE\fR), or
+entering a path to a program or script that outputs the password
+(\fB\-\-password=extprog://\fR\fIPROGRAM\fR). 
+
+When using the \fBextprog://\fR option to refer to a shell script, make
+sure the script also defines the user's shell, and outputs the actual password.
+Otherwise the executed program fails, because it does not know what shell to use for the
+shell script. For example, if the password string is defined in a file named
+\fBmy_password.txt\fR, and you want to use the bash shell, include
+these lines in the script:
+
+.nf
+#!/usr/bash
+cat /full/pathname/to/my_password.txt
+.fi
+.RS 
+\fBCaution\fR
+
+Supplying the password on the command line is not a secure option. For example, in
+a multi-user environment, the password given directly on the command line is trivial
+to recover from the process table. You should set up a more secure way to
+authenticate. For non-interactive batch jobs, it is more secure to use public-key
+authentication without a passphrase, or host-based authentication. At a minimum, use a
+file or a program to supply the password.
+.RE
+.TP 
+\fB\-\-plugin\-path=\fR\fIPATH\fR 
+Sets plugin path to \fIPATH\fR. This is only used in the FIPS
+mode.
+.TP 
+\fB\-\-tcp\-connect\-timeout=\fR\fIVALUE\fR 
+Defines a timeout period (in seconds) for establishing a TCP connection to the
+Secure Shell server. Enter a timeout value as a positive number. Value 0 (zero) disables
+this feature and the default system TCP timeout will be used, instead.
+.TP 
+\fB\-\-user=\fR\fIUSERNAME\fR 
+\fIUSERNAME\fR will be used in the logon if the user name is
+not specified in the address string.
+.TP 
+\fB\-V, \-\-version\fR 
+Displays program version and exits.
+.TP 
+\fB\-h, \-\-help, \-?\fR 
+Displays a short summary of command-line options and exits.
+.SH COMMANDS
+When sftpg3 is ready to accept commands, it will display the prompt
+\fBsftp>\fR. The user can then enter any of the following commands:
+.PP
+.nf
+!               append          ascii           auto            binary
+break           cd              chmod           close           continue
+debug           delete          digest          echo            exit
+get             getext          help            helpall         lappend
+lcd             lchmod          lclose          ldelete         ldigest
+lls             llsroots        lmkdir          localopen       locsite
+lopen           lpwd            lreadlink       lrename         lrm
+lrmdir          ls              lsite           lsroots         lsymlink
+mget            mkdir           mput            open            pause
+put             pwd             quit            readlink        rename
+rm              rmdir           set             setext          setperm
+sget            site            sput            sunique         symlink
+type            verbose
+.fi
+.TP 
+\fB!\fR [\fBcommand\fR] [\fBarguments\fR] 
+Invokes an interactive shell on the local machine. if a
+\fIcommand\fR is given, it is used as the command to be executed.
+Optional \fIarguments\fR can be given depending on the
+command.
+.TP 
+\fBappend \fR[\fB\-u, \-\-unlink\-source\fR] [\fB\-\-streaming\fR] [\fB\-\-force\-lower\-case\fR] [\fB\-\-statistics\fR] [\fB\-\-summary\-display\fR] [\fB\-\-summary\-format\fR] [\fB\-\-progress\-display\fR] [\fB\-\-progress\-line\-format\fR] [\fB\-\-progress\-line\-interval\fR] \fBsrcfile \fR[\fBdstfile\fR] 
+Appends the specified local file to the remote file. No globbing can be used.
+
+Options:
+.RS 
+.TP 
+\fB\-u, \-\-unlink\-source\fR 
+Removes the source file after file transfer.
+.TP 
+\fB\-\-streaming\fR [ \fB=yes\fR | \fBno\fR | \fBforce\fR | \fBext\fR ] 
+Uses streaming in file transfer if the server supports it. Files smaller than
+\fIbuffer_size_bytes\fR are not transferred using
+streaming. Use \fBforce\fR with small files. Default:
+\fByes\fR
+
+Use \fBext\fR with z/OS hosts to enable direct MVS data set access.
+Use this option only when the file transfer is mainly used for mainframe data set
+transfers, as it can slow down the transfer of small files in other environments. 
+
+The \fB\-\-streaming=ext\fR option requires also the
+\fB\-\-checksum=no\fR option, because if checksums are calculated, the
+file transfer uses staging, which excludes streaming.
+.TP 
+\fB\-\-force\-lower\-case\fR 
+Destination filename will be converted to lowercase characters.
+.RE
+
+The semantics of options \fB\-\-statistics\fR,
+\fB\-\-summary\-display\fR, \fB\-\-summary\-format\fR,
+\fB\-\-progress\-display\fR, \fB\-\-progress\-line\-format\fR, and
+\fB\-\-progress\-line\-interval\fR are the same as with 
+get.
+.TP 
+\fBascii\fR [\fB\-s\fR] [\fBremote_nl_conv\fR] [\fBlocal_nl_conv\fR] 
+Command ascii sets the transfer mode to ASCII.
+
+For transfers between Tectia on z/OS and other hosts, this also enables automatic
+ASCII-EBCDIC conversion. Default conversion is between code sets ISO8859-1 and IBM-1047.
+Files are transferred using the \fBLINE\fR format. The
+site and lsite commands can be used to change
+the values.
+
+If you enter the ascii command with any options, it does not set
+the transfer mode to ASCII, but affects the newline conventions used in the transferred
+files. You can also set the server's newline convention by using a host profile that
+specifies the host type. For more information, see the 
+\fBssh-broker-config\fR(5)
+man page.
+
+Options:
+.RS 
+.TP 
+\fB\-s\fR 
+Shows the current newline convention. The line delimiters used in different
+systems are: 
+
+.nf
+dos:    CRLF (\\r\\n, 0x0d 0x0a)
+mac:    CR (\\r, 0x0d)
+mvs:    NEL (\\n, 0x15)
+unix:   LF (\\n, 0x0a)
+.fi
+.TP 
+\fIremote_nl_conv\fR \fIlocal_nl_conv\fR 
+This syntax can be used to define the remote and local newline conventions.
+The \fIlocal_nl_conv\fR option operates on the local end, but
+notice that usually the correct local newline convention is already compiled in.
+
+You can either set hints of the newline conventions for the underlying
+transfer layer, which by default tries to use the actual newline convention given
+by the server, or alternatively you can force the newline mode. 
+
+To set hints of the newline conventions, use these values in the
+\fIremote_nl_conv\fR and
+\fIlocal_nl_conv\fR options: \fBdos\fR,
+\fBunix\fR, and \fBmac\fR. These settings will be used if
+the remote SSH server does not automatically provide any newline information to
+the SFTP client. For example:
+
+.nf
+sftp> ascii
+ File transfer mode is now ascii. 
+sftp> ascii unix dos 
+ Newline conventions updated.
+.fi
+
+To force the newline conventions, use these values:
+\fBforce\-dos\fR, \fBforce\-unix\fR, and
+\fBforce\-mac\fR. These settings force the newline mode irrespective
+of what the remote SSH server suggests to the SFTP client.
+
+.nf
+sftp> ascii
+ File transfer mode is now ascii.
+sftp> ascii force\-unix force\-dos
+ Newline conventions updated.
+.fi
+
+You can also set either one of the options to \fBask\fR, which will
+cause sftpg3 to prompt you for the newline convention when
+needed.
+.RE
+.TP 
+\fBauto\fR 
+File transfer mode will be selected automatically from the file extension.
+.TP 
+\fBbinary\fR 
+Files will be transferred in binary mode.
+.TP 
+\fBbreak\fR 
+Interrupts batch file execution. Batch file execution can be continued with the
+continue command.
+.TP 
+\fBbye\fR 
+Quits the application.
+.TP 
+\fBcd \fR\fBdirectory\fR 
+Changes the current remote working directory.
+.TP 
+\fBchmod\fR [\fB\-R\fR] [\fB\-f\fR] [\fB\-v\fR] \fBOCTAL\-MODE \fR[\fBfile\fR]\&... , \fBchmod \fR[\fB\-R\fR] [\fB\-f\fR] [\fB\-v\fR] [\fBugoa\fR] [\fB+\-=\fR] [\fBrwxs\fR] [\fBfile\fR]\&... 
+With Unix files, sets file permissions of the specified file or files to the bit
+pattern \fIOCTAL-MODE\fR or changes the file permissions according
+to the symbolic mode \fB[ugoa][+\-=][rwxs]\fR. 
+
+Options:
+.RS 
+.TP 
+\fB\-R\fR 
+Recursively changes files and directories.
+.TP 
+\fB\-f\fR 
+Uses silent mode (error messages are suppressed).
+.TP 
+\fB\-v\fR 
+Uses verbose mode (lists every file processed).
+.RE
+.TP 
+\fBclose\fR 
+Closes the remote connection.
+.TP 
+\fBcontinue\fR 
+Continues interrupted batch file execution.
+.TP 
+\fBdebug \fR[ \fBdisable\fR | \fBno\fR | \fBdebuglevel\fR ] 
+Disables or enables debug. With \fBdisable\fR or \fBno\fR,
+debugging is disabled. Otherwise, sets \fIdebuglevel\fR as debug
+level string, as per command-line option \fB\-D\fR.
+.TP 
+\fBdelete\fR [\fB\-H, \-\-hash\fR] [\fB\-o, \-\-offset\fR] [\fB\-l, \-\-length\fR] \fBfile\fR 
+Tries to delete a file or directory specified in \fIfile\fR.
+The options are the same as for 
+rm.
+.TP 
+\fBdigest\fR [\fB\-H, \-\-hash\fR] [\fB\-o, \-\-offset\fR] [\fB\-l, \-\-length\fR] \fBfile\fR 
+Calculates MD5 or SHA-1 digest over file data. The digest is calculated over the
+data on the disk. If any code or line delimiter conversion attributes are in effect,
+they are ignored when calculating the digest. 
+
+Options:
+.RS 
+.TP 
+\fB\-H, \-\-hash=\fR \fBmd5\fR\fBsha1\fR 
+Use \fBmd5\fR or \fBsha1\fR hash algorithm (default:
+\fBmd5\fR).
+.TP 
+\fB\-o, \-\-offset=\fR\fIOFFSET\fR 
+Start reading from file offset \fIOFFSET\fR.
+.TP 
+\fB\-l, \-\-length=\fR\fILENGTH\fR 
+Read \fILENGTH\fR bytes of file data.
+.RE
+.TP 
+\fBecho \fR\fBText to be echoed.\fR 
+Echo the text. This command can be used for example in batch mode to print text into
+batch logs.
+.TP 
+\fBexit\fR 
+Quits the application.
+.TP 
+\fBget\fR [\fB\-p, \-\-preserve\-attributes\fR] [\fB\-u, \-\-unlink\-source\fR] [\fB\-I, \-\-interactive\fR] [\fB\-\-overwrite\fR] [\fB\-\-checksum\fR] [\fB\-W, \-\-whole\-file\fR] [\fB\-\-checkpoint\fR] [\fB\-\-streaming\fR] [\fB\-\-force\-lower\-case\fR] [\fB\-\-prefix\fR] [\fB\-\-statistics\fR] [\fB\-\-summary\-display\fR] [\fB\-\-summary\-format\fR] [\fB\-\-progress\-display\fR] [\fB\-\-progress\-line\-format\fR] [\fB\-\-progress\-line\-interval\fR] [\fB\-\-max\-depth=\fR] \fBfile\fR \&... 
+Transfers the specified files from the remote end to the local end. By default,
+directories are recursively copied with their contents, but this is configurable in the
+Connection Broker configuration with the SFTP compatibility mode setting
+(\fBsftpg3\-mode\fR in \fBssh\-broker\-config.xml\fR). To view
+the currently set SFTP compatibility mode, run command:
+
+.nf
+sftp> help get
+.fi
+
+The currently set compatibility mode is shown in the beginning of the help for
+command get.
+
+The SFTP compatibility mode options are:
+.RS 
+.TP 
+\fBtectia\fR
+The sftpg3 client transfers files recursively from the
+current directory and all its subdirectories.
+.TP 
+\fBftp\fR 
+The get command is executed as sget
+meaning that it transfers a single file, and no subdirectories are copied. 
+.TP 
+\fBopenssh\fR 
+Only regular files and symbolic links from the specified directory are copied,
+and no subdirectories are copied. Otherwise the semantics of the
+get command are unchanged.
+.RE
+
+Options:
+.RS 
+.TP 
+\fB\-p, \-\-preserve\-attributes\fR 
+Preserves the file permissions and the timestamps when both the source and the
+destination are on Unix file systems (including z/OS USS). Preserves the
+timestamps but not the file permissions, if either one, the source or the
+destination is on Windows. If the destination is on z/OS MVS, none will be
+preserved. 
+.TP 
+\fB\-u, \-\-unlink\-source\fR 
+Removes the source file after file transfer. Also directories are removed, if
+they become empty (move mode).
+.TP 
+\fB\-I, \-\-interactive\fR 
+Prompts whether to overwrite an existing destination file (does not work with
+batch mode).
+.TP 
+\fB\-\-overwrite\fR [ \fB=yes\fR | \fBno\fR ] 
+Decides whether to overwrite existing destination file(s) (default:
+\fByes\fR).
+.TP 
+\fB\-\-checksum\fR [ \fB=yes\fR | \fBno\fR | \fBmd5\fR | \fBsha1\fR | \fBmd5\-force\fR | \fBsha1\-force\fR | \fBcheckpoint\fR ] 
+Uses MD5 or SHA-1 checksums or a separate checkpoint database to determine the
+point in the file where file transfer can be resumed. Files smaller than
+\fIbuffer_size_bytes\fR are not checked. Use
+\fBmd5\-force\fR or \fBsha1\-force\fR with small files
+(default: \fByes\fR, i.e. use MD5 checksums). Use checkpointing when
+transferring large files one by one.
+.TP 
+\fB\-W, \-\-whole\-file\fR 
+Does not try incremental checks. By default (if this option is not given),
+incremental checks are tried. This option can only be used together with the
+\fB\-\-checksum\fR option.
+.TP 
+\fB\-\-checkpoint=s\fR\fI<seconds>\fR 
+Time interval between checkpoint updates (default:
+\fI10\fR seconds). This option can only be used when
+\fB\-\-checksum=checkpoint\fR.
+.TP 
+\fB\-\-checkpoint=b\fR\fI<bytes>\fR 
+Byte interval between checkpoint updates (default: 10 MB). This option can
+only be used when \fB\-\-checksum=checkpoint\fR.
+.TP 
+\fB\-\-streaming\fR [ \fB=yes\fR | \fBno\fR | \fBforce\fR | \fBext\fR ] 
+Uses streaming in file transfer if the server supports it. Files smaller than
+\fIbuffer_size_bytes\fR are not transferred using
+streaming. Use \fBforce\fR with small files. Default:
+\fByes\fR
+
+Use \fBext\fR with z/OS hosts to enable direct MVS data set access.
+Use this option only when the file transfer is mainly used for mainframe data set
+transfers, as it can slow down the transfer of small files in other
+environments.
+
+The \fB\-\-streaming=ext\fR option requires also the
+\fB\-\-checksum=no\fR option, because if checksums are calculated, the
+file transfer uses staging, which excludes streaming.
+
+An alternative way to activate extended streaming is to define
+\fBSSH_SFTP_STREAMING_MODE=ext\fR and
+\fBSSH_SFTP_CHECKSUM_MODE=no\fR as environment variables. 
+.TP 
+\fB\-\-force\-lower\-case\fR 
+Destination file name will be converted to lower case characters.
+.TP 
+\fB\-\-max\-depth=\fR\fIVALUE\fR 
+Defines whether directories are copied recursively. The value can be:
+
+\fB0\fR - unlimited recursion, directories are recursively copied
+with their contents
+
+\fB1\fR - copies files from the specified directory only, not from
+subdirectories
+
+\fB2\-n\fR - copies files recursively from the specified number of
+directory levels. Here \fBn\fR means the system-specific
+maximum.
+
+This command line option overrides the recursion depth set in the Connection Broker
+configuration with element \fBsftpg3\-mode\fR and/or the setting made
+using environment variable \fBSSH_SFTP_CMD_GETPUT_MODE\fR.
+.TP 
+\fB\-\-prefix=\fR\fIPREFIX\fR 
+Adds prefix \fBPREFIX\fR to filename during the file transfer. The
+prefix is removed after the file has been successfully transferred.
+
+On z/OS, when applied to MVS data set names, the prefix will be inserted after
+the High Level Qualifier (HLQ) by default. In case you want the prefix to be a
+separate qualifier, include a dot at the end of the prefix:
+
+.nf
+\-\-prefix=\fIPREFIX.\fR
+.fi
+.TP 
+\fB\-\-statistics\fR [ \fB=no\fR | \fByes\fR | \fBsimple\fR ] 
+.RS 
+\fBNote\fR
+
+In release 6.1.5, the behavior of the \fB\-\-statistics\fR option
+has changed and the \fB\-\-statistics\-format\fR option has been
+removed. Instead of them, use the new \fB\-\-summary\-display\fR and
+\fB\-\-summary\-format\fR options.
+.RE
+
+The \fB\-\-statistics\fR option chooses the style of the statistics
+to be shown after a file transfer operation. Note that
+\fB\-\-statistics\fR and \fB\-\-summary\-display\fR must not be
+used together.
+
+The \fB\-\-statistics\fR option takes the following values:
+
+\fBno\fR - no statistics will be created.
+
+\fByes\fR - shows a progress bar during the file transfer. This is
+the default. An example of the output:
+
+.nf
+sftp> get \-\-statistics="yes" sourcefile
+sourcefile               |  127MB |  42.9MiB/s | TOC: 00:00:03 | 100%
+.fi
+
+\fBsimple\fR - simple one-line statistics will be displayed after
+the file transfer has ended. For example:
+
+.nf
+sftp> get \-\-statistics=simple testfile
+sourcefile   | 127MB | 151.3MiB/s | TOC: 00:00:00 | 100%
+.fi
+.TP 
+\fB\-\-summary\-display\fR [ \fB=no\fR | \fByes\fR | \fBsimple\fR | \fBbytes\fR ] 
+Chooses the style of the file transfer summary data to be displayed after a
+file transfer operation. With the summary display, the progress bar data is also
+displayed by default.
+
+Note that \fB\-\-summary\-display\fR and \fB\-\-statistics\fR
+must not be used together. 
+
+The \fB\-\-summary\-display\fR option takes the following
+values:
+
+\fBno\fR - no summary data will be created. This is the
+default.
+
+\fByes\fR - detailed summary data will be created. You can
+configure the contents with the \fBsummary\-format\fR option. By
+default, the following contents are displayed in the summary:
+
+.nf
+Default settings:                    Render for example this:
+"Source: %c:%g\\n"                    user@host1#22:/path/to/source/file
+"Source parameters: %e\\n"            X=TEXT, C=ISO8859\-1,D=IBM.1047
+"Destination: %C:%G\\n"               user@host2#22:/path/to/destination/file
+"Destination parameters: %E\\n"       NONE
+"File size: %s bytes\\n"              123456 bytes
+"Transferred: %t bytes\\n"            123456 bytes
+"Rate: %RB/s\\n"                      345kiB/s
+"Start: %xy\-%xt\-%xd %xh:%xm:%xs\\n"   2010\-01\-26 13:10:56
+"Stop: %Xy\-%Xt\-%Xd %Xh:%Xm:%Xs\\n"    2010\-01\-26 13:23:30
+"Time: %y\\n"                         00:12:34
+.fi
+
+\fBsimple\fR - simple one-line summary will be displayed. For
+example:
+
+.nf
+sftp> get \-\-summary\-display=simple sourcefile
+sourcefile  | 127MB | 151.3MiB/s | TOC: 00:00:00 | 100%
+.fi
+
+\fBbytes\fR - basic statistics reporting the transferred bytes will
+be displayed. For example:
+
+.nf
+sftp> get \-\-summary\-display=bytes sourcefile
+Transferred 12915145984 bytes, file: 'sourcefile' \-> 'destinationfile'
+.fi
+.TP 
+\fB\-\-summary\-format=\fR\fIFORMAT_STRING\fR 
+Chooses the format and the contents of the summary. You can use this option
+when \fB\-\-summary\-display=yes\fR. Do not use this option with
+\fB\-\-statistics\fR.
+
+Select the contents for the summary using the following definitions:
+
+.nf
+%c  \- source connection: user@host#port or profile
+%C  \- destination connection: user@host#port or profile
+%D* \- current date
+%e  \- source parameters (file transfer and data set parameters)
+%E  \- destination parameters (file transfer and data set parameters)
+%f  \- source file name
+%F  \- destination file name
+%g  \- /path/to/source/file
+%G  \- /path/to/destination/file
+%k  \- compression done ("zlib" or "none")
+%p  \- transfer percentage
+%q  \- transfer rate in bit/s
+%Q  \- transfer rate as "XXyb/s" (b/s, kib/s, Mib/s, Gib/s)
+%r  \- transfer rate in bytes/s
+%R  \- transfer rate as "XXyB/s" (B/s, kiB/s, MiB/s, GiB/s)
+%s  \- file size in bytes
+%S  \- file size as "XXyB" (B, kiB, MiB or GiB)
+%t  \- transfer size in bytes
+%T  \- transfer size as "XXyB" (B, kiB, MiB or GiB)
+%x* \- start date
+%X* \- end date
+%y  \- elapsed time
+%Y  \- time remaining
+%z  \- ETA or TOC, if transfer has finished
+%Z  \- string "ETA" or "TOC", if transfer has finished
+
+Where * is one of the following:
+
+h \- hours (00\-23)
+m \- minutes (00\-59)
+s \- seconds (00\-59)
+f \- milliseconds (0\-999)
+d \- day of the month (1\-31)
+t \- month (1\-12)
+y \- year (1970\-)
+
+Other special characters in format strings are:
+
+\\n \- line feed
+\\r \- carriage return
+\\t \- horizontal tab
+\\\\ \- backslash
+.fi
+.TP 
+\fB\-\-progress\-display\fR [ \fB=no\fR | \fBbar\fR | \fBline\fR ] 
+Chooses the mode of displaying the progress during a file transfer operation.
+The default is \fBbar\fR, which shows a progress bar. Option
+\fBline\fR shows the progress information according to the settings
+made in the \fB\-\-progress\-line\-format\fR option.
+
+Do not use this option with \fB\-\-statistics\fR.
+.TP 
+\fB\-\-progress\-line\-format=\fR\fIFORMAT_STRING\fR 
+Chooses what information will be shown on the progress line. You can use this
+option when \fB\-\-progress\-display=line\fR.
+
+Do not use this option with \fB\-\-statistics\fR.
+
+Select the contents for the progress line using the definitions described for
+option \fB\-\-summary\-format\fR of the get command
+above.
+.TP 
+\fB\-\-progress\-line\-interval=\fR\fIseconds\fR 
+Defines how often the progress information is updated in the line mode. The
+interval is given in seconds, and the default is 60 seconds. 
+
+Do not use this option with \fB\-\-statistics\fR.
+.RE
+.TP 
+\fBgetext\fR 
+Displays the extensions that will be ASCII in the auto transfer mode.
+.TP 
+\fBlappend \fR[\fBoptions\fR]\&... \fBsrcfile \fR[\fBdstfile\fR] 
+The same as
+append,
+but appends the specified remote file to the local file. 
+.TP 
+\fBlcd \fR\fBdirectory\fR 
+Changes the current local working directory.
+.TP 
+\fBlchmod \fR[\fB\-R\fR] [\fB\-f\fR] [\fB\-v\fR] \fBOCTAL\-MODE \fR[\fBfile\fR]\&... , \fBlchmod \fR[\fB\-R\fR] [\fB\-f\fR] [\fB\-v\fR] [\fBugoa\fR] [\fB+\-=\fR] [\fBrwxs\fR] [\fBfile\fR]\&... 
+The same as 
+chmod,
+but operates on local files.
+.TP 
+\fBlclose\fR 
+Closes the local connection.
+.TP 
+\fBldelete\fR [\fBoptions\fR]\&... \fBfile\fR \&... 
+The same as 
+delete,
+but operates on local files.
+.TP 
+\fBldigest \fR[\fB\-H, \-\-hash\fR] [\fB\-o, \-\-offset\fR] [\fB\-l, \-\-length\fR] \fBfile\fR 
+The same as
+digest,
+but operates on local files.
+.TP 
+\fBlls \fR[\fB\-R\fR] [\fB\-l\fR] [\fB\-S\fR] [\fB\-r\fR] [\fB\-p\fR] [\fB\-z|+z\fR] [\fBfile\fR]\&... 
+The same as 
+ls,
+but operates on local files.
+.TP 
+\fBllsroots\fR 
+The same as
+lsroots,
+but operates on local files (when the local end has been opened to a VShell server).
+.TP 
+\fBlmkdir \fR\fBdirectory\fR 
+The same as
+mkdir,
+but operates on local files.
+.TP 
+\fBlocalopen \fR[\fBuser@\fR] \fBhostname\fR[\fB#port\fR] [\fB\-l\fR] [\fB\-\-user=\fR \fBUSERNAME\fR] 
+The same as 
+lopen.
+.TP 
+\fBlopen \fR[\fBuser@\fR] \fBhostname\fR[\fB#port\fR] [\fB\-l\fR] [\fB\-\-user=\fR \fBUSERNAME\fR] 
+Tries to connect the local end to the host \fIhostname\fR. If
+this is successful, lls and friends will operate on the file system
+on that host.
+
+Options:
+.RS 
+.TP 
+\fB\-l\fR 
+Connects the local end to the file system of the SFTP client host (which does
+not require a server). This is also the default state when no
+lopen commands have been given.
+.TP 
+\fB\-\-user\fR 
+Defines the user in the connection to be
+\fIUSERNAME\fR.
+.RE
+.TP 
+\fBlocsite\fR [ \fBnone\fR | \fBname1=value1 name2=value2\fR\&... ] 
+The same as 
+site,
+but operates on local files and data sets.
+.TP 
+\fBlpwd\fR 
+Prints the name of the current local working directory.
+.TP 
+\fBlreadlink \fR\fBpath\fR 
+The same as 
+readlink, 
+but operates on local files.
+.TP 
+\fBlrename \fR\fBoldfile\fR \fBnewfile\fR 
+The same as 
+rename,
+but operates on local files.
+.TP 
+\fBlrm\fR [\fBoptions\fR]\&... \fBfile\fR \&... 
+The same as 
+rm,
+but operates on local files.
+.TP 
+\fBlrmdir \fR\fBdirectory\fR 
+The same as 
+rmdir,
+but operates on local files.
+.TP 
+\fBls\fR [\fB\-R\fR] [\fB\-l\fR] [\fB\-S\fR] [\fB\-r\fR] [\fB\-p\fR] [\fB\-z|+z\fR] [\fBfile\fR]\&... 
+Lists the names of files on the remote server. For directories, contents are listed.
+If no arguments are given, the contents of the current working directory are
+listed.
+
+Options:
+.RS 
+.TP 
+\fB\-R\fR 
+Directory trees are listed recursively. By default, subdirectories of the
+arguments are not visited.
+.TP 
+\fB\-l\fR 
+Permissions, owners, sizes and modification times are also shown (long
+format).
+.TP 
+\fB\-S\fR 
+Sorting is done based on file sizes (default: alphabetical sorting).
+.TP 
+\fB\-r\fR 
+The sort order is reversed.
+.TP 
+\fB\-p\fR 
+Only one page of listing is shown at a time.
+.TP 
+\fB\-z\fR 
+The client generates the long output.
+.TP 
+\fB+z\fR 
+The long output supplied by the server is used, if available (alias for option
+\fB\-l\fR).
+.RE
+.TP 
+\fBlsite\fR [ \fBnone\fR | \fBname1=value1 name2=value2\fR\&... ] 
+The same as 
+site,
+but operates on local files and data sets.
+.TP 
+\fBlsroots\fR 
+Dumps the virtual roots of the server. (This is a VShell extension. Without this you
+cannot know the file system structure of a VShell server.)
+.TP 
+\fBlsymlink \fR\fBtargetpath \fR\fBlinkpath\fR 
+The same as 
+symlink,
+but operates on local files.
+.TP 
+\fBmget\fR [\fBoptions\fR]\&... \fBfile\fR \&... 
+Synonymous to 
+get.
+.TP 
+\fBmkdir \fR\fBdirectory\fR 
+Tries to create the directory specified in \fIdirectory\fR.
+.TP 
+\fBmput\fR [\fBoptions\fR]\&... \fBfile\fR \&... 
+Transfers the specified files from the local end to the remote end. Options and
+semantics are the same as for 
+get. 
+Synonymous to 
+put.
+.TP 
+\fBopen\fR [\fBuser@\fR] \fBhostname\fR[\fB#port\fR] [\fB\-l\fR] [\fB\-\-user=\fR \fBUSERNAME\fR] 
+Tries to connect the remote end to the host \fIhostname\fR.
+
+Options:
+.RS 
+.TP 
+\fB\-l\fR 
+Connects the remote end to the file system of the SFTP client host (which does
+not require a server).
+.TP 
+\fB\-\-user\fR 
+Defines the user in the connection to be \fIUSERNAME\fR.
+.RE
+.TP 
+\fBpause\fR [\fBseconds\fR] 
+Pauses batch file execution for \fIseconds\fR seconds, or if
+\fIseconds\fR is not given until ENTER is
+pressed.
+.TP 
+\fBput\fR [\fBoptions\fR]\&... \fBfile\fR \&... 
+Transfers the specified files from the local end to the remote end. Options and
+semantics are the same as for 
+get.
+.TP 
+\fBpwd\fR 
+Prints the name of the current remote working directory.
+.TP 
+\fBquit\fR 
+Quits the application.
+.TP 
+\fBreadlink \fR\fBpath\fR 
+Provided that \fIpath\fR is a symbolic link, shows where the
+link is pointing to.
+.TP 
+\fBrename\fR \fBoldfile\fR \fBnewfile\fR 
+Tries to rename the \fIoldfile\fR to
+\fInewfile\fR. If \fInewfile\fR already
+exists, the files are left intact.
+.TP 
+\fBrm \fR[\fB\-I, \-\-interactive\fR] [\fB\-r, \-\-recursive\fR] \fBfile\fR \&... 
+Tries to delete a file or directory specified in \fIfile\fR.
+
+Options:
+.RS 
+.TP 
+\fB\-I, \-\-interactive\fR 
+Prompts whether to remove a file or directory (does not work with batch
+mode).
+.TP 
+\fB\-r, \-\-recursive\fR 
+Directories are removed recursively.
+.RE
+.TP 
+\fBrmdir \fR\fBdirectory\fR 
+Tries to delete the directory specified in \fIdirectory\fR.
+This command removes the directory only if it is empty and has no subdirectories.
+.TP 
+\fBset\fR [ \fBdefaults\fR | \fB\-\-commands=\fR \fBname1,name2,\fR... \fBexit\-value=\fR \fBVALUE\fR | \fBoption1=value1 option2=value2\fR\&... ] 
+Sets the default values for various parameters. The \fBset\fR command
+takes the following options:
+.RS 
+.TP 
+\fBdefaults\fR 
+Sets the parameters to be system defaults.
+.TP 
+\fBchecksum\fR [ \fB=yes\fR | \fBno\fR | \fBmd5\fR | \fBsha1\fR | \fBmd5\-force\fR | \fBsha1\-force\fR | \fBcheckpoint\fR ] 
+Uses MD5 or SHA-1 checksums or a separate checkpoint database to determine the
+point in the file where file transfer can be resumed. Files smaller than
+\fIbuffer_size_bytes\fR are not checked. Use
+\fBmd5\-force\fR or \fBsha1\-force\fR with small files. The
+default is \fBmd5\fR (in z/OS the default is \fBno\fR). Use
+checkpointing when transferring large files one by one.
+.TP 
+\fBcompatibility\-mode\fR [ \fB=tectia\fR | \fBftp\fR | \fBopenssh\fR ] 
+Defines what mode of recursiveness is used in the file transfer:
+.RS 
+.TP 
+\fBtectia\fR 
+The sftpg3 client transfers files recursively from
+the current directory and all its subdirectories. This is the default
+mode.
+.TP 
+\fBftp\fR 
+A single file is transferred, and no subdirectories are copied.
+.TP 
+\fBopenssh\fR 
+Only regular files and symbolic links from the specified directory are
+copied, and no subdirectories are copied.
+.RE
+.TP 
+\fBcompressions\fR [ \fB=none\fR | \fBzlib\fR ] 
+Defines whether compression is used in file transfer:
+.RS 
+.TP 
+\fBnone\fR 
+Compression is not used. This is the default.
+.TP 
+\fBzlib\fR 
+Enables zlib compression in file transfer.
+.RE
+.TP 
+\fBexit\-value=\fR\fIVALUE\fR 
+Defines the exit value of sftpg3 in batch mode in case of
+an error. The value must be between 0 and 255. If \fBexit\-value\fR is
+set to something else than 0 and the \fB\-\-commands\fR parameter is not
+used, batch execution terminates when the first error occurs.
+
+Example 1: If the rename command in this batch job fails,
+sftpg3 will stop and return exit value "6":
+
+.nf
+open \fIuser\fR@\fIhost\fR
+set exit\-value=6
+rename \fIfile\fR \fIfile2\fR
+\fI<next command in batch job>\fR
+quit
+.fi
+
+Example 2: If you want to ignore a possible failure of a
+specific command and return exit value "0" independent of the actual result of
+the operation, use set exit-value=0 after the command. This
+example batch job ignores possible failure in renaming a file: 
+
+.nf
+open \fIuser\fR@\fIhost\fR
+rename \fIfile\fR \fIfile2\fR
+set exit\-value=0
+\fI<next command in batch job>\fR
+quit
+.fi
+.RS 
+.TP 
+\fB\-\-commands=\fR\fIname1,name2,...\fR \fBexit\-value=\fR\fIVALUE\fR 
+This option makes an sftpg3 batch job abort when any
+of the specified commands fail. When a command that is
+\fInot\fR specified with this option fails, the batch job
+execution continues, and the exit value of the batch job is set to the one
+defined with \fBexit\-value\fR. Note that if
+\fBexit\-value=0\fR, the exit value of the failed command will
+be returned.
+
+Example 3: When sftpg3 is running
+in batch mode, it will abort execution if a put,
+get, or ls command fails. If any
+other command (with the exceptions mentioned below) fails, execution will
+continue until the end of the batch file. In both cases value "3" will be
+returned:
+
+.nf
+set \-\-commands=put,get,ls exit\-value=3
+.fi
+
+Example 4: When sftpg3 is running
+in batch mode, it will abort execution when a put or
+get command fails. If any other command (with the
+exceptions mentioned below) fails, execution will continue. In any case the
+original exit value of the last failed command will be returned:
+
+.nf
+set \-\-commands=put,get exit\-value=0
+.fi
+
+Exceptions: When \fBexit\-value\fR is set
+for specific commands with the \fB\-\-commands\fR option, also the
+following situations will cause the batch job execution to abort:
+.RS 
+.TP 0.2i
+\(bu
+A cd command resulting in an error
+.TP 0.2i
+\(bu
+Any invalid command
+.TP 0.2i
+\(bu
+Authentication failed error
+.TP 0.2i
+\(bu
+Unable to connect to server error
+.TP 0.2i
+\(bu
+Connection aborted error
+.RE
+
+By default (\fBset defaults\fR), in case of errors, sftpg3 does not stop
+but instead will continue executing and return the last error message.
+
+Invalid commands added in \fB\-\-commands\fR will be ignored.
+.RE
+.TP 
+\fBoverwrite\fR [ \fB=yes\fR | \fBno\fR ] 
+Decides whether to overwrite existing destination file(s) (default:
+\fByes\fR).
+.TP 
+\fBprogress\-display\fR [ \fB=bar\fR | \fBline\fR | \fBno\fR ] 
+Chooses the mode of displaying the progress during a file transfer operation.
+The default is \fBbar\fR, which shows a progress bar. Option
+\fBline\fR shows the progress information according to the settings
+made with the \fBprogress\-line\-format\fR option. Option
+\fBno\fR disables progress display.
+.TP 
+\fBprogress\-line\-format=\fR\fIFORMAT_STRING\fR 
+Chooses what information will be shown on the progress line. Use this option
+when \fB\-\-progress\-display=line\fR. See the definitions of contents
+options in command: \fBget \-\-progress\-line\-format\fR.
+.TP 
+\fBprogress\-line\-interval=\fR\fIseconds\fR 
+Defines how often the progress information is updated in line mode. The
+interval is given in seconds, and the default is 60 seconds. 
+.TP 
+\fBsummary\-display\fR [ \fB=no\fR | \fByes\fR | \fBsimple\fR | \fBbytes\fR ] 
+Chooses the style of the file transfer summary data to be displayed after a
+file transfer operation. With the summary display, the progress bar data is also
+displayed by default. Do not use this option with
+\fB\-\-statistics\fR.
+
+See the options described for command: \fBget
+\-\-summary\-display\fR
+.TP 
+\fBsummary\-format=\fR\fIFORMAT_STRING\fR 
+Chooses the format and the contents of the summary. You can use this option
+when \fB\-\-summary\-display=yes\fR. Do not use this option with
+\fB\-\-statistics\fR.
+
+See the definitions of contents options in command: 
+\fBget \-\-summary\-format\fR
+.TP 
+\fBstreaming\fR [ \fB=yes\fR | \fBno\fR | \fBforce\fR | \fBext\fR ] 
+Uses streaming in file transfer if the server supports it. Files smaller than
+\fIbuffer_size_bytes\fR are not transferred using
+streaming. Use \fBforce\fR with small files. Default:
+\fByes\fR
+
+Use \fBext\fR with z/OS hosts to enable direct MVS data set access.
+Use this option only when the file transfer is mainly used for mainframe data set
+transfers, as it can slow down the transfer of small files in other environments. 
+
+The \fBstreaming=ext\fR option requires also the
+\fBchecksum=no\fR option, because if checksums are calculated, the
+file transfer uses staging, which excludes streaming.
+.RE
+.TP 
+\fBsetext\fR [\fBextension\fR]\&... 
+Sets the file extensions that will be ASCII in the auto transfer mode. Normal
+zsh-fileglob regexps can be used in the file extensions.
+.TP 
+\fBsetperm \fR\fBfileperm\fR [:\fBdirperm\fR] 
+Sets the default file or directory permission bits for upload. (Prefix
+\fIfileperm\fR with \fBp\fR to preserve permissions of
+existing files or directories.)
+.TP 
+\fBsget \fR[\fBoptions\fR]\&... \fBsrcfile \fR[\fBdstfile\fR] 
+Transfers a single specified file from the remote end to the local end under the
+filename defined with \fIdstfile\fR. Directories are not copied. No
+wildcards can be used. Options are the same as for 
+get.
+.TP 
+\fBsite\fR [ \fBnone\fR | \fBname1=value1 name2=value2\fR\&... ] 
+Sets the file and data set parameters for the remote host. Parameters can be entered
+either one by one, or several parameters can be delimited by spaces or commas. Both long
+parameters and abbreviations can be used. When run without arguments, the
+site command outputs the list of entered parameters. Setting
+\fBnone\fR resets all parameters.
+
+The available parameters are:
+.RS 
+.TP 0.2i
+\(bu
+\fBAUTOMOUNT=YES|NO|IMMED\fR
+.TP 0.2i
+\(bu
+\fB[NO]AUTOMOUNT|[NO]AUTOM\fR
+.TP 0.2i
+\(bu
+\fBAUTORECALL=YES|NO\fR
+.TP 0.2i
+\(bu
+\fB[NO]AUTORECALL|[NO]AUTOR\fR
+.TP 0.2i
+\(bu
+\fBBLKSIZE|B|BLOCKSI=\fR\fIsize\fR
+.TP 0.2i
+\(bu
+\fBBLOCKS|BL\fR
+.TP 0.2i
+\(bu
+\fBCONDDISP|CO=CATLG|UNCATLG|KEEP|DELETE\fR
+.TP 0.2i
+\(bu
+\fBCYLINDERS|CY\fR
+.TP 0.2i
+\(bu
+\fBDATACLAS|DA=\fR\fIclass\fR
+.TP 0.2i
+\(bu
+\fBDATASET_SEQUENCE_NUMBER|SEQNUM=\fR\fInumber\fR
+.TP 0.2i
+\(bu
+\fBDEFER|DE=YES|NO\fR
+.TP 0.2i
+\(bu
+\fB[NO]DEFER|DE\fR
+.TP 0.2i
+\(bu
+\fBDIRECTORY_SIZE|M|DI|DIRSZ=\fR\fIsize\fR
+.TP 0.2i
+\(bu
+\fBEXPIRY_DATE|EXPDT=\fR\fIyyddd|yyyyddd\fR
+.TP 0.2i
+\(bu
+\fBFILE_STATUS|STATUS=NEW|MOD|SHR|OLD\fR
+.TP 0.2i
+\(bu
+\fBFILETYPE|FILET=SEQ|JES\fR
+.TP 0.2i
+\(bu
+\fBFIXRECFM|FI=\fR\fIlength\fR
+.TP 0.2i
+\(bu
+\fBJOB_ID|JESID=\fR\fIID\fR
+.TP 0.2i
+\(bu
+\fBJOB_OWNER|JESO=\fR\fIname\fR
+.TP 0.2i
+\(bu
+\fBJOBNAME|JESJOB=\fR\fIname\fR
+.TP 0.2i
+\(bu
+\fBKEYLEN|KEYL=\fR\fIlength\fR
+.TP 0.2i
+\(bu
+\fBKEYOFF|KEYO=\fR\fIoffset\fR
+.TP 0.2i
+\(bu
+\fBLABEL_TYPE|LABEL=NL|SL|NSL|SUL|BLP|LTM|AL|AUL\fR
+.TP 0.2i
+\(bu
+\fBLIKE=\fR\fIlike\fR
+.TP 0.2i
+\(bu
+\fBLRECL|R|LR=\fR\fIlength\fR
+.TP 0.2i
+\(bu
+\fBMGMTCLAS|MG=\fR\fIclass\fR
+.TP 0.2i
+\(bu
+\fBNORMDISP|NOR=CATLG|UNCATLG|KEEP|DELETE\fR
+.TP 0.2i
+\(bu
+\fBPRIMARY_SPACE|PRI=\fR\fIspace\fR
+.TP 0.2i
+\(bu
+\fBPROFILE|P|PROF=\fR\fIprofile\fR
+.TP 0.2i
+\(bu
+\fBRECFM|O|REC=\fR\fIrecfm\fR
+.TP 0.2i
+\(bu
+\fBRECORD_TRUNCATE|U|TRUN=YES|NO\fR
+.TP 0.2i
+\(bu
+\fB[NO]TRUNCATE|[NO]TRU|[NO]TRUN\fR
+.TP 0.2i
+\(bu
+\fBRETENTION_PERIOD|RET=\fR\fIdays\fR
+.TP 0.2i
+\(bu
+\fBSECONDARY_SPACE|SE|SEC=\fR\fIspace\fR
+.TP 0.2i
+\(bu
+\fBSIZE|L=\fR\fIsize\fR
+.TP 0.2i
+\(bu
+\fBSPACE_RELEASE|RLSE=YES|NO\fR
+.TP 0.2i
+\(bu
+\fBSPACE_UNIT|SU=BLKS|TRKS|CYLS|AVGRECLEN\fR
+.TP 0.2i
+\(bu
+\fBSPACE_UNIT_LENGTH|SUL=\fR\fIlength\fR
+.TP 0.2i
+\(bu
+\fBSTAGING|S|STAGE=YES|NO\fR
+.TP 0.2i
+\(bu
+\fBSTORCLAS|ST=\fR\fIclass\fR
+.TP 0.2i
+\(bu
+\fBSVC99_TEXT_UNITS|SVC99=\fR\fIstring\fR
+.TP 0.2i
+\(bu
+\fBTRACKS|TR\fR
+.TP 0.2i
+\(bu
+\fBTRAILING_BLANKS|TRAIL=YES|NO\fR
+.TP 0.2i
+\(bu
+\fB[NO]TRAILINGBLANKS|[NO]TRAI|[NO]TRAIL\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_CODESET|C|CODESET=\fR\fIcodeset\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_FILE_CODESET|D|FCODESET=\fR\fIcodeset\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_FILE_LINE_DELIMITER|J|FLDELIM=UNIX|MVS|MVS\-FTP|DOS|MAC|NEL\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_FORMAT|F|FORMAT=LINE|STREAM|RECORD\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_LINE_DELIMITER|I|LDELIM=UNIX|MVS|MVS\-FTP|DOS|MAC|NEL\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_MODE|X|MODE=BIN|TEXT\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_TRANSLATE_DSN_TEMPLATES|A|XDSNT=\fR\fItemplates\fR
+.TP 0.2i
+\(bu
+\fBTRANSFER_TRANSLATE_TABLE|E|XTBL=\fR\fItable\fR
+.TP 0.2i
+\(bu
+\fBTYPE|T=PS|PO|PDS|POE|PDSE|GDG|HFS|VSAM|ESDS|KSDS|RRN\fR
+.TP 0.2i
+\(bu
+\fBUNIT|UN=\fR\fIunit\fR
+.TP 0.2i
+\(bu
+\fBUNIT_COUNT|UC|UNC=\fR\fInumber\fR
+.TP 0.2i
+\(bu
+\fBUNIT_PARALLEL|UNP=YES|NO\fR
+.TP 0.2i
+\(bu
+\fBVOLUME_COUNT|VC|VOLCNT=\fR\fInumber\fR
+.TP 0.2i
+\(bu
+\fBVOLUMES|VO|VOL=\fR\fIvol1+vol2+...\fR
+.RE
+.TP 
+\fBsput\fR [\fBoptions\fR]\&... \fBsrcfile \fR[\fBdstfile\fR] 
+Transfers a single specified file from the local end to the remote end under the
+filename defined with \fIdstfile\fR. Directories are not copied. No
+wildcards can be used. Options are the same as for 
+get.
+.TP 
+\fBsunique\fR [\fBon\fR] [\fBoff\fR] 
+Stores files with unique names. If no option is specified, the command toggles the
+state of 'sunique'.
+
+In case more than one of the transferred files have the same name,
+this feature adds a sequential number to the end of the repeated filename, for example:
+\fBfile.name\fR, \fBfile.name1\fR, and
+\fBfile.name2\fR.
+.TP 
+\fBsymlink \fR\fBtargetpath \fR\fBlinkpath\fR 
+Creates symbolic link \fIlinkpath\fR, which will point to
+\fItargetpath\fR.
+.TP 
+\fBtype\fR [ \fBascii\fR | \fBauto\fR | \fBbinary\fR | \fBdefault\fR ] 
+Sets file transfer type. If type is not specified, the current file transfer type is
+displayed.
+.RS 
+.TP 
+\fBascii\fR 
+Transfer file in ascii mode. See
+ascii
+for more information.
+.TP 
+\fBauto\fR 
+Transfer file in auto mode. See
+auto
+for more information.
+.TP 
+\fBbinary\fR 
+Transfer file in binary mode. See
+binary
+for more information.
+.TP 
+\fBdefault\fR 
+Transfer file in binary mode. This mode is identical to
+\fBbinary\fR except that when the server is Tectia Server for IBM z/OS, no extra
+parameters are specified for the server. See
+binary
+for more information.
+.RE
+.TP 
+\fBverbose\fR 
+Enables verbose mode (identical to the debug 2 command). You may
+later disable verbose mode by debug disable.
+.TP 
+\fBhelp\fR [\fBtopic\fR] 
+If \fItopic\fR is not given, lists the available topics. If
+\fItopic\fR is given, outputs available online help about the
+topic.
+.TP 
+\fBhelpall\fR 
+Outputs available online help about all topics.
+.SH "COMMAND INTERPRETATION"
+sftpg3 understands both backslashes (\\) and
+quotation marks ("") on the command line. A backslash can be used for
+ignoring the special meaning of any character in the command-line interpretation. It will be
+removed even if the character it precedes has no special meaning.
+.PP
+When specifying filenames that contain spaces, enclose them in quotation marks.
+.RS 
+\fBNote\fR
+.PP
+Commands get . and put . will get or put every
+file in the current directory and possibly they overwrite files in your current
+directory.
+.RE
+.PP
+sftpg3 supports wildcard characters (also known as glob patterns) given
+to commands chmod, lchmod, ls,
+lls, rm, lrm,
+get, and put. 
+.SH "COMMAND-LINE EDITING"
+The following key sequences can be used for command-line editing:
+.TP 
+\fBCtrl-Space\fR 
+Set mark.
+.TP 
+\fBCtrl-A\fR 
+Go to the beginning of the line. 
+.TP 
+\fBCtrl-B\fR 
+Move the cursor one character to the left. 
+.TP 
+\fBCtrl-D\fR 
+Erase the character to the right of the cursor, or exit the program if the command
+line is empty. 
+.TP 
+\fBCtrl-E\fR 
+Go to the end of the line. 
+.TP 
+\fBCtrl-F\fR 
+Move the cursor one character to the right. 
+.TP 
+\fBCtrl-H\fR 
+Backspace. 
+.TP 
+\fBCtrl-I\fR 
+Tab. 
+.TP 
+\fBCtrl-J\fR 
+Enter. 
+.TP 
+\fBCtrl-K\fR 
+Delete the rest of the line. 
+.TP 
+\fBCtrl-L\fR 
+Redraw the line. 
+.TP 
+\fBCtrl-M\fR 
+Enter. 
+.TP 
+\fBCtrl-N\fR 
+Move to the next line. 
+.TP 
+\fBCtrl-P\fR 
+Move to the previous line. 
+.TP 
+\fBCtrl-T \fR
+Toggle two characters. 
+.TP 
+\fBCtrl-U\fR 
+Delete the line. 
+.TP 
+\fBCtrl-W\fR 
+Delete a region (the region's other end is marked with Ctrl-Space). 
+.TP 
+\fBCtrl-X\fR 
+Begin an extended command. 
+.TP 
+\fBCtrl-Y\fR 
+Yank deleted line. 
+.TP 
+\fBCtrl-_\fR 
+Undo. 
+.TP 
+\fBCtrl-X Ctrl-L\fR 
+Lower case region. 
+.TP 
+\fBCtrl-X Ctrl-U\fR 
+Upper case region. 
+.TP 
+\fBCtrl-X Ctrl-X\fR 
+Exchange cursor and mark. 
+.TP 
+\fBCtrl-X H\fR 
+Mark the whole buffer. 
+.TP 
+\fBCtrl-X U\fR 
+Undo. 
+.TP 
+\fBEsc Ctrl-H\fR 
+Backwards word delete. 
+.TP 
+\fBEsc Delete\fR 
+Backwards word delete. 
+.TP 
+\fBEsc Space\fR 
+Delete extra spaces (leaves only one space). 
+.TP 
+\fBEsc <\fR 
+Go to the beginning of the line. 
+.TP 
+\fBEsc >\fR 
+Go to the end of the line. 
+.TP 
+\fBEsc @\fR 
+Mark current word. 
+.TP 
+\fBEsc A\fR 
+Go back one sentence. 
+.TP 
+\fBEsc B\fR 
+Go back one word. 
+.TP 
+\fBEsc C\fR 
+Capitalize current word. 
+.TP 
+\fBEsc D\fR 
+Delete current word. 
+.TP 
+\fBEsc E\fR 
+Go forward one sentence. 
+.TP 
+\fBEsc F\fR 
+Go forward one word. 
+.TP 
+\fBEsc K\fR 
+Delete current sentence. 
+.TP 
+\fBEsc L\fR 
+Change current word to lower case. 
+.TP 
+\fBEsc T\fR 
+Transpose words. 
+.TP 
+\fBEsc U\fR 
+Change current word to upper case. 
+.TP 
+\fBDelete\fR 
+Backspace. 
+.SH "FILENAME SUPPORT"
+Different operating systems allow different character sets in filenames. On Unix, some of
+the special characters are allowed in filenames, but on Windows, the following characters are
+not allowed:
+.PP
+.nf
+\\/ : * ? " < > |
+.fi
+.PP
+The sftpg3 command-line tool (both as an interactive and in a batch
+file) follows the syntax and semantics of Unix shell command-line also on the Windows
+platform, except that the escape character is ~ (tilde).
+.PP
+When you transfer files that have special characters in the filename (for example
+\fBunixfilename*?".txt\fR) from a Unix server to Windows, you need to provide
+the files with new names that are acceptable on Windows. 
+.TP 
+The sftpg3 command-line client includes two versions of the get command:
+The get command can be used to transfer several files at the same
+time, but it is not possible to define target filenames. Note that if there are special
+characters in the filenames, you need to rename the files already on Unix so that the
+names are acceptable also on Windows.The sget command is used to transfer one file at a time, and it
+allows you to define a new name for the destination file. Use it to make the name
+acceptable on Windows. The command sequence is as follows:
+
+.nf
+$ sftpg3
+.fi
+
+.nf
+sftp> open \fIuser@server\fR
+.fi
+
+.nf
+sftp> sget "file*name.txt" \fIwindowsfilename.txt\fR
+.fi
+.SS "ESCAPING SPECIAL CHARACTERS"
+In the sftpg3 command, the following characters have a special
+meaning, and they need to be escaped in commands that take filenames as arguments:
+.PP
+* asterisk is a wildcard character for any number of any
+characters
+.PP
+? question mark is a wildcard for any single character
+.PP
+"" quotation marks are placed around strings that are to be taken 'as
+is'
+.PP
+\\ backslash is an escape character on Unix
+.PP
+~ tilde is an escape character on Windows
+.PP
+The escape character tells the sftpg3 command to treat the next
+character "as is" and not to assume any special meaning for it. The escape character is
+selected according to the operating system of the local machine. 
+.PP
+Note that the \\ and ~ characters are special
+characters themselves, and if they are present in the filename, an escape character must be
+placed in front of them,too. Therefore, if you need to enter a filename containing
+\\ in Unix or ~ in Windows to any of the
+sftpg3 commands, add the relevant escape character to it:
+.PP
+\\\\ on Unix
+.PP
+~~ on Windows
+.PP
+When a filename or part of a filename is placed within the quotation marks
+"", the sftpg3 command interprets the quoted part
+\&'as is', and none of the characters within the quote are interpreted as wildcards or as any
+other special characters.
+.PP
+However, on Unix a quotation mark " can also be part of a filename.
+If you need to enter the " character in a filename, you must add the
+escape character in front of it both on Unix and on Windows. 
+.PP
+For example, to enter a file named \fBfile\-"name".txt\fR into a command
+on Windows, enter the following command:
+.PP
+.nf
+sftp> sget "file\-~"name~".txt" filename.txt
+.fi
+.PP
+See the examples below to learn how the escape characters are used in the Tectia
+sftpg3 commands, and how to enter filenames with special characters in
+different operating systems.
+.TP 
+Examples of filenames in the sftpg3 commands:
+The following filenames are valid in Unix, but they need escape characters in the
+commands:
+
+.nf
+file|name.txt
+file\-"name".txt
+file?name.txt
+file*name.txt
+file\\name.txt
+file \- name.txt
+file~name.txt
+.fi
+When using the sftpg3 command-line tool on Unix, enter the
+above mentioned filenames in the following formats:
+
+.nf
+file\\|name.txt     or  "file|name.txt"
+file\-\\"name\\".txt  or  "file\-\\"name\\".txt"
+file\\?name.txt     or  "file?name.txt"
+file\\*name.txt     or  "file*name.txt"
+file\\\\name.txt     or  "file\\\\name.txt"
+file\\ \-\\ name.txt  or  "file \- name.txt"
+file~name.txt      or  "file~name.txt"
+.fi
+
+Example commands on Unix:
+
+.nf
+sftp> get "file*name.txt"
+.fi
+
+.nf
+sftp> sget "file*name.txt" newfilename.txt
+.fi
+.SH "ENVIRONMENT VARIABLES"
+sftpg3 uses the following environment variables:
+.TP 
+SSH_SFTP_BATCH_FILE=\fIstartup_batch_file\fR 
+Defines the path to the sftpg3 startup batch file. The file is
+run and the sftpg3 commands defined in the file are executed each
+time sftpg3 is started.
+
+If this variable is not defined, sftpg3 looks for a startup batch
+file named \fBssh_sftp_batch_file\fR in the user-specific directory
+\fB$HOME/.ssh2/\fR on Unix or \fB%APPDATA%\\SSH\\\fR on
+Windows. 
+
+Note that if this variable is defined but the file is missing or cannot be accessed,
+sftpg3 fails to start.
+.TP 
+SSH_SFTP_CHECKSUM_MODE\fB=yes|no|md5|sha1|md5\-force|sha1\-force|checkpoint\fR 
+Defines the setting for comparing checksums. 
+For more information, see the description of the \fBchecksum\fR element on the 
+\fBssh-broker-config\fR(5)
+man page.
+.TP 
+SSH_SFTP_SHOW_BYTE_COUNT\fB=yes|no\fR 
+If this variable is set to \fByes\fR, the number of transferred bytes is
+shown after successful file transfer. Also the names of source and destination files are
+shown. The default is \fBno\fR. 
+.TP 
+SSH_SFTP_STATISTICS\fB=yes|no|simple\fR 
+If this variable is set to \fByes\fR (default), normal progress bar is
+shown while transferring the file. If it is set to \fBno\fR, progress bar is
+not shown. If it is set to \fBsimple\fR, file transfer statistics are shown
+after the file has been transferred.
+.SH "EXIT VALUES"
+sftpg3 returns the following values based on the result of the
+operation:
+.PP
+.nf
+0     Operation was successful. 
+1     Internal error. 
+2     Connection aborted by the user.
+3     Destination is not a directory, but a directory was specified by the user. 
+4     Connecting to the host failed. 
+5     Connection lost. 
+6     File does not exist. 
+7     No permission to access file. 
+8     Undetermined error from sshfilexfer.
+11    Some non\-fatal errors occured during a directory operation.
+101   Wrong command\-line arguments specified by the user.
+.fi
+.PP
+In batch mode, sftpg3 returns the value 0 only if no errors occurred
+during the execution. A failure to change the current working directory, a failure to
+establish a connection, or a connection loss during batch operation cause
+sftpg3 to abort. Other errors are reported to stderr and the last error
+value is returned as the exit value of the sftpg3 process.
+.SH EXAMPLES
+Open a sftpg3 session with the remote end connected to the server
+defined in the connection profile \fIprofile1\fR in the
+\fBssh\-broker\-config.xml\fR file (the local end is initially connected to the
+file system of the SFTP client host):
+.PP
+.nf
+$ sftpg3 profile1
+.fi
+.PP
+Run sftpg3 in batch mode:
+.PP
+.nf
+$ sftpg3 \-B batch.txt
+.fi
+.PP
+Example contents of the batch file \fIbatch.txt\fR are shown below.
+Non-interactive authentication methods are used and the server host keys have been stored
+beforehand:
+.PP
+.nf
+lopen user@unixserver.example.com
+open user@winserver.example.com
+binary
+lcd backup
+cd c:/temp
+get \-\-force\-lower\-case Testfile\-X.bin
+lchmod 700 testfile\-x.bin
+quit
+.fi
+.PP
+The example batch file opens the local end of the connection to a Unix server and the
+remote end to a Windows server, and sets the transfer mode to binary. It changes to local
+directory \fIbackup\fR and remote directory
+\fIC:\\Temp\fR, and copies a file from the remote directory to the local
+directory. The filename is changed to lower-case characters
+(\fItestfile-x.bin\fR). After transfer, the file permissions are
+changed to allow the user full rights and others no rights. 
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-broker-g3\fR(1),
+\fBssh-broker-config\fR(5),
+\fBsshg3\fR(1),
+\fBscpg3\fR(1)

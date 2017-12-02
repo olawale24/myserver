@@ -1,0 +1,341 @@
+.TH ssh-translation-table 1 "16 June 2017"  
+.SH NAME
+ssh-translation-table \- Secure Shell Translation Table
+.SH SYNOPSIS
+.ad l
+\fBssh\-translation\-table\fR \kx
+.if (\nxu > (\n(.lu / 2)) .nr x (\n(.lu / 5)
+'in \n(.iu+\nxu
+[\fBoptions\fR]\&...
+.br
+[\fBfilename\fR]
+'in \n(.iu-\nxu
+.ad b
+.SH DESCRIPTION
+ssh\-translation\-table
+is a utility program that generates translation tables for coded character set (CCS)
+conversions. ssh\-translation\-table stores the translation table
+in \fIfilename\fR. If \fIfilename\fR is
+not given, ssh\-translation\-table writes the translation table to
+standard output.
+.SH OPTIONS
+The following options are available:
+.TP 
+\fB\-b, \-\-binary \fR
+Use the z/OS-specific binary file format.
+.TP 
+\fB\-f, \-\-from=\fR\fICODESET\fR
+Specify the source code set of the inbound conversion, which is also
+the target code set of the outbound conversion. The default value is
+\fIISO8859-1\fR. For example:
+
+.nf
+\-\-from ISO8859\-15
+.fi
+.TP 
+\fB\-t, \-\-to=\fR\fICODESET\fR
+Specify the target code set of the inbound conversion, which is also
+the source code set of the outbound conversion. The default value is
+\fIIBM-1047,swaplfnl\fR if the underlying
+implementation is ICU, otherwise \fIIBM-1047\fR.
+For example:
+
+.nf
+\-\-to IBM\-037
+.fi
+.TP 
+\fB\-l, \-\-list\-charsets\fR
+List available character sets. Note that all character sets are not
+single byte character sets. Only single byte character sets can be
+used.
+.TP 
+\fB\-D, \-\-debug=\fR\fILEVEL\fR
+Sets the debug level. \fILEVEL\fR is a number
+from 0 to 99, where 99 specifies that all debug information should be
+displayed. This should be the first argument on the command line.
+.TP 
+\fB\-h, \-\-help\fR
+Displays a short summary of command-line options and exits.
+.SH "TRANSLATION TABLE"
+A translation table is a file containing two tables describing the character
+conversion, the inbound table and the outbound table. Each table consists of 256
+target values.
+.PP
+In Tectia File Transfer, the inbound table is used when converting data from the
+line to the data set. The outbound table is used when converting data from a file and
+sending the data out on the line.
+.PP
+The binary format, which is z/OS specific, consists of three 256 byte fields. The
+first is a comment in EBCDIC, which is ignored in the conversion software, the
+second is the inbound table and the third is the outbound table.
+.PP
+The text format can have interspersed comments. The target values are in
+hexadecimal.
+.PP
+A table is a list of 256 values represented as two hexadecimal characters
+(from 00 to FF). The position of the value is the index for conversion. The first
+position, i.e. position 00, represents the converted value for byte value of
+0.
+.PP
+The hexadecimal values in the tables are case-insensitive. So values 0a and 0A are
+the same. Also, it is possible to add comments into the file. The comment starts
+with character '#'. Everything after that until end of line is treated as comment
+and ignored. Also all white spaces are ignored.
+.RS 
+\fBNote\fR
+.PP
+Only single byte translations are supported with translation tables.
+.RE
+.PP
+Here is an example translation table generated with command
+ssh\-translation\-table:
+.PP
+.nf
+## SSH TRANSLATION TABLE FILE FORMAT VERSION 1.0
+##################################################################
+#
+# This file is an example translation table that can be used to
+# translate data from 'ISO8859\-1' to 'IBM\-1047,swaplfnl' while reading
+# from a file or from 'IBM\-1047,swaplfnl' to 'ISO8859\-1' while writing
+# to a file.
+#
+# The format of translation table file is following:
+#
+# \- White spaces are ignored.
+# \- Everything after '#' character until end of line is a comment
+#   that is ignored.
+# \- The first table is used when writing data to a file.
+# \- The second table is used when reading data from a file.
+# \- Both tables must exist.
+# \- Table is a simple hexadecimal representation of the
+#   translation. Each value is represented as two hexadecimal
+#   characters. The first line gives the values in table
+#   positions 0\-15 (00\-0F), the second line 16\-31 (10\-1F)
+#   and so on.
+#
+# Note: Only single byte translations are supported.
+#
+#################################################################
+
+# Inbound (network to file) translation table:
+# IBM\-1047,swaplfnl \-> ISO8859\-1
+
+#0\-1\-2\-3\-4\-5\-6\-7\-8\-9\-A\-B\-C\-D\-E\-F
+000102039C09867F978D8E0B0C0D0E0F #0
+101112139D0A08871819928F1C1D1E1F #1
+808182838485171B88898A8B8C050607 #2
+909116939495960498999A9B14159E1A #3
+20A0E2E4E0E1E3E5E7F1A22E3C282B7C #4
+26E9EAEBE8EDEEEFECDF21242A293B5E #5
+2D2FC2C4C0C1C3C5C7D1A62C255F3E3F #6
+F8C9CACBC8CDCECFCC603A2340273D22 #7
+D8616263646566676869ABBBF0FDFEB1 #8
+B06A6B6C6D6E6F707172AABAE6B8C6A4 #9
+B57E737475767778797AA1BFD05BDEAE #A
+ACA3A5B7A9A7B6BCBDBEDDA8AF5DB4D7 #B
+7B414243444546474849ADF4F6F2F3F5 #C
+7D4A4B4C4D4E4F505152B9FBFCF9FAFF #D
+5CF7535455565758595AB2D4D6D2D3D5 #E
+30313233343536373839B3DBDCD9DA9F #F
+
+# Outbound (file to network) translation table:
+# ISO8859\-1 \-> IBM\-1047,swaplfnl
+#
+#0\-1\-2\-3\-4\-5\-6\-7\-8\-9\-A\-B\-C\-D\-E\-F
+00010203372D2E2F1605150B0C0D0E0F #0
+101112133C3D322618193F271C1D1E1F #1
+405A7F7B5B6C507D4D5D5C4E6B604B61 #2
+F0F1F2F3F4F5F6F7F8F97A5E4C7E6E6F #3
+7CC1C2C3C4C5C6C7C8C9D1D2D3D4D5D6 #4
+D7D8D9E2E3E4E5E6E7E8E9ADE0BD5F6D #5
+79818283848586878889919293949596 #6
+979899A2A3A4A5A6A7A8A9C04FD0A107 #7
+202122232425061728292A2B2C090A1B #8
+30311A333435360838393A3B04143EFF #9
+41AA4AB19FB26AB5BBB49A8AB0CAAFBC #A
+908FEAFABEA0B6B39DDA9B8BB7B8B9AB #B
+6465626663679E687471727378757677 #C
+AC69EDEEEBEFECBF80FDFEFBFCBAAE59 #D
+4445424643479C485451525358555657 #E
+8C49CDCECBCFCCE170DDDEDBDC8D8EDF #F
+
+# EOF
+.fi
+.RS 
+\fBNote\fR
+.PP
+When ICU libraries are used for generating ASCII to EBCDICtranslation tables,
+\fB,swaplfnl\fR must be added to the EBCDIC codepage name so
+that ASCII line feed characters (0A) are correctly translated to EBCDIC newline
+characters (15).
+.RE
+.PP
+In order to create a custom translation table, first create a translation table
+with ssh\-translation\-table and then edit it with any text
+editor.
+.SH "ENVIRONMENT VARIABLES"
+.TP 
+\fBSSH_CHARSET_CONV\fR
+The full pathname of the Tectia conversion DLL. Only required if ssh\-translation\-table
+or the conversion DLL are not in the installation directories. Here is an example of the pathname:
+
+\fBSSH_CHARSET_CONV=/opt/tectia/lib/shlib/i18n_iconv.so\fR
+.SH "USING TRANSLATION TABLES WITH TECTIA FILE TRANSFER"
+Translation tables can be used with Tectia file transfer clients and server. The
+translation can be performed either in the client or in the server. The translation
+table file must be available in the host that is performing the translation.
+.SH "USING TRANSLATION TABLES WITH SFTPG3"
+Translation table filename is specified using site parameter
+TRANSFER_TRANSLATE_TABLE or E. Since translation table filename can be part of file
+transfer advice string, '\fB/\fR' character must be encoded as
+\&'\fB%2f\fR'. Also, the parameter must be just one value without
+spaces. Space must be encoded as '\fB%20\fR'.
+.RS 
+\fBNote\fR
+.PP
+File transfer clients sftpg3 and scpg3
+encode '\fB/\fR' internally as '\fB%2f\fR'.
+.RE
+.RS 
+\fBNote\fR
+.PP
+If translation is performed in Tectia sftpg3 or scpg3 client, server does not
+have to be Tectia.
+.RE
+.PP
+Here is an upload example, where translation is done in the
+sftpg3 client:
+.PP
+.nf
+$ sftpg3 user@example.com
+sftp> lsite E=/path/to/ISO8859\-1_to_IBM\-1047,swaplfnl.txt
+sftp> sput ISO8859\-1_file.txt IBM\-1047_file.txt
+.fi
+.PP
+With the lsite command, translation is activated on the local
+end. Text file is translated from ISO8859-1 to IBM-1047 and transferred as a binary
+file.
+.RS 
+\fBNote\fR
+.PP
+Since translation tables only handle single byte convertions it is not
+possible to change newline convention from DOS to Unix or MVS with the
+translation table only.
+.RE
+.PP
+The following example shows the download of a file:
+.PP
+.nf
+$ sftpg3 user@example.com
+sftp> lsite E=/path/to/ISO8859\-1_to_IBM\-1047,swaplfnl.txt
+sftp> sget IBM\-1047_file.txt ISO8859\-1_file.txt
+.fi
+.PP
+In this upload example, translation is done in the remote server:
+.PP
+.nf
+$ sftpg3 user@example.com
+sftp> ascii
+sftp> site E=/path/to/IBM\-1047,swaplfnl_to_ISO8859\-1.txt
+sftp> sput ISO8859\-1_file.txt IBM\-1047_file.txt
+.fi
+.PP
+With the site command, translation is activated on the remote
+end. Text file is first transferred as text to remote end and then translated from
+ISO8859-1 to IBM-1047.
+.RS 
+\fBNote\fR
+.PP
+Since now the translation is done on the remote end, it is possible to first
+perform newline conversion on the client. Also newline conversion where the
+length of the data changes, like from DOS to UNIX, can be done in this
+case.
+.RE
+.PP
+The following example shows the download of the file:
+.PP
+.nf
+$ sftpg3 user@example.com
+sftp> ascii
+sftp> site E=/path/to/IBM\-1047,swaplfnl_to_ISO8859\-1.txt
+sftp> sget IBM\-1047_file.txt ISO8859\-1_file.txt
+.fi
+.SH "USING TRANSLATION TABLES WITH SCPG3"
+Here is an upload example, where translation is done in the
+scpg3 client:
+.PP
+.nf
+$ scpg3 \-\-src\-site=E=/path/to/ISO8859\-1_to_IBM\-1047,swaplfnl.txt 
+ISO8859\-1_file.txt user@example.com:IBM\-1047_file.txt
+.fi
+.PP
+With the \fB\-\-src\-site\fR option, translation is activated on the local
+end. Text file is translated from ISO8859-1 to IBM-1047 and transferred as a binary
+file.
+.PP
+The following example shows the download of the file:
+.PP
+.nf
+$ scpg3 \-\-dst\-site E=/path/to/ISO8859\-1_to_IBM\-1047,swaplfnl.txt 
+user@example.com:IBM\-1047_file.txt ISO8859\-1_file.txt
+.fi
+.PP
+In this upload example, translation is done in remote server:
+.PP
+.nf
+$ scpg3 \-a \-\-dst\-site=E=/path/to/IBM\-1047,swaplfnl_to_ISO8859\-1.txt 
+ISO8859\-1_file.txt user@example.com:IBM\-1047_file.txt
+.fi
+.PP
+With the \fB\-\-dst\-site\fR option, translation is activated on the
+remote end. Text file is first transferred as text to remote end and then translated
+from ISO8859-1 to IBM-1047.
+.RS 
+\fBNote\fR
+.PP
+Since now the translation is done on the remote end, it is possible to first
+perform newline conversion on the client. Also newline conversion where the
+length of the data changes, like from DOS to UNIX, can be done in this
+case.
+.RE
+.PP
+The following example shows the download of the file:
+.PP
+.nf
+$ scpg3 \-a \-\-src\-site=E=/path/to/IBM\-1047,swaplfnl_to_ISO8859\-1.txt 
+user@example.com:IBM\-1047_file.txt ISO8859\-1_file.txt
+.fi
+.SH "USING TRANSLATION TABLES WITH OPENSSH"
+Here is an upload example, where translation is done in Tectia Server:
+.PP
+.nf
+$ sftp user@example.com
+sftp> put ISO8859\-1_file.txt 
+/ftadv:E=%2fpath%2fto%2fIBM\-1047,swaplfnl_to_ISO8859\-1.txt/IBM\-1047_file.txt
+.fi
+.PP
+With \fBftadv\fR string in destination file name, translation is
+activated on the remote end. Text file is first transferred to remote end and then
+translated from ISO8859-1 to IBM-1047.
+.RS 
+\fBNote\fR
+.PP
+When translation table information is given in \fBftadv\fR string,
+\&'\fB/\fR' character must be encoded as
+\&'\fB%2f\fR'. Also, since the parameter must be just one value
+without spaces, space must be encoded as '\fB%20\fR'.
+.RE
+.PP
+The following example shows the download of the file:
+.PP
+.nf
+$ sftp user@example.com
+sftp> get /ftadv:E=%2fpath%2fto%2fIBM\-1047,
+swaplfnl_to_ISO8859\-1.txt/IBM\-1047_file.txt ISO8859\-1_file.txt
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBscpg3\fR(1), \fBsftpg3\fR(1)

@@ -1,0 +1,437 @@
+IMPORTANT 
+READ CAREFULLY BEFORE INSTALLING OR USING THIS PRODUCT 
+
+
+
+THIS PRODUCT CONTAINS THE TECTIA(R) SSH SERVER COMPUTER SOFTWARE 
+APPLICATIONS AND RELATED DOCUMENTATION AND OTHER PROPRIETARY MATERIAL 
+(COLLECTIVELY, THE "SOFTWARE"), THE USE OF WHICH IS SUBJECT TO THE TERMS OF 
+THIS END-USER LICENSE AGREEMENT ("AGREEMENT"). TERM "SOFTWARE", AS USED IN 
+THIS AGREEMENT, DOES NOT MEAN POSSIBLE OPEN SOURCE COMPONENTS. INSTALLATION 
+OR USE OF THE SOFTWARE CONSTITUTES YOUR AND YOUR COMPANY'S ASSENT TO AND 
+ACCEPTANCE OF ALL OF THE TERMS OF THIS AGREEMENT AND YOUR COMPANY TO BE 
+BOUND BY AND BECOME A PARTY TO THIS AGREEMENT. IF YOU DO NOT AGREE WITH ALL 
+OF THE TERMS OF THIS AGREEMENT, YOU MUST NOT INSTALL THE SOFTWARE AND YOU 
+MUST RETURN THE SOFTWARE AND ALL MANUALS AND DOCUMENTATION TO SSH 
+COMMUNICATIONS SECURITY CORPORATION ("LICENSOR") OR LICENSOR'S RESPECTIVE 
+DISTRIBUTOR FOR A REFUND WITHIN TEN (10) DAYS OF RECEIPT OF THE PRODUCTS. 
+WRITTEN APPROVAL IS NOT A PREREQUISITE TO THE VALIDITY OR ENFORCEABILITY OF 
+THIS AGREEMENT. IF YOU HAVE ORDERED THE SOFTWARE, LICENSOR'S ACCEPTANCE OF 
+YOUR PURCHASE ORDER IS EXPRESSLY CONDITIONAL ON YOUR ASSENT TO THESE TERMS 
+TO THE EXCLUSION OF ALL OTHER TERMS (EXCEPT NON-PREPRINTED TERMS IN WRITING 
+SIGNED BY BOTH PARTIES); IF THESE TERMS ARE CONSIDERED AN OFFER BY LICENSOR, 
+ACCEPTANCE IS EXPRESSLY LIMITED TO THESE TERMS. 
+
+End-User License Agreement 
+
+This End-User License Agreement constitutes the agreement between SSH 
+Communications Security Corporation ("Licensor") and the individual or legal 
+entity who has ordered the products which are the subject of this Agreement 
+("You") for the license of the Software. 
+
+1. GRANT OF LICENSE 
+
+Licensor hereby grants to You a non-transferable, non-exclusive, 
+non-sublicensable license to install and use the Software on the number of 
+hardware based computers, virtual machines within hardware based computers, 
+or instances within a cloud infrastructure for which You have paid the 
+applicable license fees. 
+
+You shall use the licenses solely for your business operations and the use 
+is subject to the terms and conditions set forth in this Agreement. For 
+avoidance of doubt, one license of the Software authorizes You to install 
+and use a single instance of the Software on a hardware based computer or a 
+virtual machine within hardware based computer. In virtualized or shared 
+desktop environments and/or infrastructures, one license is required for 
+each concurrent user using the Software on an installed hardware or virtual 
+computer. 
+
+The licenses granted to You hereunder shall be in force, (a) for 
+subscriptions: as long as the subscriptions and the payment responsibility 
+thereof is in force or (b) for perpetual licenses: without time limit, also 
+after this agreement has ended. 
+
+2. OWNERSHIP 
+
+Licensor and/or its licensors retains all ownership, title and intellectual 
+property rights with respect to the Software and all enhancements, fixes, 
+corrections, modifications, copies and portions thereof, whether or not 
+incorporated into or with other software. Licensor and/or its licensors 
+reserve all rights not expressly granted to You herein. Any license granted 
+by Licensor under this Agreement is not a sale of the Software or any 
+portion or copy thereof. This Agreement does not convey title or ownership, 
+but instead gives You only the limited rights of use as set forth in this 
+Agreement. The Software contains valuable trade secrets of Licensor and its 
+licensors. All worldwide ownership of and all rights, title and interests in 
+and to the Software, and all copies and portions of the Software, including 
+without limitation, all intellectual property rights therein and thereto, 
+are and shall remain exclusively with Licensor. The Software is protected, 
+among other ways, by the copyright laws of the United States of America, the 
+European Union and international copyright treaties. All rights not 
+expressly granted herein are retained by Licensor and its licensors. You 
+agree that any copies of the Software will contain the same proprietary 
+notices which appear on and in the Software. The Software may contain Open 
+Source components that are licensed under their respective terms. Licensor 
+shall provide a list of Open Source Licenses for a particular version of the 
+Software in the Software user documentation. 
+
+3. USE RESTRICTIONS 
+
+You have no right to receive, use or examine any source code or design 
+documentation relating to the Software. 
+
+You shall not nor allow any third party to: 
+
+(i) use the Software except in accordance with the terms of this Agreement; 
+
+(ii) modify, translate, reverse engineer, decompile, disassemble or 
+otherwise attempt to reconstruct or discover the source code from the 
+binaries of the Software, except to the extent applicable laws specifically 
+prohibit such restriction; 
+
+(iii) modify, translate, adapt, alter the Software or create derivative 
+works from the Software (e.g. incorporating the Software in a commercial 
+product or service without a proper license); 
+
+(iv) copy the Software or any portion thereof (except for one emergency or 
+back-up copy per license that You have paid for); 
+
+(v) sell, assign, rent, lease, sublicense, lend, convey, distribute or 
+otherwise transfer rights to the Software or to this Agreement or use or 
+allow others to use the Software for the benefit of third parties; 
+
+(vi) load or use any portion of the Software (whether or not modified or 
+incorporated into or with other software) on or with any machine or system 
+other than the computers for which You have paid the applicable license 
+fees; 
+
+(vii) remove any product identification, copyright, proprietary notices or 
+labels from the Software; or 
+
+(viii) use any of Licensor's trademarks in any manner other than their 
+presence within Your copy of the Software without prior written permission 
+of Licensor; 
+
+(ix) use the Software to perform any unauthorized transfer of information 
+(e.g. transfer of files in violation of a copyright) or for any illegal 
+purpose; 
+
+(x) if You use Open Source software in conjunction with the Software, you 
+must ensure that Your use does not; a) create, or purport to create, 
+obligations of Licensor and/or its licensors with respect to the Software; 
+or b) grant, or purport to grant, to any third party any rights to or 
+immunities under Licensor's and/or its licensors' intellectual property or 
+proprietary rights in the Software. You also may not combine the Software 
+with programs licensed under the GNU General Public License ("GPL") in any 
+manner that could cause, or could be interpreted or asserted to cause, the 
+Software or any parts thereto to become subject to the terms of the GPL. 
+"Open Source" software used herein shall mean software that is available 
+without charge for use, modifications and distribution and is often licensed 
+under terms that require the user to make the user's modifications to the 
+Open Source software or any software that the user 'combines' with the Open 
+Source software freely available in source code; or c) violate the 
+respective Open Source licenses and related terms and conditions. 
+
+(xi) transfer any rights under this Agreement, including, but not limited 
+to, to any other company or division; 
+
+(xii) incorporate, integrate or otherwise include the Software with any 
+other software or documentation; 
+
+(xiii) use the Software for the business needs of another person or entity. 
+
+Any and all copies made by You as permitted hereunder must contain all of 
+the original Software's copyright, trademark and other proprietary notices 
+and marks. 
+
+4. TEMPORARY EVALUATION 
+
+If You would like to use the Software for a limited time solely for internal 
+evaluation purposes before paying the applicable license fee(s) for the 
+license granted under Section 1, You may use the Software subject to this 
+Agreement, and the additional terms and use restrictions set forth on 
+Schedule A hereto (the "Evaluation License"). 
+
+5. FEES 
+
+You must pay Licensor the license fee(s) and the support service fee(s) for 
+the Software in the amount(s) and in the manner set forth in Licensor's 
+respective invoices. 
+
+6. SUPPORT SERVICES 
+
+Provided that You are not using the Software under an Evaluation License and 
+that You have paid in full the license fee(s) for the Software and that You 
+have paid in full the support service fee(s) for the Software, You will 
+receive new releases of Software as Licensor, in its sole discretion, 
+releases them from time to time and technical support for certain time 
+periods set by Licensor in its sole discretion. Unless the Parties have 
+otherwise agreed in writing and signed by both Parties, such Support 
+Services shall be provided according to the SSH Standard Support Service 
+Terms and Conditions, which can be found online at: 
+http://www.ssh.com/legal/terms 
+
+The content of different levels of SSH Support Services and general 
+information about SSH Support can be found online at: 
+http://www.ssh.com/services/technical-support
+For more detailed description of scopes for SSH Support Services, please 
+contact the Licensor. 
+
+Any supplemental Software code provided to you as part of the Support 
+Services shall be considered part of the Software and subject to the terms 
+and conditions of this Agreement. 
+
+7. CONFIDENTIALITY 
+
+The Software and any license authorization codes are confidential and 
+proprietary information of Licensor. You agree to take all necessary steps 
+to protect the Software and any license authorization codes, if any, from 
+unauthorized disclosure or use. You agree that You will not disclose the 
+Software, in source code or object code form, to any third party. 
+
+8. WARRANTY 
+
+YOU ACKNOWLEDGE THAT THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF 
+ANY KIND. LICENSOR EXPRESSLY DISCLAIMS, TO THE EXTENT PERMITTED BY 
+APPLICABLE LAW, ALL WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, 
+INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OF MERCHANTABILITY, OF 
+FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT OF THIRD PARTY 
+INTELLECTUAL PROPERTY RIGHTS, AND ANY WARRANTY THAT MAY ARISE BY REASON OF 
+TRADE USAGE, CUSTOM OR COURSE OF DEALING. LICENSOR DOES NOT WARRANT THAT THE 
+SOFTWARE WILL BE OR ERROR-FREE OR THAT ITS USE WILL BE UNINTERRUPTED NOR 
+THAT THE SOFTWARE WILL OPERATE WITH ANY HARDWARE AND/OR OTHER SOFTWARE OR 
+REGARDING THE USE, OR THE RESULTS OF THE USE, OF THE SOFTWARE OR 
+DOCUMENTATION IN TERMS OF CORRECTNESS, ACCURACY, RELIABILITY OR OTHERWISE. 
+
+9. LIMITATION OF LIABILITY 
+
+THE ENTIRE RISK AS TO RESULTS AND PERFORMANCE OF THE SOFTWARE IS ASSUMED BY 
+YOU. ANY LIABILITY OF LICENSOR WITH RESPECT TO THE SOFTWARE, THE PERFORMANCE 
+THEREOF OR DEFECTS THEREIN, OR UNDER THIS AGREEMENT, UNDER ANY WARRANTY, 
+NEGLIGENCE, STRICT LIABILITY OR OTHER LEGAL THEORY SHALL BE LIMITED 
+EXCLUSIVELY TO PRODUCT REPLACEMENT OR REPAIR, OR IF REPLACEMENT OR REPAIR IS 
+INADEQUATE AS A REMEDY OR IN LICENSOR'S SOLE OPINION, IMPRACTICAL, TO A 
+REFUND OF THE ACTUAL AMOUNT PAID BY YOU FOR THE SOFTWARE OR SERVICES GIVING 
+RISE TO THE CLAIM. 
+
+10. DISCLAIMER OF DAMAGES 
+
+UNDER NO CIRCUMSTANCES WILL LICENSOR OR ITS LICENSORS BE LIABLE FOR ANY 
+SPECIAL, INDIRECT, INCIDENTAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES OF ANY 
+KIND OR NATURE WHATSOEVER, WHETHER BASED ON CONTRACT, WARRANTY, TORT 
+(INCLUDING NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, ARISING OUT OF OR IN 
+ANY WAY RELATED TO THE SOFTWARE, THIS AGREEMENT, WHETHER DUE TO A BREACH OF 
+LICENSOR'S OBLIGATIONS HEREUNDER OR OTHERWISE, EVEN IF LICENSOR OR ITS 
+LICENSORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE OR IF SUCH 
+DAMAGE COULD HAVE BEEN REASONABLY FORESEEN, AND NOTWITHSTANDING ANY FAILURE 
+OF ESSENTIAL PURPOSE OF ANY EXCLUSIVE REMEDY PROVIDED IN THIS AGREEMENT. 
+SUCH LIMITATION ON DAMAGES INCLUDES, BUT IS NOT LIMITED TO, DAMAGES FOR LOSS 
+OF GOODWILL, BUSINESS, REVENUE, OR SAVINGS, LOST PROFITS, LOSS OF DATA OR 
+SOFTWARE, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION OR IMPAIRMENT OF 
+OTHER GOODS. IN NO EVENT WILL LICENSOR OR ITS LICENSORS BE LIABLE FOR THE 
+COSTS OF PROCUREMENT OF SUBSTITUTE SOFTWARE OR SERVICES. 
+
+YOU ACKNOWLEDGE THAT THIS SOFTWARE IS NOT DESIGNED OR LICENSED FOR USE IN 
+ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS SUCH AS OPERATION OF NUCLEAR 
+FACILITIES, AIRCRAFT NAVIGATION OR CONTROL, OR LIFE-CRITICAL APPLICATIONS. 
+LICENSOR EXPRESSLY DISCLAIMS ANY LIABILITY RESULTING FROM USE OF THE 
+SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS AND ACCEPTS 
+NO LIABILITY IN RESPECT OF ANY ACTIONS OR CLAIMS BASED ON THE USE OF THE 
+SOFTWARE IN ANY SUCH ON-LINE EQUIPMENT IN HAZARDOUS ENVIRONMENTS BY YOU. FOR 
+PURPOSES OF THIS PARAGRAPH, THE TERM "LIFE-CRITICAL APPLICATION" MEANS AN 
+APPLICATION IN WHICH THE FUNCTIONING OR MALFUNCTIONING OF THE SOFTWARE MAY 
+RESULT DIRECTLY OR INDIRECTLY IN PHYSICAL INJURY OR LOSS OF HUMAN LIFE. 
+
+11. SOFTWARE AND SUPPORT SERVICES CHANGES 
+
+At any time during the term of this Agreement, the Licensor may: (a) 
+implement changes in, or modify the Software, including documentation; (b) 
+discontinue the manufacture of the Software and/or providing related Support 
+Services. If the Licensor discontinues the manufacture of the Software 
+and/or providing Support Services, then the Licensor shall make all 
+reasonable efforts to give notice at least one hundred and eighty (180) 
+calendar days prior to intended date of discontinuation. 
+
+12. TERMINATION 
+
+This Agreement will terminate immediately and automatically without notice 
+if You breach any provision in this Agreement. Upon termination You will 
+remove all copies of the Software or any part of the Software from any and 
+all computer storage devices and destroy the Software. At Licensor's 
+request, You or your authorized signatory will certify in writing to 
+Licensor that all complete and partial copies of the Software have been 
+destroyed and that none remain in your possession or under your control. 
+Except for the provisions entitled "Grant of License" and "Support 
+Services", the provisions of this Agreement will survive termination. 
+Termination is not an exclusive remedy, and all other remedies available to 
+Licensor under this Agreement or at law or equity shall be available to 
+Licensor whether or not this Agreement is terminated. 
+
+13. U.S. GOVERNMENT RIGHTS 
+
+If You are, or if You use the Software by or on behalf for any unit or 
+agency of the United States Government, this provision applies. The Software 
+is "commercial computer software" as that term is used and discussed in the 
+Federal Acquisition Regulation (the "FAR 12.212(a)) and in any successor 
+regulations. Licensor represents that the Software was developed entirely at 
+private expense, that no part of the Software was first produced in the 
+performance of a Government contract, and that no part of the Software is in 
+the public domain. 
+
+14. RESTRICTED RIGHTS 
+
+Use, duplication, or disclosure by the U.S. Government is subject to 
+restrictions set forth in this Agreement. Manufacturer is SSH Communications 
+Security Corporation, Kornetintie 3, FI-00380 Helsinki, Finland. 
+
+15. EXPORT LAW 
+
+You acknowledge and agree that the Software may be subject to restrictions 
+and controls, such as but not limited to those, imposed by the European 
+Union and/or the United States of America export control laws and 
+regulations. You agree and certify that neither the Software nor any direct 
+product thereof is being or will be acquired, shipped, transferred, or 
+re-exported, directly or indirectly, into any country, except pursuant to an 
+export control license, issued by the appropriate authority, or will be used 
+for any purpose prohibited by the same. By using the Software, You are 
+acknowledging and agreeing to the foregoing, and You are representing and 
+warranting that You will comply with all of the European Union and the 
+United States of America and other applicable country laws and regulations 
+when either exporting or re-exporting or importing the Software or any 
+underlying information technology. Further, You represent and warrant that 
+You are not a national of Cuba, Iran, Iraq, Libya, North Korea, Sudan, Syria 
+or any other country subject to trade sanctions or a party listed in the 
+U.S. Table of Denial Orders or U.S. Treasury Department's list of Specially 
+Designated Nationals or any similar lists published by the relevant national 
+authorities. 
+
+16. CONTROLLING LAW, VENUE AND SETTLEMENT OF DISPUTES 
+
+If you acquired the Software in the United States, this Agreement shall be 
+interpreted and construed in accordance with the laws of the State of New 
+York, without regard to conflicts of law principles. If you acquired the 
+Software outside the United States, this Agreement shall be interpreted and 
+construed in accordance with the local laws, without regard to conflicts of 
+law principles. 
+
+Further, the application of the United Nations Convention on Contracts for 
+the International Sale of Goods is always expressly excluded and disclaimed. 
+
+If you acquired the Software in the United States, any dispute, controversy 
+or claim arising out of, relating to or in connection with this Agreement, 
+or the breach, termination or validity hereof or thereof, shall be 
+determined by the American Arbitration Association ("AAA") in accordance 
+with the AAA's Commercial Arbitration Rules ("the AAA Rules"). The number of 
+arbitrators shall be three, unless otherwise agreed by the Parties. The 
+place of arbitration shall be New York, State of New York. The language of 
+the arbitration shall be English. In accordance with the AAA Rules, the 
+arbitrators shall be entitled to award interim measures of relief, including 
+but not limited to injunctive relief and measures for the protection or 
+conservation of property. The arbitrators shall have the power to order an 
+award of damages and to award injunctive relief. The prevailing party in the 
+arbitration shall recover its costs of arbitration, including but not 
+limited to its reasonable attorneys' fees. Either party shall have the right 
+to file an action in an applicable Court of the State of New York for the 
+sole purpose of enforcing the arbitration award. 
+
+If you acquired the Software outside the United States, any dispute, 
+controversy or claim arising out of, relating to or in connection with this 
+Agreement, or the breach, termination or validity hereof or thereof, shall 
+be finally settled under the Rules of Arbitration of the International 
+Chamber of Commerce by one (1) arbitrator appointed in accordance with the 
+said Rules. The place of arbitration shall be Helsinki, Finland. All 
+proceedings shall be conducted in the English language. 
+
+Notwithstanding the above provisions of this section, Licensor shall have 
+the right to collect amounts owed by You in any court having jurisdiction 
+over You. 
+
+17. OPEN SOURCE COMPONENTS 
+
+"Open Source Component" means additional separate components that might be 
+distributed along with the Software or as part of it, each licensed to You 
+under its own applicable license terms and conditions. 
+
+Notwithstanding the license grant set forth in Section 1, You acknowledge 
+that certain components of the Software may be Open Source Components. 
+Licensor shall provide a list of Open Source Licenses for a particular 
+version of the Software in the Software user documentation. To the extent 
+required by the licenses covering Open Source Components, the terms of such 
+licenses will apply in lieu of the terms of this Agreement. To the extent 
+the terms of the licenses applicable to Open Source Components prohibit any 
+of the restrictions in this Agreement with respect to such Open Source 
+Component, such restrictions will not apply to such Open Source Component. 
+To the extent the terms of the licenses applicable to Open Source Components 
+require Licensor to make an offer to provide source code of Open Source 
+Component in connection with the Product, such offer is hereby made. YOU 
+ACKNOWLEDGE THAT LICENSOR IS NOT THE AUTHOR, OWNER OR LICENSOR OF ANY OPEN 
+SOURCE COMPONENT, AND THAT LICENSOR MAKES NO WARRANTIES OR REPRESENTATIONS, 
+EXPRESS OR IMPLIED, AS TO THE QUALITY, CAPABILITIES, OPERATIONS, PERFORMANCE 
+OR SUITABILITY OF ANY OPEN SOURCE COMPONENT. 
+
+18. MISCELLANEOUS 
+
+If any provision hereof shall be held illegal, invalid or unenforceable, in 
+whole or in part, such provision shall be modified to the minimum extent 
+necessary to make it legal, valid and enforceable, and the legality, 
+validity and enforceability of all other provisions of this Agreement shall 
+not be affected thereby. 
+
+No delay or failure by either party to exercise or enforce at any time any 
+right or provision hereof shall be considered a waiver thereof or of such 
+party's right thereafter to exercise or enforce each and every right and 
+provision of this Agreement. 
+
+This Agreement will bind and inure to the benefit of each party's permitted 
+successors and assigns. You may not assign this Agreement in whole or in 
+part, without Licensor's prior written consent. Any attempt to assign this 
+Agreement without such consent will be null and void. 
+
+This Agreement sets forth the entire agreement and understanding between You 
+and Licensor relating to the subject matter hereof and supersedes all prior 
+oral and written and all contemporaneous oral negotiations, commitments and 
+understandings of the parties, if any. This Agreement sets forth Licensor's 
+entire liability and Your exclusive remedy with respect to the Software. 
+
+SCHEDULE A 
+
+TEMPORARY EVALUATION ATTACHMENT 
+
+This Schedule A to the above-referenced Agreement is incorporated into the 
+Agreement, and limits the license granted under the Agreement with respect 
+to the Software. 
+
+The Software is provided only for, and the license is granted for the sole 
+purpose of Your internal evaluation of the Software and not for any 
+productive or commercial use. You will make no other use of the Software or 
+any portion thereof, whether or not incorporated into or with any other 
+software. 
+
+Unless earlier terminated as provided in the Agreement, the license granted 
+hereunder will terminate 45 days from the delivery of the Software to You 
+(the "Evaluation Period"). 
+
+Any use of the Software beyond the Evaluation Period requires payment of the 
+applicable license fee(s). You agree that on or before the end of the 
+Evaluation Period, You will either pay the applicable end-user list price or 
+separately agreed license fee(s) with respect to the Software or immediately 
+cease using the Software and destroy all copies that the You may have in 
+your possession or control, and remove the Software from your computers. 
+
+In addition to termination and any other remedies Licensor may have or 
+exercise, if You breach the terms of this Schedule A or any other portion of 
+the Agreement, You shall promptly pay to Licensor its end-user list price or 
+license fee(s) for each unauthorized use of the Software. 
+
+YOU ACKNOWLEDGE THAT THE SOFTWARE IS PROVIDED "AS IS" AND THE LICENSOR 
+PROVIDES NO WARRANTY WHATSOEVER, EXPRESS OR IMPLIED, WITH RESPECT TO THE 
+SOFTWARE OR THE USE OF FUNCTIONING THEREOF (INCLUDING, WITHOUT LIMITATION 
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND 
+NON-INFRINGEMENT) AND WILL HAVE NO LIABILITY WHATSOEVER IN CONNECTION WITH 
+THE SOFTWARE OR THE USE OR FUNCTIONING THEREOF OR LOSS OF DATA RESULTING 
+THEREFROM. 
+
+This Schedule A is an addition to the Agreement and does not change or 
+supersede any term of the Agreement except to the extent unambiguously 
+inconsistent therewith. 
+

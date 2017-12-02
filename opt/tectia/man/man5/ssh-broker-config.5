@@ -1,0 +1,2694 @@
+.TH ssh-broker-config 5 "16 June 2017"  
+.SH NAME
+ssh-broker-config \- Tectia Connection Broker configuration file format
+.PP
+The Connection Broker configuration file \fBssh\-broker\-config.xml\fR is used by Tectia Client and
+ConnectSecure on Unix and Windows. The Connection Broker configuration file must be a valid XML file that follows the
+\fBssh\-broker\-ng\-config\-1.dtd\fR document type definition.
+.SH "CONNECTION BROKER FILES"
+The Connection Broker reads three configuration files (if all are available):
+.TP 0.4i
+1.
+The \fBssh\-broker\-config\-default.xml\fR file is read first. It holds
+the factory default settings. It is not recommended to edit the file, but you can use it
+to view the default settings.
+
+This file must be available and correctly formatted for the Connection Broker to start.
+.TP 0.4i
+2.
+Next, the Connection Broker reads the global configuration file. The settings in the global
+configuration file override the default settings.
+
+If the global configuration file is missing or malformed, the Connection Broker will start
+normally, and will read the user-specific configuration file, instead. A malformed global
+configuration file is ignored and the default settings or user-specific settings, if they
+exist, are used instead.
+.TP 0.4i
+3.
+Last, the Connection Broker reads the user-specific configuration file, if it is available. The
+settings in the user-specific configuration file override the settings in the global
+configuration file, with the following exceptions:
+.RS 
+.TP 0.2i
+\(bu
+The following settings from the user-specific configuration are combined with the
+settings of the global configuration file:
+.RS 
+.TP 0.2i
+\(bu
+In \fBgeneral\fR element, the \fBkey\-stores\fR,
+\fBcert\-validation\fR and \fBfile\-access\-control\fR
+settings
+.TP 0.2i
+\(bu
+In \fBprofiles\fR element, all settings
+.TP 0.2i
+\(bu
+In \fBstatic\-tunnels\fR element, all settings.
+.RE
+.TP 0.2i
+\(bu
+If a connection profile with the same name has been defined in both the global
+configuration file and user-specific configuration file, the latter one is
+used.
+.RE
+
+If the user-specific configuration file is missing, the Connection Broker will start using the
+previously read configuration files. However, if a user-specific configuration exists but
+is malformed, the Connection Broker will not start at all.
+.PP
+On Unix, the default configuration file locations are as follows:
+.TP 0.2i
+\(bu
+the default configuration:
+
+\fB/opt/tectia/share/auxdata/ssh\-broker\-ng/ssh\-broker\-config\-default.xml\fR
+.TP 0.2i
+\(bu
+the global configuration: \fB/etc/ssh2/ssh\-broker\-config.xml\fR
+.TP 0.2i
+\(bu
+the user-specific configuration:
+\fB$HOME/.ssh2/ssh\-broker\-config.xml\fR
+.TP 0.2i
+\(bu
+the XML DTD:
+
+\fB/opt/tectia/share/auxdata/ssh\-broker\-ng/ssh\-broker\-ng\-config\-1.dtd\fR
+.RS 
+\fBNote\fR
+.PP
+In Tectia Client/Server 6.1 and earlier on Unix the default auxiliary data directory
+\fBauxdata\fR was located in \fB/etc/ssh2/ssh\-tectia/\fR. If
+your \fBssh\-broker\-config.xml\fR file was created for Tectia Client/Server version
+6.1 or earlier, please update its DOCTYPE declaration to contain the current path to the
+Connection Broker configuration file DTD directory:
+\fB/opt/tectia/share/auxdata/ssh\-broker\-ng/\fR. 
+.RE
+.PP
+The following sections describe the options available in the Connection Broker configuration file. For
+more information on the syntax of the configuration file, see 
+the \fIConnection Broker XML DTD\fR.
+.SH "ENVIRONMENT VARIABLES"
+Two kinds of environment variables can be used in the Connection Broker configuration file. In
+addition to the system-level environment variables, you can use special variables that are
+Tectia specific. The environment variables take precedence over the special variables. So if an
+environment variable and a special variable have the same name, the environment variable will
+be used.
+.PP
+All alphanumeric characters and the underscore '_' sign are allowed in
+environment variables. The variable name ends to the first character that is not
+allowed.
+.PP
+You can define for example file or directory paths with environment variables, and they
+will be expanded to their values as explained below. 
+.TP 
+%VARIABLENAME%
+Replaced with the value of the environment variable if one has been defined. The
+variable is matched case-insensitively. If the variable is not defined, the string
+\&'\fB%VARIABLENAME%\fR' is the result.
+.TP 
+$VARIABLENAME
+Replaced with the value of the environment variable if one has been defined. The
+variable is matched case-sensitively on Unix and case-insensitively on Windows. If the
+variable is not defined, it is replaced with an empty string.
+.TP 
+${VARIABLENAME}\fItext\fR
+Replaced with the value defined for '\fB$VARIABLENAME\fR' with the
+\&'\fItext\fR' appended to it.
+.TP 
+${VARIABLENAME:-\fIdefault_value\fR}
+Replaced with the value defined for '\fB$VARIABLENAME\fR', or
+replaced with the '\fIdefault_value\fR' if the variable is not
+set.
+.PP
+The Tectia specific special variables are:
+.TP 
+%U or %username%
+Replaced with the currently logged in user name.
+.TP 
+%username-without-domain%
+Replaced with the currently logged in user name in short format, i.e. without the
+domain part. Available on Windows.
+.TP 
+%G or %groupname%
+Replaced with the group name of the currently logged in user.
+.TP 
+%D or %homedir%
+Replaced with the home directory defined for the currently logged in user.
+.TP 
+%IU or %userid%
+Replaced with the user identifier defined for the currently logged in user.
+.TP 
+%IG or %groupid%
+Replaced with the group identifier defined for the currently logged in user.
+.PP
+The special variables can also be entered using the Unix format, for example,
+\fB$username\fR.
+.SH "DOCUMENT TYPE DECLARATION AND THE ROOT ELEMENT"
+The Connection Broker configuration file is a valid XML file and starts with the Document Type
+Declaration.
+.PP
+The root element in the configuration file is \fBsecsh\-broker\fR. It can
+include \fBgeneral\fR, \fBdefault\-settings\fR,
+\fBprofiles\fR, \fBstatic\-tunnels\fR, \fBgui\fR, 
+and \fBlogging\fR
+elements.
+.PP
+An example of an empty configuration file is shown below:
+.PP
+.nf
+<!DOCTYPE secsh\-broker SYSTEM "ssh\-broker\-ng\-config\-1.dtd">
+<secsh\-broker version="1.0">
+  <general />
+  <default\-settings />
+  <profiles />
+  <static\-tunnels />
+  <gui />
+  <logging />
+
+</secsh\-broker>
+.fi
+.SH "THE general ELEMENT"
+The \fBgeneral\fR element contains settings such as the cryptographic library
+and the key stores to be used.
+.PP
+The \fBgeneral\fR element can contain zero or one instance of the following
+elements: \fBcrypto\-lib\fR, \fBcert\-validation\fR,
+\fBkey\-stores\fR, \fBuser\-config\-directory\fR,
+\fBprotocol\-parameters\fR; and multiple \fBknown\-hosts\fR
+elements.
+.TP 
+crypto\-lib
+This element selects the cryptographic library mode to be used. Either the standard
+version (\fBstandard\fR) or the FIPS 140-2 certified version
+(\fBfips\fR) of the cryptographic library can be used. The library name is
+given as a value of the \fBmode\fR attribute. By default, standard
+cryptographic libraries are used. The OpenSSL cryptographic library is used in the
+\fIFIPS mode\fR.
+
+FIPS mode will be used if it is so specified either in the global or
+the user configuration file (or both).
+
+.nf
+<crypto\-lib mode="standard" />
+.fi
+
+In the FIPS mode, the cryptographic operations are performed according
+to the rules of the FIPS 140-2 standard. The FIPS library includes the
+\fB3des\-cbc\fR, \fBaes128\-cbc\fR, \fBaes128\-ctr\fR,
+\fBaes192\-cbc\fR, \fBaes192\-ctr\fR, \fBaes256\-cbc\fR,
+and \fBaes256\-ctr\fR ciphers, and all the supported HMAC-SHA (both HMAC-SHA1
+and HMAC-SHA2) variants of MAC. 
+
+For a list of platforms on which the FIPS library has been validated or tested, see
+\fITectia Client/Server Product Description\fR. 
+.TP 
+cert\-validation
+This element defines public-key infrastructure (PKI) settings used for validating
+remote server authentication certificates. The element can have the following
+attributes: \fBend\-point\-identity\-check\fR, \fBdefault\-domain\fR,
+\fBhttp\-proxy\-url\fR, \fBsocks\-server\-url\fR,
+\fBcache\-size\fR, \fBmax\-crl\-size\fR,
+\fBexternal\-search\-timeout\fR, \fBmax\-ldap\-response\-length\fR,
+\fBldap\-idle\-timeout\fR and \fBmax\-path\-length\fR.
+
+The \fBend\-point\-identity\-check\fR attribute specifies whether the client
+will verify the server's host name or IP address against the Subject Name or Subject
+Alternative Name (DNS Address) specified in the server host certificate. The default
+value is \fByes\fR. If set to \fBno\fR, the fields in the server
+host certificate are \fInot\fR verified and the certificate is accepted
+based on the validity period and CRL check only.
+.RS 
+\fBCaution\fR
+
+Setting \fBend\-point\-identity\-check="no"\fR is a security risk. Then
+anyone with a certificate issued by the same trusted certification authority (CA) that
+issues the server host certificates can perform a man-in-the-middle attack on the
+server. 
+.RE
+
+Alternatively, if set to \fBask\fR, the user can decide to either cancel
+or continue establishing the connection in case that the server's host name does not
+match the one in the certificate.
+
+The \fBdefault\-domain\fR attribute can be used when the end-point
+identity check is enabled. It specifies the default domain part of the remote system
+name and it is used if only the base part of the system name is available. The
+\fBdefault\-domain\fR is appended to the system name if it does not contain
+a dot (\fB.\fR).
+
+If the default domain is not specified, the end-point identity check will still work
+with short host names. For example, when a user tries to connect to a host
+"\fBrock\fR" giving only the short host name and the certificate contains
+the full DNS address "\fBrock.example.com\fR", the connection will be
+opened and Tectia Client/Server will issue a warning about accepting a connection to
+"\fBrock\fR".
+
+The \fBhttp\-proxy\-url\fR attribute defines an HTTP proxy and the
+\fBsocks\-server\-url\fR attribute defines a SOCKS server for making LDAP or
+OCSP queries for certificate validity.
+
+The address of the server is given as the value of the attribute. The format of the
+address is \fBsocks://username@socks_server:port/network/netmask,network/netmask
+\&...\fR (with a SOCKS server) or
+\fBhttp://username@proxy_server:port/network/netmask,network/netmask
+\&...\fR (with an HTTP proxy).
+
+For example, to make the SOCKS server use host \fBsocks.ssh.com\fR
+and port \fB1080\fR for connections outside of networks
+\fB192.196.0.0\fR (16-bit domain) and \fB10.100.23.0\fR (8-bit
+domain), and to get these networks connected directly, set
+\fBsocks\-server\-url\fR as follows:
+
+.nf
+"socks://mylogin@socks.ssh.com:1080/192.196.0.0/16,10.100.23.0/24"
+.fi
+
+The \fBcache\-size\fR attribute defines the maximum size (in megabytes) of
+in-memory cache for the certificates and CRLs. The allowed value range is 1 to 512, and
+the default value is 35 MB. 
+
+The \fBmax\-crl\-size\fR attribute defines the maximum accepted size (in
+megabytes) of CRLs. Processing large CRLs can consume a considerable amount of memory
+and processing power, so in some environments it is advisable to limit their size. The
+allowed value range is 1 to 512, and the default value is 11 MB.
+
+The \fBexternal\-search\-timeout\fR attribute defines the time limit (in
+seconds) for external HTTP and LDAP searches for CRLs and certificates. The allowed
+value range is 1 to 3600 seconds, and the default value is 60 seconds.
+
+The \fBmax\-ldap\-response\-length\fR attribute defines the maximum accepted
+size (in megabytes) of LDAP responses. The allowed value range is 1 to 512, and the
+default value is 11 MB.
+
+The \fBldap\-idle\-timeout\fR attribute defines an idle timeout for LDAP
+connections. The validation engine retains LDAP connections and reuses them in
+forthcoming searches. The connection is closed only after the LDAP idle timeout has been
+reached. The allowed value range is 1 to 3600 seconds, and the default idle timeout is
+30 seconds.
+
+The \fBmax\-path\-length\fR attribute limits the length of the
+certification paths when validating certificates. It can be used to safeguard the paths
+or to optimize against the paths getting too long in a deeply hierarchical PKI or when
+the PKI is heavily cross-certified with other PKIs. Using the attributes requires
+knowing the upper limit of the paths used in certificate validation. For example:
+
+.nf
+<cert\-validation max\-path\-length="6">
+  <ldap\-server address="ldap://myldap.com" port="389" />
+  <dod\-pki enable="yes" />
+  <ca\-certificate name="CA 1" file="ca\-certificate1.crt" />
+</cert\-validation>
+.fi
+
+In the example, the path is limited to six certificates, including the end-entity
+and root CA certificates. If not specified, the default value is 10. Decrease the value
+to optimize the validation if the maximum length of the encountered paths in the
+certificate validation is known.
+
+The \fBcert\-validation\fR element can contain multiple
+\fBldap\-server\fR, \fBocsp\-responder\fR,
+\fBcrl\-prefetch\fR elements, one \fBdod\-pki\fR element, and
+multiple \fBca\-certificate\fR and \fBkey\-store\fR elements. The
+elements have to be in the listed order.
+.RS 
+.TP 
+ldap\-server
+This element specifies an LDAP server \fBaddress\fR and
+\fBport\fR used for fetching CRLs and/or subordinate CA certificates
+based on the issuer name of the certificate being validated. Several LDAP servers
+can be specified by using several \fBldap\-server\fR elements.
+
+CRLs are automatically retrieved from the CRL distribution point defined in
+the certificate to be verified if the point exists.
+
+The default value for \fBport\fR is \fB389\fR.
+.TP 
+ocsp\-responder
+This element specifies an OCSP (Online Certificate Status Protocol) responder
+service address in URL format with attribute \fBurl\fR. Several OCSP
+responders can be specified by using several \fBocsp\-responder\fR
+elements.
+
+If the certificate has a valid Authority Info Access extension with an OCSP
+Responder URL, it will be used instead of this setting. Note that for the OCSP
+validation to succeed, both the end-entity certificate and the OCSP Responder
+certificate must be issued by the same CA. 
+
+The \fBvalidity\-period\fR (in seconds) can be optionally defined.
+During this time, new OCSP queries for the same certificate are not made but the
+old result is used. The default validity period is \fB0\fR (a new query
+is made every time).
+.TP 
+crl\-prefetch
+This element instructs Tectia Client/Server to periodically download a CRL from the
+specified URL. The \fBurl\fR value can be an LDAP or HTTP URL, or it
+can refer to a local file. The file format must be either binary DER or base64,
+PEM is not supported.
+
+To download CRLs from the local file system, define the file URL in this
+format:
+
+.nf
+file:///absolute/path/name
+.fi
+
+To download CRLs from an LDAP server, define the LDAP URL in this
+format:
+
+.nf
+ldap://ldap.server.com:389/CN=Root%20CA,
+       OU=certification%20authorities,DC=company,
+       DC=com?certificaterevocationlist
+.fi
+
+Use the \fBinterval\fR attribute to specify how often the CRL is
+downloaded. The default is \fB3600\fR seconds.
+.TP 
+dod\-pki
+One of the compliance requirements of the US Department of Defense Public-Key
+Infrastructure (DoD PKI) is to have the Digital Signature bit set in the Key Usage
+of the certificate. To enforce digital signature in key usage, set the value of
+the \fBenable\fR attribute to \fByes\fR. The default is
+\fBno\fR. 
+.TP 
+ca\-certificate
+This element defines a certification authority (CA) used in server
+authentication. It can have four attributes: \fBname\fR,
+\fBfile\fR, \fBdisable\-crls\fR, and
+\fBuse\-expired\-crls\fR.
+
+The \fBname\fR attribute must contain the name of the CA.
+
+The element must either contain the path to the X.509 CA certificate file as a
+value of the \fBfile\fR attribute, or include the certificate as a
+base64-encoded ASCII block.
+
+CRL checking can be disabled by setting the \fBdisable\-crls\fR
+attribute to \fByes\fR. The default is \fBno\fR.
+
+Expired CRLs can be used by setting a numeric value (in seconds) for the
+\fBuse\-expired\-crls\fR attribute. The default is \fB0\fR
+(do not use expired CRLs).
+.TP 
+key\-store
+This element defines CA certificates stored in an external key store for
+server authentication. Currently it is used only on z/OS for CA certificates
+stored in System Authorization Facility (SAF).
+.RE
+
+An example of a certificate validation configuration is shown below:
+
+.nf
+<cert\-validation  end\-point\-identity\-check="yes" 
+                  default\-domain="example.com"
+                  http\-proxy\-url="http://proxy.example.com:8080">
+  <ldap\-server    address="ldap://ldap.example.com:389" />
+  <ocsp\-responder url="http://ocsp.example.com:8090" 
+                  validity\-period="0" /> 
+  <crl\-prefetch   url="file:///full.path.to.crlfile" 
+                  interval="1800" />
+  <dod\-pki        enable="no" />
+  <ca\-certificate name="ssh_ca1"
+                  file="ssh_ca1.crt"
+                  disable\-crls="no"
+                  use\-expired\-crls="100" />
+</cert\-validation>         
+.fi
+.TP 
+key\-stores
+This element defines settings for user public-key and certificate
+authentication.
+
+Under the \fB<general>\fR element, there can be one
+\fB<key\-stores>\fR instance which in turn can have any number of
+\fB<key\-store>\fR, \fB<user\-keys>\fR, and
+\fB<identification>\fR elements, and the order of the elements is
+free.
+
+Special variables and environment variables can be used when defining the values for
+the elements. The following variables can be used and they will be expanded as
+follows:
+.RS 
+.TP 0.2i
+\(bu
+\fB%U\fR = \fB%USERNAME%\fR = user name
+.TP 0.2i
+\(bu
+\fB%USERNAME\-WITHOUT\-DOMAIN%\fR = user name without the domain
+part
+.TP 0.2i
+\(bu
+\fB%IU\fR = \fB%USERID%\fR = user ID 
+.TP 0.2i
+\(bu
+\fB%IG\fR = \fB%GROUPID%\fR = user group ID 
+.TP 0.2i
+\(bu
+\fB%D\fR = \fB%HOMEDIR%\fR = the user's home
+directory
+.TP 0.2i
+\(bu
+\fB%G\fR = \fB%GROUPNAME%\fR = the name of the user's
+default group 
+.RE
+
+Also environment variables are replaced with their current values. For example it is
+possible to use strings \fB$HOME\fR or \fB%HOME%\fR to expand to
+user's home directory (if environment variable \fBHOME\fR is set).
+.RS 
+\fBNote\fR
+
+Short alias names (for example, \fB%U\fR) are case-sensitive and long
+alias names (for example, \fB%USERNAME%\fR) are case-insensitive. 
+.RE
+.RS 
+.TP 
+key\-store
+Each of the \fBkey\-store\fR elements configures one key store
+provider. The \fBkey\-stores/key\-store\fR element can take the following
+attributes: \fBtype\fR and \fBinit\fR.
+
+The \fBtype\fR attribute is the key store type. The currently
+supported types are \fB"mscapi"\fR, \fB"pkcs11"\fR, 
+\fB"software"\fR, and \fB"zos\-saf"\fR.
+
+The \fBinit\fR attribute is the initialization info specific to the
+key-store-provider. The initialization string can contain special strings
+explained above in
+\fBkey\-stores\fR.
+
+For key store configuration examples, see 
+the \fBkey\-stores\fR description above.
+
+See also \fIKey Store Configuration Examples\fR
+below.
+.TP 
+user\-keys
+The \fBuser\-keys\fR element can be used to override the default
+directory for the user keys. The \fBuser\-keys\fR element can take the
+following attributes: 
+
+The \fBdirectory\fR attribute defines the directory where the user
+private keys are stored. Enter the full path.
+
+The \fBpassphrase\-timeout\fR attribute defines the time (in
+seconds) after which the passphrase-protected private key will time out, and the
+user must enter the passphrase again. The default is \fB0\fR, meaning
+that the passphrase does not time out. The value of this element should be longer
+than the \fBpassphrase\-idle\-timeout\fR value.
+
+By default, the Connection Broker keeps the passphrase-protected private keys open once
+the user has entered the passphrase successfully. This can be changed with the
+passphrase timeout options. When \fBpassphrase\-timeout\fR is set, the
+private key stays open (usable without further passphrase prompts) until the
+timeout expires. The \fBpassphrase\-timeout\fR attribute sets the hard
+timeout, that is set only once when the key is opened and will not be reset even
+if the key is used multiple times. 
+
+The \fBpassphrase\-idle\-timeout\fR attribute defines the time (in
+seconds) after which the passphrase-protected private key will time out unless the
+user accesses or uses the key. The \fBpassphrase\-idle\-timeout\fR is
+reset every time the key is accessed. The default is \fB0\fR, meaning
+that the passphrase never times out.
+
+Both of the timeout options can be set simultaneously, but notice that if the
+idle timeout is set longer than the hard timeout, the idle timeout has no
+effect.
+.TP 
+identification
+The \fBidentification\fR element can be used to override the
+default location of the identification file that defines the user keys. The
+\fBidentification\fR element can take the following attributes: 
+
+The \fBfile\fR attribute specifies the location of the
+identification file. Enter the full path.
+
+The \fBbase\-path\fR attribute defines the directory where the
+identification file expects the user private keys to be stored. This element can
+be used to override the default relative path interpretation of the identification
+file (paths relative to the identification file directory). 
+
+The \fBpassphrase\-timeout\fR attribute defines the time (in
+seconds) after which the user must enter the passphrase again. The default is
+\fB0\fR, meaning that the passphrase is not re-requested.
+
+The \fBpassphrase\-idle\-timeout\fR attribute defines a time (in
+seconds) after which the passphrase times out if there are no user actions. The
+default is \fB0\fR, meaning that the passphrase does not time
+out.
+
+The timeout settings affect only those private keys that are listed in the
+identification file. 
+.RE
+.TP 
+strict\-host\-key\-checking
+.RS 
+\fBNote\fR
+
+This element is deprecated starting from Tectia Client/Server version 6.1.4.
+.RE
+
+This element is supported in configuration for backwards compatibility and used only
+if the \fBpolicy\fR attribute of the
+\fBserver\-authentication\-methods/auth\-server\-publickey\fR element under
+\fBdefault\-settings\fR or \fBprofiles/profile\fR is not defined.
+In this case, the host key policy is interpreted based on the values of this option and
+the \fBhost\-key\-always\-ask\fR and \fBaccept\-unknown\-host\-keys\fR
+options. 
+See \fIThe default-settings Element\fR 
+below for details.
+.TP 
+host\-key\-always\-ask
+.RS 
+\fBNote\fR
+
+This element is deprecated starting from Tectia Client/Server version 6.1.4.
+.RE
+
+This element is supported in configuration for backwards compatibility and used only
+if the \fBpolicy\fR attribute of the
+\fBserver\-authentication\-methods/auth\-server\-publickey\fR element under
+\fBdefault\-settings\fR or \fBprofiles/profile\fR is not defined.
+In this case, the host key policy is interpreted based on the values of this option and
+the \fBstrict\-host\-key\-checking\fR and
+\fBaccept\-unknown\-host\-keys\fR options. 
+See \fIThe default-settings Element\fR 
+below for details.
+.TP 
+accept\-unknown\-host\-keys
+.RS 
+\fBNote\fR
+
+This element is deprecated starting from Tectia Client/Server version 6.1.4.
+.RE
+
+This element is supported in configuration for backwards compatibility and used only
+if the \fBpolicy\fR attribute of the
+\fBserver\-authentication\-methods/auth\-server\-publickey\fR element under
+\fBdefault\-settings\fR or \fBprofiles/profile\fR is not defined.
+In this case, the host key policy is interpreted based on the values of this option and
+the \fBstrict\-host\-key\-checking\fR and \fBhost\-key\-always\-ask\fR
+options. 
+See \fIThe default-settings Element\fR 
+below for details.
+.RS 
+\fBCaution\fR
+
+Consider carefully before enabling this option. Disabling the host-key checks
+makes you vulnerable to man-in-the-middle attacks.
+.RE
+.TP 
+user\-config\-directory
+This element can be used to change the storage location of the user-specific
+configuration files away from the default which is \fB$HOME/.ssh2/\fR on
+Unix, and "\fB%APPDATA%\\SSH\fR" on Windows. It can be used for example,
+if you want to store all client-side configurations to a centralized location.
+
+When this element is added to the global configuration file, the Connection Broker reads the
+following user-specific files in the defined location:
+.RS 
+.TP 0.2i
+\(bu
+User's key file
+.TP 0.2i
+\(bu
+User's own configuration files
+.TP 0.2i
+\(bu
+User's known host keys
+.TP 0.2i
+\(bu
+User's random_seed file
+.TP 0.2i
+\(bu
+Windows GUI profile files: \fB1.ssh2, 2.ssh2\fR
+.TP 0.2i
+\(bu
+The startup batch file for the sftpg3 client:
+\fBssh_sftp_batch_file\fR
+.RE
+.RS 
+\fBNote\fR
+
+Stop all existing SSH applications before modifying the
+\fBuser\-config\-directory\fR setting in the Connection Broker configuration. 
+
+The \fBuser\-config\-directory\fR setting affects all Tectia products
+running on the same host, for example Tectia Client and Tectia ConnectSecure.
+.RE
+
+The \fBuser\-config\-directory\fR option takes an attribute
+\fBpath\fR, whose value can be either a directory path or one of the
+following variables:
+.RS 
+.TP 0.2i
+\(bu
+\fB%U\fR: The user name.
+.TP 0.2i
+\(bu
+\fB%username%\fR: The user name.
+.TP 0.2i
+\(bu
+\fB%username\-without\-domain%\fR: The user name without domain
+definition.
+.TP 0.2i
+\(bu
+\fB%D\fR: The user's home directory.
+.TP 0.2i
+\(bu
+\fB%homedir%\fR: The user's home directory.
+.TP 0.2i
+\(bu
+\fB%USER_CONFIG_DIRECTORY%\fR: The user-specific configuration
+directory.
+.TP 0.2i
+\(bu
+\fB%IU\fR: The user's ID, on Unix only
+.TP 0.2i
+\(bu
+\fB%userid%\fR: The user's ID, on Unix only
+.TP 0.2i
+\(bu
+\fB%IG\fR: The group ID, on Unix only
+.TP 0.2i
+\(bu
+\fB%groupid%\fR: The group ID, on Unix only
+.RE
+
+The default is \fB%USER_CONFIG_DIRECTORY%\fR. This variable refers to the
+user-specific configuration directory: \fB$HOME/.ssh2\fR on Unix, and
+\fB%APPDATA%\\SSH\fR on Windows. The
+\fB%USER_CONFIG_DIRECTORY%\fR variable cannot be used in other
+settings.
+.TP 
+file\-access\-control
+On Unix, this element can be used to enable checking of file access permissions
+defined for the global and user-specific configuration files, and for the private keys
+files. If the permissions are not as expected, the Connection Broker will refuse to start, or to use
+certain private keys.
+
+By default this setting is disabled. On Windows, this element has no effect.
+
+The file permissions are checked differently, if the
+\fBfile\-access\-control\fR element is set in both the global and user
+configuration files, or just in one of them. 
+
+.nf
+Setting in:      |Checks the file permissions for:
+                 |
+Global   User    | Global   User     Private
+config   config  | config   config   key files
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+yes      yes / \- |   X        X        X
+yes      no      |   X        X        \-
+no / \-   yes     |   \-        X        X
+no / \-   no / \-  |   \-        \-        \-
+.fi
+
+In the table: \fB"no"\fR means \fBfile\-access\-control
+enable="no"\fR. The \fB"\-"\fR sign means that the setting is not
+defined in the file at all. 
+
+When the file access permissions are checked, the controls are applied as
+follows:
+.RS 
+.TP 0.2i
+\(bu
+Expected permissions for the global configuration file: read rights for all,
+write rights only for the user and group. If the permissions are any wider, the
+Connection Broker will not start.
+.TP 0.2i
+\(bu
+Expected permissions for the user configuration file: only the user has read and
+write rights. If the permissions are any wider, the Connection Broker will not start.
+.TP 0.2i
+\(bu
+Expected permissions for the private key files: only the user has read and write
+rights. If the permissions are any wider, keys that do not pass the check will be
+ignored.
+.RE
+.TP 
+protocol\-parameters
+This element contains protocol-specific values that can be used to tune the
+performance. It should be used only in very specific environments. In normal situations
+the default values should be used.
+
+The \fBthreads\fR attribute can be used to define the number of threads
+the protocol library uses (fast path dispatcher threads). This attribute can be used to
+allow more concurrent cryptographic transforms in the protocol on systems with more than
+four CPUs. If the value is set to zero, the default value is used.
+
+Example of the \fBthreads\fR attribute:
+
+.nf
+<protocol\-parameters threads="8" />
+.fi
+.TP 
+known\-hosts
+This element can be used to specify locations for storing the host keys of known
+server hosts, and to define the storage format of the host key files. If no
+\fBknown\-hosts\fR directories are specified, the known host keys are stored
+to the default directories. 
+On z/OS (only), this element can contain \fBkey\-store\fR elements.
+
+This element can be used:
+.RS 
+.TP 0.2i
+\(bu
+To specify non-default directories that contain the public-key data or
+public-key files of known server hosts.
+.TP 0.2i
+\(bu
+To specify a non-default location for OpenSSH-style known_hosts files that
+contain the public-key data of known server hosts.
+.TP 0.2i
+\(bu
+(\fIOn z/OS\fR) To specify a SAF key store that contains the
+certificates of known server hosts.
+.RE
+
+The server host keys are searched in the \fBknown\-hosts\fR paths in the
+order they are specified in the configuration. The settings of the last defined
+\fBknown\-hosts\fR element are used when storing new host keys.
+
+If you define any \fBknown\-hosts\fR file settings, the default OpenSSH
+files will be overridden. So if you wish to make the Connection Broker use both the default OpenSSH
+locations and other locations specified in the configuration, you need to specify all
+the locations separately. 
+
+You can define several \fBknown\-hosts\fR elements, and each of them can
+contain one or several attributes: \fBpath\fR, \fBdirectory\fR,
+\fBfile\fR and \fBfilename\-format\fR. 
+
+The \fBpath\fR attribute requires a full path to the known-hosts file or
+directory as the value. For example:
+
+.nf
+<known\-hosts path="/u/username/.ssh/known_hosts" />
+<known\-hosts path="/etc/ssh2/hostkeys" />
+<known\-hosts path="/u/username/.ssh2/hostkeys" />
+<known\-hosts path="/h/username/hostkeys" filename\-format="plain" />
+.fi
+
+The \fBdirectory\fR attribute is used to define that known host keys are
+saved to a non-default directory. Enter the complete path to the directory as the value.
+If the defined directory does not exist, it will be created during the first connection
+attempt. If a file is found in its place, the connection will be made but the host key
+will not be stored, and the user gets a warning about it. The
+\fBfilename\-format\fR attribute can be used together with the
+\fBdirectory\fR setting to define in which format the host key files will
+be stored. Example of the \fBdirectory\fR attribute:
+
+.nf
+<known\-hosts directory="<path_to_dir>/MyKEYS" 
+             filename\-format="plain" />
+.fi
+
+The \fBpath\fR or \fBdirectory\fR (whichever is present)
+defined in the last \fBknown\-hosts\fR element in the configuration file will
+be used when storing new known host keys. If both attributes are present in the last
+\fBknown\-hosts\fR element, the location specified in the
+\fBdirectory\fR attribute will be used.
+
+The \fBfile\fR attribute is used to point to an OpenSSH-style known_hosts
+file. Enter the complete path to the file as the value. If a directory is found in its
+place, it is considered an error, and the connection attempt will fail. In case the
+\fBknown\-hosts\fR element only contains the \fBfile\fR
+attribute, and the defined OpenSSH known_hosts file exists, the received host keys are
+searched first in the defined file, and if not found there, the search continues in the
+default Tectia-specific locations. 
+
+Example of the \fBfile\fR attribute:
+
+.nf
+<known\-hosts file="<path_to_file>/.ssh2/openSSH_keys" />
+.fi
+
+An empty \fBfile\fR or \fBpath\fR attribute will disable the
+handling of the OpenSSH known_hosts file:
+
+.nf
+<known\-hosts file="" />
+or
+<known\-hosts path="" />
+.fi
+
+The \fBfilename\-format\fR attribute defines the format in which new host
+key files are stored. The \fBfilename\-format\fR attribute is only relevant
+for the last specified \fBknown\-hosts\fR element and for the default
+directory.
+
+The \fBfilename\-format\fR attribute takes the values:
+\fBhash\fR (default), \fBplain\fR, and \fBdefault\fR
+(equals to hash). 
+
+With value \fBhash\fR, the host key files will be stored in format:
+\fBkeys_<hash>\fR, for example
+"\fBkeys_182166d2efe5a134d3fb948646e0b48f780bff6c\fR". 
+
+With value \fBplain\fR, the file name format will be
+\fBkey_<port>_<hostname>.pub\fR, where
+\fB<port>\fR is the port the Secure Shell server is running on and
+\fB<hostname>\fR is the host name you use when connecting to the
+server; for example "\fBkey_22_my.example.com.pub\fR".
+
+Setting \fB<known\-hosts filename\-format="plain" />\fR changes the
+storage format of host key files for the next \fBknown\-hosts\fR elements or
+for the default storage location if no other \fBknown\-hosts\fR elements are
+present.
+
+The \fBfilename\-format="default"\fR alternative can be used as the last
+option when the same \fBknown\-hosts\fR element is used to define several
+locations for the host keys some of which store the keys in plain format.
+
+See also the \fIKey Store Configuration Examples\fR
+below.
+.RS 
+.TP 
+key\-store
+This element defines an external key store for certificates of known server
+hosts. Currently it is used only on z/OS for server certificates stored in System
+Authorization Facility (SAF).
+.RE
+.TP 
+extended
+This element is reserved for future use. 
+.SS "KEY STORE CONFIGURATION EXAMPLES"
+Example with Software Provider
+.PP
+The software provider handles key pairs stored on disk in standard Secure Shell v2 or
+legacy OpenSSH formats and X.509 certificates stored in native X.509, PKCS #7, and PKCS #12
+formats.
+.PP
+To add a single key file (for example, \fB/u/exa/keys/enigma\fR and
+\fB/etc/my_key\fR), specify both the private key file and the public key
+file:
+.PP
+.nf
+<key\-stores>
+  <key\-store type="software" 
+      init="key_files(/u/exa/keys/enigma.pub,/u/exa/keys/enigma)" />
+  <key\-store type="software" 
+      init="key_files(/etc/my_key.pub,/etc/my_key)" />
+</key\-stores>
+.fi
+.PP
+To add all keys from a specific directory (for example all keys from
+\fB/u/exa/keys\fR and \fB/etc/keys\fR):
+.PP
+.nf
+<key\-stores>
+  <key\-store type="software" 
+             init="directory(path(/u/exa/keys))" />
+  <key\-store type="software" 
+             init="directory(path(/etc/keys))" />
+</key\-stores>
+.fi
+.PP
+Example with PKCS #11 Provider
+.PP
+The PKCS #11 provider handles keys and certificates stored in PKCS #11
+tokens (for example, smart cards or USB tokens).
+.PP
+Specify the dynamic library path for the PKCS provider and all or a
+specific slot. For example, with all slots:
+.PP
+.nf
+<key\-stores>
+  <key\-store type="pkcs11" init="dll(/usr/lib/pkcs.so),slots(all)" />
+</key\-stores>
+.fi
+.PP
+For example, with one slot named \fBsesam\fR:
+.PP
+.nf
+<key\-stores>
+  <key\-store type="pkcs11" 
+             init="dll(/usr/local/lib/pkcs.so),slots(sesam)" />
+</key\-stores>
+.fi
+.SH "THE default-settings ELEMENT"
+The \fBdefault\-settings\fR element defines the default connection-related
+settings. Profile-specific settings can override these settings. 
+.PP
+The \fBdefault\-settings\fR element can contain zero or one instance of the
+following elements in the listed order: \fBciphers\fR, \fBmacs\fR,
+\fBkexs\fR, \fBhostkey\-algorithms\fR, \fBrekey\fR,
+\fBauthentication\-methods\fR, \fBhostbased\-default\-domain\fR,
+\fBcompression\fR, \fBproxy\fR, \fBidle\-timeout\fR,
+\fBtcp\-connect\-timeout\fR, \fBkeepalive\-interval\fR,
+\fBexclusive\-connection\fR, \fBserver\-banners\fR,
+\fBforwards\fR, \fBextended\fR, \fBremote\-environment\fR,
+\fBserver\-authentication\-methods\fR,
+\fBauthentication\-success\-message\fR, \fBsftpg3\-mode\fR,
+\fBterminal\-selection\fR, \fBterminal\-bell\fR,
+\fBclose\-window\-on\-disconnect\fR, \fBquiet\-mode\fR,
+\fBchecksum\fR, and \fBaddress\-family\fR.
+.PP
+The default\-settings element can take one attribute:
+.PP
+The \fBuser\fR attribute can be used to define a default user name to be used
+when connecting to remote servers. The value of the \fBuser\fR attribute can be one
+of the following:
+.TP 0.2i
+\(bu
+A generic user name that will be used in connections unless another user name is
+specified in the connection profile settings or in the connection attempt. Note that the
+user name is treated case sensitively. 
+.TP 0.2i
+\(bu
+"\fB%USERNAME%\fR" can be used to apply the user name of the currently
+logged in user. 
+.TP 0.2i
+\(bu
+In case this option is used but left empty, the Connection Broker will prompt the user for a user
+name.
+.PP
+The default\-settings element can contain the following elements:
+.TP 
+ciphers
+This element defines the ciphers that the client will propose to the server. The
+\fBciphers\fR element can contain multiple \fBcipher\fR
+elements. 
+
+The ciphers are tried in the order they are specified.
+.RS 
+.TP 
+cipher
+This element selects a cipher \fBname\fR that the client requests
+for data encryption.
+
+The supported ciphers are:
+
+\fB3des\-cbc\fR
+
+\fBaes128\-cbc\fR
+
+\fBaes192\-cbc\fR
+
+\fBaes256\-cbc\fR
+
+\fBaes128\-ctr\fR
+
+\fBaes192\-ctr\fR
+
+\fBaes256\-ctr\fR
+
+\fBarcfour\fR
+
+\fBblowfish\-cbc\fR
+
+\fBtwofish\-cbc\fR
+
+\fBtwofish128\-cbc\fR
+
+\fBtwofish192\-cbc\fR
+
+\fBtwofish256\-cbc\fR
+
+\fBcrypticore128@ssh.com\fR
+
+\fBseed\-cbc@ssh.com\fR
+
+\fBnone\fR (no encryption)
+
+The default ciphers used by the Connection Broker are, in order: 
+\fBcrypticore128@ssh.com\fR 
+(on Windows and Linux x86), 
+\fBaes128\-cbc\fR, \fBaes128\-ctr, \fR
+\fBaes192\-cbc\fR, \fBaes192\-ctr, \fR
+\fBaes256\-cbc\fR, \fBaes256\-ctr, \fRand
+\fB3des\-cbc\fR.
+
+The ciphers that can operate in the FIPS mode are
+\fB3des\-cbc\fR, \fBaes128\-cbc\fR,
+\fBaes128\-ctr\fR, \fBaes192\-cbc\fR,
+\fBaes192\-ctr\fR, \fBaes256\-cbc\fR, and
+\fBaes256\-ctr\fR.
+.RE
+
+.nf
+<ciphers>
+  <cipher name="aes128\-cbc" />
+  <cipher name="3des\-cbc" />
+</ciphers>
+.fi
+.TP 
+macs
+This element defines the MACs that the client will propose to the server. The
+\fBmacs\fR element can contain multiple \fBmac\fR elements. 
+
+The MACs are tried in the order they are specified.
+.RS 
+.TP 
+mac
+This element selects a MAC \fBname\fR that the client requests for
+data integrity verification.
+
+The supported MAC algorithms are:
+
+\fBhmac\-md5\fR
+
+\fBhmac\-md5\-96\fR
+
+\fBhmac\-sha1\fR
+
+\fBhmac\-sha1\-96\fR
+
+\fBhmac\-sha2\-256\fR
+
+\fBhmac\-sha256\-2@ssh.com\fR
+
+\fBhmac\-sha224@ssh.com\fR
+
+\fBhmac\-sha256@ssh.com\fR
+
+\fBhmac\-sha384@ssh.com\fR
+
+\fBhmac\-sha2\-512\fR
+
+\fBhmac\-sha512@ssh.com\fR 
+
+\fBcrypticore\-mac@ssh.com\fR
+
+\fBnone\fR (no data integrity verification)
+
+The default MACs used by the Connection Broker are, in order:
+
+\fBcrypticore\-mac@ssh.com\fR 
+(on Windows and Linux x86)
+
+\fBhmac\-sha1\fR
+
+\fBhmac\-sha1\-96\fR
+
+\fBhmac\-sha2\-256\fR
+
+\fBhmac\-sha256\-2@ssh.com\fR
+
+\fBhmac\-sha224@ssh.com\fR
+
+\fBhmac\-sha256@ssh.com\fR
+
+\fBhmac\-sha384@ssh.com\fR
+
+\fBhmac\-sha2\-512\fR
+
+\fBhmac\-sha512@ssh.com\fR
+
+All the supported HMAC-SHA (both HMAC-SHA1 and HMAC-SHA2)
+algorithm variants can operate in the FIPS mode.
+.RE
+
+.nf
+<macs>
+  <mac name="hmac\-sha1" />
+</macs>
+.fi
+.TP 
+kexs
+This element defines the key exchange methods (KEXs) that the client will propose to
+the server. The \fBkexs\fR element can contain multiple \fBkex\fR
+elements. 
+
+The KEXs are tried in the order they are specified.
+.RS 
+.TP 
+kex
+This element selects a KEX \fBname\fR that the client requests for
+the key exchange method.
+
+The supported KEX methods are:
+
+\fBdiffie\-hellman\-group1\-sha1\fR
+
+\fBdiffie\-hellman\-group14\-sha1\fR
+
+\fBdiffie\-hellman\-group14\-sha224@ssh.com\fR
+
+\fBdiffie\-hellman\-group14\-sha256@ssh.com\fR
+
+\fBdiffie\-hellman\-group15\-sha256@ssh.com\fR
+
+\fBdiffie\-hellman\-group15\-sha384@ssh.com\fR
+
+\fBdiffie\-hellman\-group16\-sha384@ssh.com\fR
+
+\fBdiffie\-hellman\-group16\-sha512@ssh.com\fR
+
+\fBdiffie\-hellman\-group18\-sha512@ssh.com\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha1\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha256\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha224@ssh.com\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha384@ssh.com\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha512@ssh.com\fR
+
+\fBecdh\-sha2\-nistp256\fR
+
+\fBecdh\-sha2\-nistp384\fR
+
+\fBecdh\-sha2\-nistp521\fR
+
+The default KEX methods used by the Connection Broker are, in order:
+
+\fBdiffie\-hellman\-group14\-sha1\fR
+
+\fBdiffie\-hellman\-group14\-sha256@ssh.com\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha1\fR
+
+\fBdiffie\-hellman\-group\-exchange\-sha256\fR
+
+
+All the supported KEXs can operate in the FIPS mode on Linux, Windows, Solaris
+and HP-UX Itanium. However, the following supported KEXs cannot operate in the
+FIPS mode on HP-UX PA-RISC and IBM AIX due to issues in the OpenSSL cryptographic
+library version 0.9.8:
+
+
+\fBdiffie\-hellman\-group15\-sha256@ssh.com\fR
+
+\fBdiffie\-hellman\-group15\-sha384@ssh.com\fR
+
+\fBecdh\-sha2\-nistp256\fR
+
+\fBecdh\-sha2\-nistp384\fR
+
+\fBecdh\-sha2\-nistp521\fR
+
+.RE
+
+.nf
+<kexs>
+   <kex name="diffie\-hellman\-group14\-sha1" />
+   <kex name="diffie\-hellman\-group14\-sha256@ssh.com" />
+</kexs>
+.fi
+.TP 
+hostkey\-algorithms
+This element defines the host key signature algorithms used for server
+authentication. The algorithms that will be used are those that are defined in both
+Tectia Server and Connection Broker configuration files. This way the use of only certain algorithms, such
+as SHA-2, can be enforced by the server. The \fBhostkey\-algorithms\fR element
+can contain multiple \fBhostkey\-algorithm\fR elements.
+
+The hostkey algorithms are tried in the order they are specified. Exception: If a
+host key of a server already exists in the host key store of the client, its algorithm
+is preferred.
+.RS 
+.TP 
+hostkey\-algorithm
+This element selects a host key signature algorithm \fBname\fR to
+be used in server authentication with host keys or certificates.
+
+The supported host key signature algorithms are:
+
+\fBssh\-dss\fR
+
+\fBssh\-dss\-sha224@ssh.com\fR
+
+\fBssh\-dss\-sha256@ssh.com\fR
+
+\fBssh\-dss\-sha384@ssh.com\fR
+
+\fBssh\-dss\-sha512@ssh.com\fR
+
+\fBssh\-rsa\fR
+
+\fBssh\-rsa\-sha224@ssh.com\fR
+
+\fBssh\-rsa\-sha256@ssh.com\fR
+
+\fBssh\-rsa\-sha384@ssh.com\fR
+
+\fBssh\-rsa\-sha512@ssh.com\fR
+
+\fBecdsa\-sha2\-nistp256\fR
+
+\fBecdsa\-sha2\-nistp384\fR
+
+\fBecdsa\-sha2\-nistp521\fR
+
+\fBx509v3\-sign\-dss\fR
+
+\fBx509v3\-sign\-dss\-sha224@ssh.com\fR
+
+\fBx509v3\-sign\-dss\-sha256@ssh.com\fR
+
+\fBx509v3\-sign\-dss\-sha384@ssh.com\fR
+
+\fBx509v3\-sign\-dss\-sha512@ssh.com\fR
+
+\fBx509v3\-sign\-rsa\fR
+
+\fBx509v3\-sign\-rsa\-sha224@ssh.com\fR
+
+\fBx509v3\-sign\-rsa\-sha256@ssh.com\fR
+
+\fBx509v3\-sign\-rsa\-sha384@ssh.com\fR
+
+\fBx509v3\-sign\-rsa\-sha512@ssh.com\fR
+
+\fBx509v3\-ecdsa\-sha2\-nistp256\fR
+
+\fBx509v3\-ecdsa\-sha2\-nistp384\fR
+
+\fBx509v3\-ecdsa\-sha2\-nistp521\fR
+
+The default host key signature algorithms used by the Connection Broker are, in order:
+
+\fBssh\-dss\fR
+
+\fBssh\-rsa\fR
+
+\fBssh\-dss\-sha256@ssh.com\fR
+
+\fBssh\-rsa\-sha256@ssh.com\fR
+
+\fBx509v3\-sign\-dss\fR
+
+\fBx509v3\-sign\-rsa\fR
+
+\fBx509v3\-sign\-dss\-sha256@ssh.com\fR
+
+\fBx509v3\-sign\-rsa\-sha256@ssh.com\fR
+.RE
+
+.nf
+<hostkey\-algorithms>
+   <hostkey\-algorithm name="ssh\-dss\-sha512@ssh.com" />
+   <hostkey\-algorithm name="ssh\-rsa\-sha224@ssh.com" />
+</hostkey\-algorithms>
+.fi
+.TP 
+rekey
+This element specifies the number of transferred \fBbytes\fR after which
+the key exchange is done again. The value \fB"0"\fR turns rekey requests off.
+This does not prevent the server from requesting rekeys, however. The default is
+1000000000 (1 GB). 
+
+.nf
+<rekey bytes="1000000000" />
+.fi
+.TP 
+authentication\-methods
+This element specifies the authentication methods that are requested by the
+client-side components. The \fBauthentication\-methods\fR element can contain
+one of each: \fBauth\-hostbased\fR, \fBauth\-password\fR,
+\fBauth\-publickey\fR, \fBauth\-gssapi\fR, and
+\fBauth\-keyboard\-interactive\fR. Alternatively, you can specify multiple
+\fBauthentication\-method\fR elements. The order of these elements is
+free.
+
+The authentication methods are tried in the order the \fBauth\-*\fR or
+\fBauthentication\-method\fR elements are listed. This means that the least
+interactive methods should be placed first.
+
+When several interactive authentication methods are defined as allowed,
+Tectia Client/Server will alternate between the methods and offers each of them in turn to the
+server in case the previous method failed.
+.RS 
+.TP 
+authentication\-method
+This element specifies an authentication method \fBname\fR. It is
+included for backwards compatibility. Use the \fBauth\-*\fR elements
+instead.
+
+The allowed authentication method names are:
+\fBgssapi\-with\-mic\fR, \fBpublickey\fR,
+\fBkeyboard\-interactive\fR, \fBpassword\fR, and
+\fBhostbased\fR.
+
+.nf
+<authentication\-methods>
+  <authentication\-method name="hostbased" />
+  <authentication\-method name="gssapi\-with\-mic" />
+  <authentication\-method name="publickey" />
+  <authentication\-method name="keyboard\-interactive" />
+  <authentication\-method name="password" />
+</authentication\-methods>
+.fi
+.TP 
+auth\-hostbased
+This element specifies that host-based authentication will be used.
+
+The \fBauth\-hostbased\fR element can include a
+\fBlocal\-hostname\fR element.
+.RS 
+.TP 
+local\-hostname 
+This element specifies the local host name, as the value of the
+\fBname\fR attribute, that is advertised to the remote server
+during host-based authentication.
+
+The remote server can use the client host name as a hint when locating
+the public key for the client host. This information is not significant to
+the authentication result, but makes it faster to find the relevant client
+host key, if the server has such a big storage of host identities, that
+trying them all would be infeasible.
+.RE
+.TP 
+auth\-password
+This element specifies that password authentication will be used.
+.TP 
+auth\-publickey
+This element specifies that public-key authentication will be used.
+
+The \fBauth\-publickey\fR element can include a
+\fBkey\-selection\fR element.
+
+The \fBauth\-publickey\fR element can include a
+\fBsignature\-algorithms\fR attribute. The attribute defines the
+public-key signature algorithms used for client authentication, given as a
+comma-separated list. The algorithms that will be used are those that are
+defined in both Tectia Server and Connection Broker configuration files. This way the use of only
+certain algorithms, such as SHA-2, can be enforced. For a list of the supported
+algorithms, see 
+the description of \fBhostkey\-algorithms\fR
+above.
+
+.nf
+<authentication\-methods>
+  <auth\-publickey 
+      signature\-algorithms="ssh\-dss, \\
+                            ssh\-dss\-sha512@ssh.com"/>
+</authentication\-methods>
+.fi
+.RS 
+.TP 
+key\-selection 
+This element specifies the key selection policy the client uses when
+proposing user public keys to the server. The \fBpolicy\fR
+attribute can take the values \fBautomatic\fR (default) and
+\fBinteractive\-shy\fR.
+
+In the \fBautomatic\fR mode, the client tries keys in the
+following order:
+.RS 
+.TP 0.4i
+1.
+Keys with public key available and private key without a passphrase
+(no user interaction)
+.TP 0.4i
+2.
+Keys with public key available but private key behind a passphrase
+(one passphrase query)
+.TP 0.4i
+3.
+Keys that need a passphrase to get the public key but private key
+without passphrase (one user query for each key which is considered and
+proposed to server, but no user interaction for actual public-key
+login)
+.TP 0.4i
+4.
+The rest of the keys, that is, keys that need a passphrase to get
+the public key and also to get the private key 
+.RE
+
+In the \fBinteractive\-shy\fR mode, the client does not try
+any keys automatically, but it prompts the user to select the key from a
+list of available keys. If the authentication with the selected key fails,
+the client will prompt the user again, removing the already tried key(s)
+from the list. If there is only one key candidate available, the key will be
+tried automatically without asking the user.
+
+The \fBkey\-selection\fR element can include the
+\fBpublic\-key\fR and \fBissuer\-name\fR
+elements.
+.RS 
+.TP 
+public\-key 
+This element can be used to specify that only plain public keys or
+only certificates are tried during public-key authentication. The
+\fBtype\fR attribute can take the values
+\fBplain\fR and \fBcertificate\fR. The default
+is to try both plain public keys and certificates.
+.TP 
+issuer\-name 
+This element can be used to filter the user certificates that will
+be included in the list presented to the user. The client-side user
+certificates can be filtered according to the issuer name that is
+compared to the certificate issuers requested or accepted by the
+server. The \fBmatch\-server\-certificate\fR attribute takes
+values \fByes\fR and \fBno\fR. With value
+\fByes\fR, Connection Broker tries matching the user certificate
+issuer name to the server certificate issuer name. Option
+\fBno\fR means that the issuer names are not used as a
+filter. By default, the filtering is not done.
+
+The \fBissuer\-name\fR is useful when a user has several
+certificates with different access rights to the same server, for
+example for a testing role and for an administrator role. The Connection Broker
+chooses the relevant certificates that are applicable on the remote
+host, and the user can choose the correct certificate from the
+short-listed ones. 
+.RE
+.RE
+.TP 
+auth\-keyboard\-interactive
+This element specifies that keyboard-interactive methods will be used in
+authentication. 
+.TP 
+auth\-gssapi
+This element specifies that GSSAPI will be used in authentication. 
+
+The \fBauth\-gssapi\fR element can take the following
+attributes:
+
+The \fBdll\-path\fR attribute specifies where the necessary GSSAPI
+libraries are located. If this attribute is not specified, the libraries are
+searched for in a number of common locations. The full path to the libraries
+should be given, for example,
+\fB"/usr/lib/libkrb5.so,/usr/lib/libgssapi_krb5.so"\fR. 
+
+On AIX, the \fBdll\-path\fR should include the archive file, if
+applicable, for example,
+\fB"<path>/libgssapi_krb5.a(libgssapi_krb5.a.so)"\fR. The
+\fBarchive(shared_object)\fR syntax is not necessary if the library
+is a shared object or has been extracted from the shared object.
+
+The \fBallow\-ticket\-forwarding\fR attribute defines whether
+Tectia Client/Server allows forwarding the Kerberos ticket over several connections. The
+attribute can have a value of \fByes\fR or \fBno\fR. The
+default is \fBno\fR.
+.RE
+
+An example of authentication-methods configuration is shown below:
+
+.nf
+<authentication\-methods>
+  <auth\-hostbased>
+    <local\-hostname name="host.example.com" />
+  </auth\-hostbased>
+  <auth\-gssapi allow\-ticket\-forwarding="yes"/>
+  <auth\-publickey>
+    <key\-selection policy="interactive\-shy">
+      <public\-key type="plain" />
+    </key\-selection>
+  </auth\-publickey>
+  <auth\-keyboard\-interactive />
+  <auth\-password>
+    <password file="/path/filename" />
+  </auth\-password>
+</authentication\-methods>
+.fi
+.TP 
+hostbased\-default\-domain
+This element specifies the host's default domain name (as \fBname\fR).
+This element is used to make sure the fully qualified domain name (FQDN) of the client
+host is transmitted to the server when using host-based user authentication.
+
+The default domain name is appended to the short host name before
+transmitting it to the server. This is needed because some platforms (Solaris for
+instance) use the short format of the host name, and with that the signature cannot be
+created.
+
+The allowed formats of the default domain names are:
+\fB\&.example.com\fR and \fBexample.com\fR (without the leading
+dot). For example:
+
+.nf
+<hostbased\-default\-domain name=".example.com" />
+.fi
+.TP 
+compression
+This element specifies whether the client sends the data compressed (PUT operation).
+When activated, compression is applied on-the-fly to all data sent out through the
+connection and on all channels in it.
+
+The name of the compression algorithm and the compression level can be given as
+attributes. The \fBname\fR attribute can be defined as \fBnone\fR
+(compression not used) or \fBzlib\fR, currently the only supported algorithm.
+By default, compression is not used.
+
+For zlib compression, the \fBlevel\fR attribute can be given an integer
+from \fB0\fR to \fB9\fR. The default compression level is
+\fB6\fR, when compression is activated but no level is given (or level is
+set to \fB0\fR). 
+
+Example: to activate maximum level compression of sent data, make
+the following setting:
+
+.nf
+<compression name="zlib" level="9" />
+.fi
+
+Note that this \fBcompression\fR setting does not affect received data
+(GET operations), but their compression is defined on the Secure Shell server. Tectia Server
+always uses compression level 6.
+.TP 
+proxy
+This element defines rules for HTTP proxy or SOCKS servers the client will use for
+connections. It has a single attribute: \fBruleset\fR.
+
+The format of the attribute value is a sequence of rules delimited by semicolons
+(\fB;\fR). Each rule has a format that resembles the URL format. In a rule,
+the connection type is given first. The type can be \fBdirect\fR,
+\fBsocks\fR, \fBsocks4\fR, \fBsocks5\fR, or
+\fBhttp\-connect\fR (\fBsocks\fR is a synonym for
+\fBsocks4\fR). This is followed by the server address and port. If the port
+is not given, the default ports are used: 1080 for SOCKS and 80 for HTTP.
+
+After the address, zero or more conditions delimited by commas (\fB,\fR)
+are given. The conditions can specify IP addresses or DNS names.
+
+.nf
+direct:///[cond[,cond]...];
+socks://server/[cond[,cond]...];
+socks4://server/[cond[,cond]...];
+socks5://server/[cond[,cond]...];
+http\-connect://server/[cond[,cond]...]
+.fi
+
+The IP address/port conditions have an address pattern and an optional port
+range:
+
+.nf
+ip_pattern[:port_range]
+.fi
+
+The \fBip_pattern\fR may have one of the following forms:
+.RS 
+.TP 0.2i
+\(bu
+a single IP address \fBx.x.x.x\fR
+.TP 0.2i
+\(bu
+an IP address range of the form \fBx.x.x.x\-y.y.y.y\fR
+.TP 0.2i
+\(bu
+an IP sub-network mask of the form \fBx.x.x.x/y\fR
+.RE
+
+The DNS name conditions consist of a host name which may be a regular expression
+containing the characters "*" and "?" and a port range:
+
+.nf
+name_pattern[:port_range]
+.fi
+
+An example \fBproxy\fR element is shown below. It causes the server to
+access the loopback address and the \fBssh.com\fR domain directly, access
+\fB*.example\fR with HTTP CONNECT, and all other destinations with
+SOCKS4.
+
+.nf
+<proxy ruleset="direct:///127.0.0.0/8,*.ssh.com;
+                http\-connect://http\-proxy.ssh.com:8080/*.example;
+                socks://fw.ssh.com:1080/" />
+.fi
+.TP 
+idle\-timeout
+This element specifies how long idle time (after all connection channels are closed)
+is allowed for a connection before automatically closing the connection. The
+\fBtime\fR is given in seconds. The \fBtype\fR is always
+\fBconnection\fR. 
+
+The default setting is 5 seconds. Setting a longer time allows the connection to the
+server to remain open even after a session (for example, sshg3) is
+closed. During this time, a new session to the server can be initiated without
+re-authentication. Setting the time to 0 (zero) terminates the connection immediately
+when the last channel to the server is closed.
+
+.nf
+<idle\-timeout time="5" />
+.fi
+.TP 
+tcp\-connect\-timeout
+This element specifies a timeout for the TCP connection. When this setting is made,
+connection attempts to a Secure Shell server are stopped after the defined time if the
+remote host is down or unreachable. This timeout overrides the default system TCP
+timeout, and this timeout setting can be overridden by defining a
+\fBtcp\-connect\-timeout\fR setting per connection profile (in the
+\fBprofiles\fR settings) or per connection (on command line).
+
+The \fBtime\fR is given in seconds. The factory default is 5 seconds.
+Value 0 (zero) disables this feature and the default system TCP timeout will be
+used.
+
+.nf
+<tcp\-connect\-timeout time="5" />
+.fi
+.TP 
+keepalive\-interval
+This element specifies an interval for sending keepalive messages to the Secure
+Shell server. The \fBtime\fR value is given in seconds. The default setting
+is 0, meaning that the keepalive messages are disabled.
+
+.nf
+<keepalive\-interval time="0" />
+.fi
+.TP 
+exclusive\-connection
+The 
+\fBexclusive\-connection\fR element can be used to specify that a new
+connection is opened for each new channel. This setting takes one attribute
+\fBenable\fR, with value \fByes\fR or \fBno\fR. The
+default is \fBno\fR, meaning that open connections are reused for new
+channels requested by a client. 
+.TP 
+server\-banners
+This element defines whether the server banner message file (if it exists) is
+visible to the user before login. The word \fByes\fR or \fBno\fR
+is given as the value of the \fBvisible\fR attribute. The default is
+\fByes\fR. 
+
+To eliminate server banners:
+
+.nf
+<server\-banners visible="no" />
+.fi
+.TP 
+forwards
+This element contains \fBforward\fR elements that define whether X11 or
+agent forwarding (tunneling) are allowed on the client side.
+.RS 
+.TP 
+forward
+This element defines X11 or agent forwarding settings.
+
+The \fBtype\fR attribute defines the forwarding type (either
+\fBx11\fR or \fBagent\fR). The \fBstate\fR
+attribute sets the forwarding \fBon\fR, \fBoff\fR, or
+\fBdenied\fR. If the forwarding is set as \fBdenied\fR,
+the user cannot enable it on the command-line.
+.RE
+
+An example forward configuration, which denies X11 forwarding and allows agent
+forwarding globally, is shown below:
+
+.nf
+<forwards>
+  <forward type="x11" state="denied" />
+  <forward type="agent" state="on" />
+</forwards>
+.fi
+.TP 
+extended
+This element is reserved for future use. 
+.TP 
+remote\-environment
+This element contains \fBenvironment\fR elements which define the
+environment variables to be passed to the server from the client side. The environment
+variables are then set on the server when requesting a command, shell or subsystem. 
+
+Note that the server can restrict the setting of environment variables.
+.RS 
+.TP 
+environment 
+This element defines the name and value of the environment variables, and
+whether the Connection Broker should process the value. Possible attributes are
+\fBname\fR, \fBvalue\fR, and \fBformat\fR. 
+
+An example remote environment configuration:
+
+.nf
+<remote\-environment>
+  <environment name="FOO" value="bar" />
+  <environment name="QUX" value="%Ubaz" format="yes" />
+  <environment name="ZAPPA" value="%Ubaz" />
+</remote\-environment>
+.fi
+
+You can use \fB%U\fR in the \fBvalue\fR to indicate a
+user name. When \fBformat="yes"\fR is also defined, the Connection Broker processes
+the \fB%U\fR into the actual user name before sending it to the
+server.
+
+Let's assume the user name is \fBjoedoe\fR in this example. The
+example configuration results in the following environment variables on the server
+side, provided that the server allows setting the environment variables: 
+
+.nf
+FOO=bar 
+QUX=joedoebaz 
+ZAPPA=%Ubaz 
+.fi
+.RE
+
+You can override the remote environment settings made in the configuration file if
+you use the sshg3 command with the following arguments on the
+command-line client: \fB\-\-remote\-environment\fR or
+\fB\-\-remote\-environment\-format\fR
+
+For information on the command-line options, see 
+the
+\fBsshg3\fR(1)
+man page.
+.TP 
+server\-authentication\-methods
+This \fBserver\-authentication\-methods\fR element can be used to force the
+Connection Broker to use only certain methods in server authentication. This element can contain
+\fBauth\-server\-publickey\fR and \fBauth\-server\-certificate\fR
+elements (one of each). The order of these elements is free.
+
+If only \fBauth\-server\-certificate\fR is specified, server certificate is
+needed. If no server certificate is received, connection fails.
+
+If only \fBauth\-server\-publickey\fR is specified, (plain) server public
+key is needed. If no server public key is received, connection fails.
+
+If both \fBauth\-server\-certificate\fR and
+\fBauth\-server\-publickey\fR are specified, server certificate is used if
+present. Otherwise server public key is used.
+.RS 
+.TP 
+auth\-server\-certificate
+The \fBauth\-server\-certificate\fR element specifies that
+certificates are used for server authentication.
+.TP 
+auth\-server\-publickey
+The \fBauth\-server\-publickey\fR element specifies that public host
+keys are used for server authentication.
+.RS 
+\fBNote\fR
+
+The host key policy settings have changed in version 6.1.4 and are now
+defined in the \fBauth\-server\-publickey\fR element. 
+.RE
+
+The element takes attribute \fBpolicy\fR that defines how unknown
+server host keys are handled. It can have the following values:
+.RS 
+.TP 0.2i
+\(bu
+\fBstrict\fR: Connect to the server only if the host key is
+found from the host key store and matches.
+
+If the policy is set to \fBstrict\fR, the Connection Broker never adds host
+keys to the user's \fB.ssh2/hostkeys\fR directory upon
+connection, and refuses to connect to hosts whose key has changed. This
+provides maximum protection against man-in-the-middle attacks. However, it
+also means you must always obtain host keys via out-of-band means, which can
+be troublesome if you frequently connect to new hosts.
+.TP 0.2i
+\(bu
+\fBask\fR (default): If the server host key is not found from
+the host key store, the user will be asked if he wants to accept the host key.
+If the host key has changed, the user is warned about it and asked how to
+proceed. If the client application is not able to ask the user (for example,
+sftpg3 in batch mode, \fB\-B\fR), the
+connection will be disconnected.
+.TP 0.2i
+\(bu
+\fBtrust\-on\-first\-use\fR or \fBtofu\fR: If the
+server host key is not found, it is stored to the user's
+\fB\&.ssh2/hostkeys\fR directory. If the host key has changed,
+the connection will be disconnected.
+.TP 0.2i
+\(bu
+\fBadvisory\fR: Use of this setting effectively disables server
+authentication, which makes the connection vulnerable to active
+attackers.
+
+If the server host key is not found in the host key store, it will be
+added to the user's \fB.ssh2/hostkeys\fR directory without user
+interaction. If the host key has changed, the connection will be continued
+without user interaction. The incident will be audited if logging is
+enabled.
+
+When the policy is set to \fBadvisory\fR, the keys from new
+hosts are automatically accepted and stored to the host key database without
+prompting acceptance from the user. However, changed host keys (from hosts
+whose keys are already in the database) are not stored, but they are accepted
+for that connection only.
+
+This setting should be used only if logging is enabled for the
+Connection Broker.
+.RS 
+\fBCaution\fR
+
+Consider carefully before setting the policy to
+\fBadvisory\fR. Disabling the host-key checks makes you
+vulnerable to man-in-the-middle attacks.
+.RE
+.RE
+
+In policy modes other than \fBstrict\fR, if logging is enabled for
+the Connection Broker, Tectia Client/Server will log information about changed and new host public
+keys with their fingerprints in the syslog (on Unix) or Event Viewer (on
+Windows).
+.RS 
+\fBNote\fR
+
+When 
+FTP-SFTP conversion is used, accepting the host key cannot be prompted from the
+user. Either the policy must be set to \fBtofu\fR or the host keys of
+the Secure Shell tunneling and SFTP servers must be obtained beforehand and
+stored based on the IP addresses of the servers.
+.RE
+
+If the \fBpolicy\fR attribute is not defined, the host key policy
+is interpreted based on the values of the old
+\fBstrict\-host\-key\-checking\fR, \fBhost\-key\-always\-ask\fR,
+and \fBaccept\-unknown\-host\-keys\fR options.
+.RS 
+\fBNote\fR
+
+In version 6.1.4 and later, the host key policy setting in the user-specific
+configuration file always takes precedence over the setting in the global
+configuration file.
+.RE
+
+Interpretation of the old host key policy (used in
+Tectia Client/Server 5.0.0-6.1.3) to the new host key policy (Tectia Client/Server 6.1.4 and
+later) is done as follows:
+
+.nf
+Old settings:                                | New
+strict\-host\-   accept\-unknown\-   host\-key\-   | host key
+key\-checking   host\-keys         always\-ask  | policy
+\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-|\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-
+ \-               \-                \-          |  ask (default)
+ enabled         \-                \-          |  strict
+ enabled         enabled          \-          |  strict
+ enabled         enabled          enabled    |  ask
+ enabled         \-                enabled    |  ask
+ \-               enabled          \-          |  trust on first use
+ \-               enabled          enabled    |  ask
+ \-               \-                enabled    |  ask
+.fi
+.TP 
+authentication\-method
+The \fBserver\-authentication\-methods/authentication\-method\fR
+element specifies an authentication method \fBname\fR. This element is
+included for backwards compatibility. Use the \fBauth\-server\-*\fR
+elements instead.
+
+.nf
+<server\-authentication\-methods>
+  <authentication\-method name="publickey" />
+  <authentication\-method name="certificate" />
+</server\-authentication\-methods>
+.fi
+.RE
+
+An example \fBserver\-authentication\-methods\fR element is shown
+below:
+
+.nf
+<server\-authentication\-methods>
+  <auth\-server\-publickey policy="ask" />
+  <auth\-server\-certificate />
+</server\-authentication\-methods>
+.fi
+.TP 
+authentication\-success\-message
+This setting defines whether the \fBAuthenticationSuccessMsg\fR messages
+are output. The \fBauthentication\-success\-message\fR element takes attribute
+\fBenable\fR with value \fByes\fR or \fBno\fR. The
+default is \fByes\fR, meaning that the messages are output and logged.
+.TP 
+terminal\-selection
+This element defines how the Tectia terminal behaves when the user selects text with
+double-clicks. The element takes one attribute: \fBselection\-type\fR, whose
+value can be:
+
+\fBselect\-words\fR - double-clicking selects one word at a time, space
+and all punctuation characters are used as delimiters. This is the default.
+
+\fBselect\-paths\fR - selects strings of characters between spaces,
+meaning a selection is extended over characters \\/.-_, so that for example
+a path to a file can be selected by double-clicking anywhere in the path.
+.TP 
+terminal\-bell
+This element defines whether Tectia terminal repeats audible notifications from the
+destination server. This option is only applied to connections with Unix servers. The
+element takes one attribute, \fBbell\-style\fR, whose value can be:
+
+\fBnone\fR - no audible notifications are used
+
+\fBpc\-speaker\fR - the user's PC speakers beep when an audible
+notification is indicated by the destination server
+
+\fBsystem\-default\fR - the Tectia terminal sounds the default alerts
+defined in the system on the destination server. This is the default. 
+.TP 
+close\-window\-on\-disconnect
+This element defines that also the Tectia terminal window is to be closed while
+disconnecting from a server session by pressing CTRL+D. The element
+takes one attribute, \fBenable\fR, whose value can be \fByes\fR or
+\fBno\fR. The default is \fBno\fR meaning that
+CTRL+D closes only the server connection but the Tectia terminal
+window remains open. 
+.TP 
+quiet\-mode
+This setting defines whether the command line clients should suppress warnings,
+error messages and authentication success messages. The \fBquiet\-mode\fR
+element takes attribute \fBenable\fR with value \fByes\fR or
+\fBno\fR. The default is \fBno\fR, meaning that the errors and
+messages are output and logged.
+
+The \fBquiet\-mode\fR element affects command line tools
+scpg3, sshg3, and sftpg3.
+Enabling the quiet mode here with setting \fBquiet\-mode enable="yes"\fR is
+the same as running these clients with option \fB\-q\fR. Note that the
+\fB\-q\fR command line parameter will take priority over the
+\fBquiet\-mode\fR element set in this configuration file.
+.TP 
+checksum
+The \fBchecksum\fR element can be used to define a default setting for
+comparing checksums. This default overwrites the factory setting that checksums are not
+checked for files smaller than 32kB.
+
+The \fBchecksum\fR element takes attribute \fBtype\fR, whose
+value can be:
+
+\fByes|YES\fR - MD5 checksums are checked on files larger than 32kB. This
+is the default value.
+
+\fBno|NO\fR - checksums are not used.
+
+\fBmd5|MD5\fR - only MD5 checksums are checked on files larger than 32kB.
+When the \fB\-\-fips\fR parameter is set with the command line clients
+scpg3 and sftpg3, this hash is not used.
+
+\fBsha1|SHA1\fR - only SHA1 checksums are checked on files larger than
+32kB. When the \fB\-\-fips\fR parameter is set with the command line clients
+scpg3 and sftpg3, this hash is used.
+
+\fBmd5\-force|MD5\-FORCE\fR - MD5 checksums are forced, except when the
+\fB\-\-fips\fR parameter is set with the command line tools
+scpg3 and sftpg3.
+
+\fBsha1\-force|SHA1\-FORCE\fR - SHA1 checksums are forced on all
+files.
+
+\fBcheckpoint|CHECKPOINT\fR - checkpointing is forced on large files that
+are transferred one by one.
+.RS 
+\fBNote\fR
+
+If the Connection Broker is started in FIPS mode and the \fBmd5\fR attribute is
+defined in the configuration file, but scpg3 or
+sftpg3 are not started with the \fB\-\-fips\fR
+parameter, then \fBmd5\fR is used.
+.RE
+
+Note that checksums can also be defined with the command line clients
+scpg3 and sftpg3, or with environment variables.
+The order of priority of the three checksum settings (in case they are different) is as
+follows, the later one always overwrites the previous value:
+.RS 
+.TP 0.2i
+\(bu
+\fBchecksum\fR setting in the configuration file
+.TP 0.2i
+\(bu
+SSH_SFTP_CHECKSUM_MODE environment variable
+.TP 0.2i
+\(bu
+Command line arguments
+.RE
+.TP 
+address\-family
+The \fBaddress\-family\fR element defines the IP address family. Give the
+address family as the value of the \fBtype\fR attribute. Tectia Client/Server will
+operate using IPv4 (\fBinet\fR) addressing, IPv6 (\fBinet6\fR), or
+both (\fBany\fR). The default value for \fBtype\fR is
+\fBany\fR.
+.SH "THE profiles ELEMENT"
+The \fBprofiles\fR element defines the connection profiles for connecting to
+the specified servers. Element \fBprofiles\fR can contain multiple
+\fBprofile\fR elements. Each profile defines the connection rules to one server.
+The settings in the \fBprofile\fR element override the default connection settings.
+.PP
+When a profile is used for the connection, the settings in the profile override the
+default settings. 
+.TP 
+profile
+The \fBprofile\fR element defines a connection profile. It has the
+following attributes: \fBid\fR, \fBname\fR, \fBhost\fR,
+\fBport\fR, \fBprotocol\fR, \fBhost\-type\fR,
+\fBconnect\-on\-startup\fR, \fBuser\fR, and
+\fBgateway\-profile\fR.
+
+The profile \fBid\fR must be a unique identifier that does not change
+during the lifetime of the profile.
+
+An additional \fBname\fR can be given to the profile. This is a free-form
+text string. The name can be used for connecting with the profile on the command line,
+so define a unique name for each profile.
+
+The \fBhost\fR attribute defines the address of the Secure Shell server
+host and it is a mandatory setting. The address can be either an IP address or a domain
+name. The value \fBhost="*"\fR can be used to prompt the user to enter the
+host address when starting the session.
+
+The \fBport\fR is a mandatory setting. It defines the port number of the
+Secure Shell server listener. The default port is \fB22\fR.
+
+The \fBprotocol\fR is a mandatory setting. It defines the used
+communications protocol. Currently the only allowed value is
+\fBsecsh2\fR.
+
+If you want to make the connection specified by the profile automatically when the
+Connection Broker is started, set the value of the \fBconnect\-on\-startup\fR attribute to
+\fByes\fR. In this case, give also the \fBuser\fR attribute (the
+user name the connection is made with). You also need to set up some form of
+non-interactive authentication for the connection.
+
+The \fBhost\-type\fR attribute sets the server type for ASCII (text) file
+transfer. This specifies the line break convention that is used for ASCII files. The
+default value is \fBdefault\fR, meaning that the line break convention is
+determined by the local platform. If the client is running on Windows, Windows
+compatible line breaks (CR + LF, '\\r\\n') are used. If the client is running
+on any other platform, Unix compatible line breaks (LF, '\\n') are used.
+Other possible values for \fBhost\-type\fR are \fBwindows\fR (for
+Windows remote host) and \fBunix\fR (for Unix remote host). Define the value
+if you are using any other server than Tectia Server.
+
+For FTP-SFTP conversion, set the server type here according to
+your target server to transfer ASCII files with correct line break convention.
+
+The \fBuser\fR attribute specifies the user name for opening the
+connection. The value "\fB%USERNAME%\fR" can be used to apply the user name
+of the currently logged in user. The value \fBuser="*"\fR can be used to
+prompt the user to enter the user name when logging in. When the \fBuser\fR
+attribute is not defined, the user name defined in the default connection settings will
+be used.
+
+An empty value \fBuser=""\fR can be used when the
+profile is used with FTP-SFTP
+conversion and the user name is taken from the application
+(\fBfilter\-engine/rule[@username\-from\-app="yes"]\fR). 
+See the \fBrule\fR element below for
+details.
+.RS 
+.TP 
+hostkey
+This element gives the path to the remote server host public key file as a
+value of the \fBfile\fR attribute.
+
+Alternatively, the public key can be included as a base64-encoded ASCII
+block.
+.TP 
+ciphers
+This element defines the ciphers used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+macs
+This element defines the MACs used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+kexs
+This element defines the KEXs used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+hostkey\-algorithms
+This element defines the hostkey signature algorithms used with this profile.
+See \fIThe default-settings
+Element\fR above for details.
+.TP 
+rekey
+This element defines the rekeying settings used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+authentication\-methods
+This element defines the authentication methods used with this profile.
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+user\-identities
+This element specifies the identities used in user public-key authentication.
+In contrast to the \fBkey\-stores\fR element that specifies all the keys
+that are available for the Connection Broker, this element can be used to control the keys
+that are attempted in authentication when this connection profile is used and to
+specify the order in which they are attempted. 
+
+The \fBuser\-identities\fR element can contain multiple
+\fBidentity\fR elements. When multiple \fBidentity\fR
+elements are used, they are tried out in the order they are listed.
+.RS 
+.TP 
+identity 
+The \fBidentity\fR element has the following attributes:
+\fBidentity\-file\fR, \fBfile\fR,
+\fBhash\fR, \fBid\fR, and \fBdata\fR.
+
+The \fBidentity\-file\fR attribute specifies that the user
+identity is read in the identification file used with public-key
+authentication. Enter the full path to the file if it is located somewhere
+else than the default identification file directory which is
+\fB$HOME/.ssh2\fR. See also \fBssh-broker-g3\fR(1).
+
+The \fBfile\fR attribute specifies the path to the public-key
+file (primarily) or to a certificate. Enter the full path and file name as
+the value. 
+
+The \fBhash\fR attribute is used to enter the hash of the
+public key that will be used to identify the related private key. The key
+must be available for the Connection Broker The public key hashes of the available keys
+can be listed with the ssh\-broker\-ctl tool. See also
+\fBssh-broker-ctl\fR(1).
+
+The \fBid\fR attribute is reserved for future use.
+
+The \fBdata\fR attribute is reserved for future use. 
+.RE
+
+An example \fBuser\-identities\fR element is shown
+below:
+
+.nf
+<user\-identities>
+  <identity identity\-file="C:\\\\ mykey" />
+  <identity file="$HOME/user/.ssh2/id_rsa_2048_a" />
+  <identity file="C:\\\\private_keys\\id_rsa_2048_a" />
+  <identity hash="#a8edd3845005931aaa658b5573609e7d31e23afd" />
+</user\-identities>
+.fi
+.TP 
+compression
+This element defines the compression settings used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+proxy
+This element defines the HTTP proxy and SOCKS server settings used with this
+profile. 
+See \fIThe default-settings Element\fR
+above for details.
+
+If \fBgateway\-profile\fR has been defined for this profile, the
+proxy setting is ignored and the default proxy setting or the proxy setting of the
+gateway profile is used instead.
+.TP 
+idle\-timeout
+This element defines the idle timeout settings used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+tcp\-connect\-timeout
+This element defines the TCP connection timeout for this profile. The timeout
+is used to terminate connection attempts to Secure Shell servers that are down or
+unreachable. The default value is 5 seconds. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+keepalive\-interval
+This element defines an interval for sending keepalive messages to the Secure
+Shell server. The setting applies to this profile. The default value is 0, meaning
+that no keepalive messages are sent. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+exclusive\-connection
+This element defines whether a new connection is
+opened for each new channel when a connection is made with this profile. This
+setting takes one attribute \fBenable\fR, with value
+\fByes\fR or \fBno\fR. The default is \fBno\fR,
+meaning that open connections are reused for new channels requested by a client.
+See also \fIThe default-settings Element\fR
+above.
+.TP 
+server\-banners
+This element defines the server banner setting used with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+forwards
+This element defines the forwards allowed with this profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+extended
+This element is reserved for future use.
+.TP 
+remote\-environment
+This element defines the remote environment settings used with this profile.
+Within the \fBremote\-environment\fR element, define an
+\fBenvironment\fR element for each environment variable to be passed
+to the server. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+server\-authentication\-methods
+This element defines the server authentication methods allowed with this
+profile. 
+See \fIThe default-settings Element\fR
+above for details.
+.TP 
+password
+This element can be used to specify a user password that the client will send
+as a response to password authentication.
+
+The password can be given directly in the \fBstring\fR attribute,
+or a path to a file containing the password can be given in the
+\fBfile\fR attribute, or a path to a program or a script that outputs
+the password can be given in the \fBcommand\fR attribute.
+
+When using the \fBcommand\fR option to refer to a shell script,
+make sure the script also defines the user's shell, and outputs the actual
+password. Otherwise the executed program fails, because it does not know what
+shell to use for the shell script. For example, if the password string is defined
+in a file named \fBmy_password.txt\fR, and you want to use the bash
+shell, include these lines in the script:
+
+.nf
+#!/usr/bash
+cat /full/pathname/to/my_password.txt
+.fi
+.RS 
+\fBCaution\fR
+
+If the password is given using this option, it is extremely important that
+the \fBssh\-broker\-config.xml\fR file, the password file, or the
+program are not accessible by anyone else than the intended user.
+.RE
+.RS 
+\fBNote\fR
+
+Any password given with the command-line options will override this
+setting.
+.RE
+.RE
+
+An example connection profile is shown below:
+
+.nf
+<profile name="rock"
+         id="id1"
+         host="rock.example.com"
+         port="22"
+         connect\-on\-startup="no"
+         user="doct">
+
+  <hostkey file="key_22_rock.pub">
+  </hostkey>
+
+  <authentication\-methods>
+    <auth\-publickey />
+    <auth\-password />
+  </authentication\-methods>
+
+  <server\-authentication\-methods>
+    <auth\-server\-publickey policy="strict" />
+  </server\-authentication\-methods>
+
+  <server\-banners visible="yes" />
+
+  <forwards>
+    <forward type="agent" state="on" />
+    <forward type="x11" state="on" />
+  </forwards>
+
+  <tunnels>
+    <local\-tunnel type="tcp"
+                  listen\-port="143"
+                  dst\-host="imap.example.com"
+                  dst\-port="143"
+                  allow\-relay="no" />
+  </tunnels>
+
+  <remote\-environment>
+    <environment name="FOO" value="bar" />
+    <environment name="QUX" value="%Ubaz" format="yes" />
+    <environment name="ZAPPA" value="%Ubaz" />
+  </remote\-environment>
+
+</profile>
+.fi
+.SH "THE filter-engine ELEMENT"
+The \fBfilter\-engine\fR element defines the filter rules for FTP-SFTP
+conversion, transparent FTP tunneling, and transparent TCP tunneling. The
+\fBfilter\-engine\fR element is used only by Tectia ConnectSecure. 
+.RS 
+\fBNote\fR
+.PP
+The \fBfilter\-engine\fR element is read from the global configuration file
+(\fB/etc/ssh2/ssh\-broker\-config.xml\fR), if such a file is available. Only
+when the global configuration file does not contain the \fBfilter\-engine\fR
+element, this element is read from the user-specific configuration file.
+.RE
+.PP
+The top level element is \fBfilter\-engine\fR. It has three attributes:
+\fBip\-generate\-start\fR, \fBip6\-generate\-start\fR and
+\fBftp\-filter\-at\-signs\fR (used with Tectia ConnectSecure, only).
+.PP
+The \fBip\-generate\-start\fR attribute defines the start address of the pseudo
+IPv4 address space. Pseudo IPs are generated by the Connection Broker when applications do the DNS query
+through the SSH connection capture component.
+.PP
+The \fBip6\-generate\-start\fR attribute is similar to
+\fBip\-generate\-start\fR, but it defines the start address of the pseudo IPv6
+address space.
+.PP
+With Tectia ConnectSecure, the \fBftp\-filter\-at\-signs\fR attribute can be used
+with FTP-SFTP conversion when scripts are used to open a connection directly from the FTP/SFTP
+client to the SFTP server, bypassing any proxies. This attribute defines that Tectia ConnectSecure uses the
+FTP user name, FTP server name, and FTP server password specified in the FTP script.
+.PP
+The FTP script is expected to specify the user name in format
+\fBftp\-user@proxy\-user@ftp\-server\fR and the password in format
+\fBftp\-password@proxy\-password\fR. The @ sign is used to extract the
+relevant data from the strings.
+.PP
+The \fBftp\-filter\-at\-signs\fR takes \fByes\fR and
+\fBno\fR as values, \fBno\fR is the default.
+.PP
+When \fBftp\-filter\-at\-signs="yes"\fR, Tectia ConnectSecure cuts the user name
+string at the first @ sign to extract the \fBftp\-user\fR and at the last
+@ sign to extract the \fBftp\-server\fR, and the rest of the string is
+ignored. Likewise, the passwords string is cut at the last @ sign and the first part is
+used as the password on the SFTP server.
+.RS 
+\fBNote\fR
+.PP
+Under the \fBfilter\-engine\fR element there can be any amount of elements
+\fBnetwork\fR, \fBdns\fR, \fBfilter\fR, or
+\fBrule\fR. The order of the elements is important, because the filter engine
+uses the elements in the order they were specified in the configuration file.
+.RE
+.TP 
+network 
+The \fBnetwork\fR element specifies a "location" where Tectia Client/Server is
+running. By using the \fBnetwork\fR element, you can implement
+location-awareness for Tectia Client/Server. It has five attributes: \fBid\fR,
+\fBaddress\fR, \fBdomain\fR, \fBip\-generate\-start\fR
+and \fBip6\-generate\-start\fR.
+
+The \fBid\fR attribute specifies a unique identifier for the
+\fBnetwork\fR element. The \fBaddress\fR attribute specifies the
+address of the network. It can be missing or empty, in which case it is not used. The
+\fBdomain\fR attribute contains the domain name of the computer. It can
+also be missing or empty, in which case it is not used. The
+\fBip\-generate\-start\fR attribute defines the start address of the pseudo
+IPv4 space. If it is defined here, it overrides the \fBip\-generate\-start\fR
+attribute of the \fBfilter\-engine\fR element. The
+\fBip6\-generate\-start\fR attribute is similar to
+\fBip\-generate\-start\fR, but it defines the start address of the pseudo
+IPv6 address space.
+.TP 
+dns 
+.RS 
+\fBNote\fR
+
+The \fBdns\fR element exists for backward-compatibility reasons.
+Currently the \fBrule\fR element is used for the same settings.
+.RE
+
+The \fBdns\fR element creates a DNS rule for the filter engine. It has
+six attributes: \fBid\fR, \fBnetwork\-id\fR,
+\fBapplication\fR, \fBhost\fR, \fBip\-address\fR, and
+\fBpseudo\-ip\fR. 
+For their descriptions, see the \fBrule\fR element below.
+.TP 
+filter 
+.RS 
+\fBNote\fR
+
+The \fBfilter\fR element exists for backward-compatibility reasons.
+Currently the \fBrule\fR element is used for the same settings.
+.RE
+
+The \fBfilter\fR element specifies an action for a connection. It has the
+following attributes: \fBdns\-id\fR, \fBports\fR,
+\fBaction\fR, \fBprofile\-id\fR, \fBdestination\fR,
+\fBdestination\-port\fR, \fBfallback\-to\-plain\fR.
+
+The \fBdns\-id\fR attribute is a reference to a \fBdns\fR
+element. 
+
+For the descriptions of the other attributes, see the
+\fBrule\fR element below.
+.TP 
+rule
+The \fBrule\fR element specifies how a filtered connection will be
+handled. It has the following attributes: \fBapplication\fR,
+\fBhost\fR, \fBip\-address\fR, \fBpseudo\-ip\fR,
+\fBports\fR, \fBaction\fR, \fBprofile\-id\fR,
+\fBdestination\fR, \fBdestination\-port\fR,
+\fBusername\fR, \fBhostname\-from\-app\fR,
+\fBusername\-from\-app\fR, \fBfallback\-to\-plain\fR,
+\fBshow\-sftp\-server\-banner\fR.
+
+The \fBapplication\fR attribute can be used to specify one or more
+applications to which the rule is applied. This can be a regular expression using the
+egrep syntax. 
+
+The \fBhost\fR attribute specifies a target host name. It can be a
+regular expression using the egrep syntax.
+
+The \fBip\-address\fR attribute specifies the target host IP address. It
+can be a regular expression using the egrep syntax. In this case the Connection Broker does the
+string matching with the assumption that the IP address is written in its canonical
+form. If both the host name and the IP address are defined, the \fBhost\fR
+attribute takes precedence and the \fBip\-address\fR attribute is
+ignored.
+
+The \fBpseudo\-ip\fR setting has the following effects when the
+\fBip\-address\fR is left empty and the \fBhost\fR
+matches:
+.RS 
+.TP 0.2i
+\(bu
+When \fBpseudo\-ip="yes"\fR, the Connection Broker assigns a pseudo IP address for
+the target host and Tectia Server resolves the real IP address. The pseudo IP addresses
+should be used when accessing an internal network from the outside, because name
+resolution for the machines in the internal network is not available from the
+outside.
+.TP 0.2i
+\(bu
+When \fBpseudo\-ip="no"\fR, a normal DNS query is made for the target
+host name. The default value is \fBno\fR. 
+.RE
+
+The \fBports\fR attribute can be a single port or a range. A range is
+specified with a hyphen between two integers (for example
+\fB"21\-25"\fR).
+.RS 
+\fBNote\fR
+
+For FTP-SFTP conversion, always specify the port unambiguously if fallback mode is
+set. Do not use an asterisk (*), because it causes problems in passive mode file
+transfer when connected to a plaintext FTP server.
+.RE
+
+The \fBaction\fR attribute specifies the action to be done when a filter
+matches. Its value can be \fBDIRECT\fR, \fBBLOCK\fR,
+\fBTUNNEL\fR, \fBFTP\-TUNNEL\fR, or
+\fBFTP\-PROXY\fR.
+.RS 
+.TP 0.2i
+\(bu
+\fBDIRECT\fR causes the connection to be made directly as plaintext
+without tunneling or FTP-SFTP conversion.
+.TP 0.2i
+\(bu
+\fBBLOCK\fR causes the connection to be blocked.
+.TP 0.2i
+\(bu
+\fBFTP\-TUNNEL\fR activates transparent FTP tunneling 
+(only on Tectia ConnectSecure)
+.TP 0.2i
+\(bu
+\fBFTP\-PROXY\fR causes the FTP-SFTP conversion to start and a
+connection to be made to the Secure Shell SFTP server. 
+.RE
+
+The \fBprofile\-id\fR attribute can be used to specify the connection
+profile that defines the connection settings.
+
+If the \fBprofile\-id\fR attribute is left empty and
+\fBhostname\-from\-app="yes"\fR is specified, the Secure Shell connection is
+made to the server specified by the client application using default settings. If a
+\fBprofile\-id\fR is specified and also
+\fBhostname\-from\-app="yes"\fR is specified, or the referred profile has
+\fB*\fR (an asterisk) or empty as the value of the \fBhost\fR
+attribute, the Secure Shell connection is made to the server specified by the client
+application using the profile settings.
+
+The \fBdestination\fR and \fBdestination\-port\fR attributes
+can be used to define a static destination address and port number that will be used as
+the end point of the connection instead of the original address and port given by the
+application.
+
+The \fBusername\fR attribute can be used to define the user name used for
+connecting to the Secure Shell server, or you can define the path from where the Connection Broker
+should retrieve the user name.
+
+The \fBhostname\-from\-app\fR attribute defines whether the Connection Broker should
+extract the Secure Shell server's host name from data sent by the application, or use a
+Secure Shell server defined by the connection profile in \fBprofile\-id\fR.
+The value is \fByes\fR or \fBno\fR, and the default is
+\fBno\fR.
+
+When \fBhostname\-from\-app="no"\fR, the tunnel 
+or FTP-SFTP conversion will be created to the 
+Secure Shell server specified in the connection profile referred in the
+\fBprofile\-id\fR attribute. Note that with transparent tunneling, the
+connection from the Secure Shell server to the final destination application will be
+unsecured and in plaintext. To achieve end-to-end security, the Secure Shell server
+should reside on the same host as the application.
+
+When \fBhostname\-from\-app="yes"\fR, the tunnel 
+or FTP-SFTP conversion will be created to the
+destination server specified by the application. This setting can be used with both FTP
+and TCP tunneling and FTP-SFTP conversion. When using
+\fBhostname\-from\-app="yes"\fR, it is no longer necessary to create a
+separate connection profile for each destination host. Note that this requires that a
+Secure Shell server is installed to each destination server 
+(or that
+\fBfallback\-to\-plain\fR is enabled to allow direct connections to those
+servers that do not have Secure Shell installed).
+
+The \fBusername\-from\-app\fR attribute defines whether the FTP tunneling
+or FTP-SFTP conversion extracts the user name from data sent by the FTP application. The
+value is \fByes\fR or \fBno\fR. The default is
+\fBno\fR.
+
+When \fBusername\-from\-app="yes"\fR, the user name received from the FTP
+client application is used. This setting can be used with FTP tunneling and FTP-SFTP
+conversion. This setting will override any user name settings made in a related
+connection profile. When \fBusername\-from\-app="no"\fR, the user name is taken
+from the connection profile defined with the \fBprofile\-id\fR
+attribute.
+
+The
+\fBfallback\-to\-plain\fR attribute can be used to define whether a direct
+(unsecured) connection is used if creating the tunnel fails or the
+connection to the Secure Shell server fails. The default value is
+\fBno\fR. Normally, when 
+the secured connection 
+fails when applying a filter rule, the Connection Broker will return an error about not being able to 
+establish a connection. 
+In FTP-SFTP conversion on Unix,
+\fBfallback\-to\-plain\fR requires that option \fB\-F\fR is used
+with the \fBssh\-capture\fR command. 
+For more details, see the \fBssh-capture\fR(1) man page.
+.RS 
+\fBNote\fR
+
+Do not enable the \fBfallback\-to\-plain\fR and
+\fBpseudo\-ip\fR options at the same time. If they both are enabled, and a
+secure connection fails, the application will try a direct connection with the pseudo
+IP, which will not work.
+.RE
+
+In FTP-SFTP conversion, if the target SFTP server is configured to send a banner to
+the client, the \fBshow\-sftp\-server\-banner\fR attribute can be used to make
+the Connection Broker forward the SFTP server banner to the FTP client. The allowed values for
+\fBshow\-sftp\-server\-banner\fR are \fByes\fR and
+\fBno\fR. The default value is \fBno\fR (the SFTP server banner
+is not forwarded to the FTP client).
+.RS 
+\fBNote\fR
+
+If you have made changes to the Connection Broker default configuration, make sure that
+showing the server banner is enabled (\fBserver\-banners visible="yes"\fR)
+in the \fBdefault\-settings\fR or in \fBprofiles\fR. 
+.RE
+.RS 
+\fBNote\fR
+
+Sending the SFTP server banner to the FTP client will cause an extra connection
+opening to the target SFTP server for retrieving the banner message.
+.RE
+
+In case of a failure in retrieving the banner message from the target SFTP server,
+the banner that Connection Broker forwards to the FTP client includes an error description, a
+default banner, and the following text:
+
+
+.nf
+Can't fetch banner from SFTP Server
+.fi
+
+.SH "THE logging ELEMENT"
+The \fBlogging\fR element changes the logging settings that define the log
+event severities and logging facilities. The element contains one or more
+\fBlog\-target\fR and \fBlog\-events\fR elements.
+.TP 
+log\-target
+This element specifies the log target for auditing. By default, the broker does not
+log anything. This element can be used to direct log data to a file or syslog.
+
+The \fBlog\-target\fR element can have \fBfile\fR and
+\fBtype\fR as attributes.
+
+The \fBtype\fR attribute specifies the logging facility where the audit
+data is output to. The value can be \fBfile\fR, \fBsyslog\fR or
+\fBdiscard\fR.
+
+The \fBfile\fR attribute sets the file system path where the audit data
+is written to. If the \fBtype\fR attribute has \fBsyslog\fR or
+\fBdiscard\fR set, the \fBfile\fR attribute is not
+allowed.
+.TP 
+log\-events
+This element sets the severity and facility of different logging events. The events
+have reasonable default values, which are used if no explicit logging settings are made.
+This setting allows customizing the default values.
+
+The element can also contain one or more \fBlog\-target\fR elements. When
+defined here, the \fBlog\-target\fR element will override the definition given
+in the \fBlogging\fR/\fBlog\-target\fR.
+
+For the events, \fBfacility\fR and \fBseverity\fR can be set
+as attributes. The events itself should be listed inside the \fBlog\-events\fR
+element.
+
+The facility can be \fBnormal\fR, \fBdaemon\fR,
+\fBuser\fR, \fBauth\fR, \fBlocal0\fR,
+\fBlocal1\fR, \fBlocal2\fR, \fBlocal3\fR,
+\fBlocal4\fR, \fBlocal5\fR, \fBlocal6\fR,
+\fBlocal7\fR, or \fBdiscard\fR. Setting the facility to
+\fBdiscard\fR causes the server to ignore the specified log events.
+
+The severity can be \fBinformational\fR, \fBnotice\fR,
+\fBwarning\fR, \fBerror\fR, \fBcritical\fR,
+\fBsecurity\-success\fR, or \fBsecurity\-failure\fR.
+
+Any events that are not specifically defined in the configuration file will use the
+default values. The defaults can be overridden for all remaining events by giving an
+empty \fBlog\-events\fR element after all other definitions and by setting a
+severity value for it.
+
+In the names of log events, the characters '*' and '?' can be used as
+wildcards.
+.PP
+An example logging configuration that logs all events, which are programmed to be logged
+by default, both to \fB/tmp/foo\fR and to \fBsyslog\fR.
+.PP
+.nf
+<logging>
+  <log\-target file="/tmp/foo" />
+  <log\-target type="syslog" />
+</logging>
+.fi
+.PP
+An example logging configuration in which events are logged to
+\fB/tmp/foo\fR, except those whose event name matches
+"Key_store_*", which will be discarded.
+.PP
+.nf
+<logging>
+  <log\-target file="/tmp/foo" />
+  <log\-events facility="discard">
+    Key_store_*
+  </log\-events>
+</logging>
+.fi
+.SH AUTHORS
+SSH Communications Security Corporation.
+.PP
+For more information, see http://www.ssh.com.
+.SH "SEE ALSO"
+\fBssh-broker-g3\fR(1),
+\fBssh-broker-ctl\fR(1),
+\fBsshg3\fR(1),
+\fBscpg3\fR(1),
+\fBsftpg3\fR(1),
+\fBssh-server-config\fR(5)

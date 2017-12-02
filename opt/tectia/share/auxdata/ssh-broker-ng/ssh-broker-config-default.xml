@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE secsh-broker SYSTEM "ssh-broker-ng-config-1.dtd">
+<!-- WARNING! This file contains the factory defaults     -->
+<!-- for the Connection Broker and is read-only.          -->
+<!-- Any changes to this file will be lost on upgrade.    -->
+<secsh-broker version = "1.0" >
+
+  <default-settings>
+    <ciphers>
+      <cipher name="crypticore128@ssh.com" />
+      <cipher name="aes128-cbc" />
+      <cipher name="aes128-ctr" />
+      <cipher name="aes192-cbc" />
+      <cipher name="aes192-ctr" />
+      <cipher name="aes256-cbc" />
+      <cipher name="aes256-ctr" />
+      <cipher name="3des-cbc" />
+    </ciphers>
+
+    <macs>
+      <mac name="crypticore-mac@ssh.com" />
+      <mac name="hmac-sha1" />
+      <mac name="hmac-sha1-96" />
+      <mac name="hmac-sha2-256" />
+      <mac name="hmac-sha256-2@ssh.com" />
+      <mac name="hmac-sha224@ssh.com" />
+      <!-- Backwards compatible to 4.x (uses 16-byte key). -->
+      <mac name="hmac-sha256@ssh.com" />
+      <mac name="hmac-sha384@ssh.com" />
+      <mac name="hmac-sha2-512" />
+      <mac name="hmac-sha512@ssh.com" />
+    </macs>
+
+    <kexs>
+      <kex name="diffie-hellman-group14-sha1" />
+      <kex name="diffie-hellman-group14-sha256@ssh.com" />
+      <kex name="diffie-hellman-group-exchange-sha1" />
+      <kex name="diffie-hellman-group-exchange-sha256" />      
+    </kexs>
+
+    <hostkey-algorithms>
+      <hostkey-algorithm name="ssh-dss" />
+      <hostkey-algorithm name="ssh-rsa" />
+      <hostkey-algorithm name="ssh-dss-sha256@ssh.com" />
+      <hostkey-algorithm name="ssh-rsa-sha256@ssh.com" />
+      <hostkey-algorithm name="x509v3-sign-dss" />
+      <hostkey-algorithm name="x509v3-sign-rsa" />
+      <hostkey-algorithm name="x509v3-sign-dss-sha256@ssh.com" />
+      <hostkey-algorithm name="x509v3-sign-rsa-sha256@ssh.com" />      
+    </hostkey-algorithms>
+
+    <rekey bytes="1000000000" />
+
+    <authentication-methods>
+      <authentication-method name="publickey" />
+      <authentication-method name="password" />
+      <authentication-method name="keyboard-interactive" />
+      <auth-gssapi />
+    </authentication-methods>
+
+    <idle-timeout type="connection" time="5" />
+
+    <server-banners visible="yes" />
+
+    <forwards>
+      <forward type="x11" state="off" />
+      <forward type="agent" state="on" />
+    </forwards>
+    
+    <authentication-success-message enable="yes"/>
+    <quiet-mode enable="no"/> 
+    <sftpg3-mode compatibility-mode="tectia"/>
+  </default-settings>
+
+  <gui hide-tray-icon="no"
+       show-exit-button="yes"
+       show-admin="yes"
+       enable-connector="yes"
+       show-security-notification="yes" />
+
+</secsh-broker>
